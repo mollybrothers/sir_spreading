@@ -14,6 +14,9 @@
 #SBATCH --time=48:00:00
 
 ##commands to run:
+##still to do: separate the GPU and CPU functions of megalodon for faster computing time.
+##Right now this script runs everything on the GPU, but there is a way to separate the aggregation functions.
+##This will require two different job scripts. One for the basecalling and one for the aggregation.
 
 source activate guppy
 module load cuda/10.0
