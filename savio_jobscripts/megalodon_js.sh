@@ -11,12 +11,13 @@
 #SBATCH --error=megalodontests.err
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=molly_brothers@berkeley.edu
-#SBATCH --time=48:00:00
+#SBATCH --time=20:00:00
 
 ##commands to run:
-##still to do: separate the GPU and CPU functions of megalodon for faster computing time.
-##Right now this script runs everything on the GPU, but there is a way to separate the aggregation functions.
-##This will require two different job scripts. One for the basecalling and one for the aggregation.
+
+##output from this command includes mod_mappings.bam and per_read_modified_base_calls.db
+##to aggregate data and get a bedMethyl file, run the megalodon_aggregate_js.sh jobscript
+##to get the per_read_modified_base_calls as a text file, run the megalodon_perreadtext_js.sh jobscript
 
 source activate guppy
 module load cuda/10.0
@@ -28,10 +29,10 @@ GUPPY_CONFIG="res_dna_r941_min_modbases-all-context_v001.cfg"
 INPUT="/global/scratch/molly_brothers/201012_Doudna/raw_data_multifast5"
 OUTPUT="/global/scratch/molly_brothers/201012_Doudna/megalodon_tests"
 MOD_MOTIF="Y A 0"
-FILES_OUT="basecalls mod_mappings"
+FILES_OUT="mod_mappings per_read_mods"
 GENOME="/global/scratch/molly_brothers/genomes/genome_mat_to_N.fa"
 PROCESSES="$SLURM_CPUS_ON_NODE"
-##NUM_READS=100
+##NUM_READS="50"
 ##READ_IDS="/global/scratch/molly_brothers/200814_McClintock/try2/basecall/barcode/barcode03_readIDs.txt"
 
 megalodon $INPUT \
@@ -42,7 +43,6 @@ megalodon $INPUT \
 --mod-motif $MOD_MOTIF \
 --reference $GENOME \
 --outputs $FILES_OUT \
---write-mods-text \
 --processes $PROCESSES \
 --devices 0 1 \
 ##--num-reads $NUM_READS
