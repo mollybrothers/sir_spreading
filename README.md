@@ -22,6 +22,6 @@ For now, a workaround is to basecall using guppy_basecaller including barcoding,
 2. `megalodon_aggregate_js.sh`
     + `modified_bases.aggregate.6mA.bed`: bedMethyl file (https://www.encodeproject.org/data-standards/wgbs/)
 
-(does not work yet. For now include the --write-mods-text flag in the first megalodon script. Eventually want this to be separate for computing speed.):
+#(does not work yet. For now include the --write-mods-text flag in the first megalodon script. Eventually want this to be separate for computing speed.):
 3. `meglaodon_perreadtext_js.sh`
     + `per_read_modified_base_calls.txt`
