@@ -16,7 +16,7 @@ For now, a workaround is to basecall using guppy_basecaller including barcoding,
 
 ## output from each megalodon step (in `savio_jobscripts`):
 1. `megalodon_js.sh`
-    + `mod_mappings.bam`: BAM file including the tags Mm and Ml, which contain information on modification probabilities for each A in each read.
+    + `mod_mappings.bam`: BAM file including the tags `Mm` and `Ml`, which contain information on modification probabilities for each A in each read.
     + `per_read_modified_base_calls.db`: SQLite database
   
 2. `megalodon_aggregate_js.sh`
