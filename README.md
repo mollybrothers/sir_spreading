@@ -16,12 +16,12 @@ For now, a workaround is to basecall using guppy_basecaller including barcoding,
 
 ## output from each megalodon step (in `savio_jobscripts`):
 1. `megalodon_js.sh`
-+ `mod_mappings.bam`: BAM file including the tags Mm and Ml, which contain information on modification probabilities for each A in each read.
-+ `per_read_modified_base_calls.db`: SQLite database
+    + `mod_mappings.bam`: BAM file including the tags Mm and Ml, which contain information on modification probabilities for each A in each read.
+    + `per_read_modified_base_calls.db`: SQLite database
   
 2. `megalodon_aggregate_js.sh`
-+ `modified_bases.aggregate.6mA.bed`: bedMethyl file (https://www.encodeproject.org/data-standards/wgbs/)
+    + `modified_bases.aggregate.6mA.bed`: bedMethyl file (https://www.encodeproject.org/data-standards/wgbs/)
 
 (does not work yet. For now include the --write-mods-text flag in the first megalodon script. Eventually want this to be separate for computing speed.):
 3. `meglaodon_perreadtext_js.sh`
-+ `per_read_modified_base_calls.txt`
+    + `per_read_modified_base_calls.txt`
