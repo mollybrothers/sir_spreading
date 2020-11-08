@@ -1,0 +1,161 @@
+---
+title: "Sir methylation"
+author: "Koen Van den Berge"
+date: "11/5/2020"
+output: html_document
+---
+
+# BED file
+
+```{r}
+library(rafalib)
+df <- read.table("~/data/molly/modified_bases.6mA.bed")
+colnames(df) <- c("chrom", "start", "end", "name", "score", "strand", "startCodon", "stopCodon", "color", "coverage", "percentage")
+
+hist(df$coverage, breaks=400, xlim=c(0,1000))
+df <- df[df$coverage > 10,]
+
+plot(df$percentage[1:1e4], pch=16, cex=1/2)
+
+dfHML <- df[df$chrom == "III" & df$start > 1 & df$end < 2.2e4,]
+plot(x=dfHML$start, y=dfHML$percentage, pch=16,main="HML region", cex=dfHML$coverage/100,
+     xlab="Position on chr3", ylab="Percentage of methylated reads")
+
+
+dfHMR <- df[df$chrom == "III" & df$start > 285e3 & df$end < 300e3,]
+plot(x=dfHMR$start, y=dfHMR$percentage, pch=16, main="HMR region", cex=dfHMR$coverage/100,
+     xlab="Position on chr3", ylab="Percentage of methylated reads")
+
+dfHMR2 <- df[df$chrom == "III" & df$start > 293000 & df$end < 294000,]
+plot(x=dfHMR2$start, y=dfHMR2$percentage, pch=16, main="HMR region", cex=dfHMR2$coverage/100,
+     xlab="Position on chr3", ylab="Percentage of methylated reads")
+```
+
+# Extract single reads and methylation probabilities
+
+## HMR region
+
+```{r}
+library(Rsamtools)
+# file below is the mod_mappings.bam file on Savio, sorted using 'samtools sort'
+bamPath <- "~/data/molly/mod_mappings.sorted.bam" 
+bamFile <- BamFile(bamPath)
+bamFile
+scanBamHeader(bamFile)
+seqinfo(bamFile)
+grHMR <- GRanges(seqnames = "III", 
+              ranges = IRanges(start = 285e3, end = 300e3))
+sbp <- ScanBamParam(which = grHMR, what = c("qname", # read ID
+                                            "seq", # sequence
+                                            "pos")) # read position (start)
+aln <- scanBam(bamFile, param = sbp)
+
+customParam <- ScanBamParam(which = grHMR,
+                            tag=c("Mm", "Ml"), 
+                            what=c("flag", #custom tag (methylation)
+                                   "qname", # read ID
+                                   "seq", # sequence
+                                   "pos")) #start position
+aln <- scanBam(bamFile, which=grHMR, param = customParam)
+
+
+bases <- aln$`III:285000-300000`$seq
+methylTag <- aln$`III:285000-300000`$tag$Mm
+methylProb <- aln$`III:285000-300000`$tag$Ml
+
+# methylation probabilities do seem to be very much read dependent
+rafalib::mypar(mfrow=c(4,4))
+hlp <- lapply(methylProb[1:112], hist, breaks=40, xlim=c(0,255))
+
+# See https://github.com/jkbonfield/hts-specs/blob/methylation/SAMtags.tex 
+# for explanation on how the Mm and Ml tags work.
+
+
+posProbList <- list()
+for(rr in 1:length(aln$`III:285000-300000`$seq)){
+  # loop over each read
+  curSeq <- aln$`III:285000-300000`$seq[rr][[1]]
+  curStart <- aln$`III:285000-300000`$pos[rr]
+  curTag <- aln$`III:285000-300000`$tag$Mm[rr]
+  curProb <- aln$`III:285000-300000`$tag$Ml[[rr]]
+  
+  # extract A bases and corresponding positions
+  # start at starting position, and total number of positions equal total number of As in sequence.
+  posA <- curStart + which(isMatchingAt("A", curSeq, at = 1:length(curSeq))) - 1
+  
+  # get at which As are considered possibly methylated
+  tagSplit <- gsub(pattern=";", x=strsplit(curTag, split=",")[[1]], replacement="")
+  stopifnot(tagSplit[1] == "A+a") # check if we're looking at m6A
+  tagSplit <- as.numeric(tagSplit[-1])
+  
+  # number of As considered for methylation should be equal to length of probability vector
+  stopifnot((sum(tagSplit == 0) + sum(tagSplit > 0)) == length(curProb))
+  
+  #get pos and prob of As considered potentially methylated
+  posMet <- posA[cumsum(tagSplit+1)] 
+  probMet <- curProb / 255
+  df <- data.frame(pos = posMet,
+                   prob = probMet)
+  # #not considered methylated: doesn't work yet
+  # posNull <- posA[-cumsum(tagSplit+1)]
+  # probNull <- rep(0, length(posNull))
+  # df <- data.frame(pos = c(posMet, posNull), 
+  #                  prob = c(probMet, probNull)) # positions and methyl probs
+  posProbList[[rr]] <- df
+}
+
+rafalib::mypar(mfrow=c(1,1))
+pal <- wesanderson::wes_palette("Zissou1", n=256, type="continuous")
+par(bty="l")
+plot(x=seq(285e3, 300e3, length=length(posProbList)),
+     y=1:length(posProbList),
+     type = "n",
+     xlab = "Position on ChrIII",
+     ylab= "Read colored by methylation probability")
+for(ii in 1:length(posProbList)){
+  curPos <- posProbList[[ii]]$pos
+  points(x=curPos, y=rep(ii, length(curPos)), col=pal[posProbList[[ii]]$prob*255],
+         pch=16, cex=1/20)
+}
+abline(v=292e3, lty=2)
+abline(v=295e3, lty=2)
+
+## setting a threshold on methylation
+rafalib::mypar(mfrow=c(1,1))
+#pal <- wesanderson::wes_palette("Zissou1", n=256, type="continuous")
+par(bty="l")
+plot(x=seq(285e3, 300e3, length=length(posProbList)),
+     y=1:length(posProbList),
+     type = "n",
+     xlab = "Position on ChrIII",
+     ylab= "Read colored by methylation probability",
+     main = "75% Methylation probability threshold")
+for(ii in 1:length(posProbList)){
+  curDf <- posProbList[[ii]]
+  curDf <- curDf[curDf$prob > .75,]
+  curPos <- curDf$pos
+  points(x=curPos, y=rep(ii, length(curPos)),
+         pch=16, cex=1/20)
+}
+abline(v=292e3, lty=2)
+abline(v=295e3, lty=2)
+
+rafalib::mypar(mfrow=c(1,1))
+#pal <- wesanderson::wes_palette("Zissou1", n=256, type="continuous")
+par(bty="l")
+plot(x=seq(285e3, 300e3, length=length(posProbList)),
+     y=1:length(posProbList),
+     type = "n",
+     xlab = "Position on ChrIII",
+     ylab= "Read colored by methylation probability",
+     main = "95% Methylation probability threshold")
+for(ii in 1:length(posProbList)){
+  curDf <- posProbList[[ii]]
+  curDf <- curDf[curDf$prob > .95,]
+  curPos <- curDf$pos
+  points(x=curPos, y=rep(ii, length(curPos)),
+         pch=16, cex=1/20)
+}
+abline(v=292e3, lty=2)
+abline(v=295e3, lty=2)
+```
