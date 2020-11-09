@@ -33,7 +33,7 @@ plot_prob <- function(input, title) {
     ylim(-2, 0)
 }
 
-control <- sorted[chrm == "III" & pos %between% c(100e3, 105e3),
+control <- III_positive_strand[chrm == "III" & pos %between% c(100e3, 105e3),
                   .(avg_prob = mean(mod_log_prob)),
                   by = pos
                   ]
