@@ -17,6 +17,8 @@ strand = "+ strand" #which strand?
 
 #the per_read_base_calls.txt file itself is too large for RStudio's memory,
 #so you'll need to use mawk on the command line to pick out the lines you want first
+#EXAMPLE:
+#cat per_read_modified_base_calls.txt | mawk '$2 ~ /^III$/ {print $0}' > chrIII.txt
 dt <- fread("/Volumes/brothers_seq/Nanopore/201012_Doudna/megalodon_outputv2/chrIII_per_read_modified_bases.txt",
             select = c(1, 2, 4, 5),
             col.names = c("read_id", "chrm", "pos", "mod_log_prob"))
