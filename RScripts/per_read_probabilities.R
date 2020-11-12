@@ -23,7 +23,12 @@ dt <- fread("/Volumes/brothers_seq/Nanopore/201012_Doudna/megalodon_outputv2/chr
 
 #convert log probabilities into probabilities
 probs <- dt[mod_log_prob > -2, list(read_id, pos, mod_log_prob, 
-                                    mod_prob = 10 ^ mod_log_prob)]
+                                    mod_prob = 10 ^ mod_log_prob)][
+                                      order(pos, read_id)
+                                    ]
+
+read_names <- unique(probs$read_id)
+probs$read_id = factor(probs$read_id, levels = read_names)
 
 # plot average probabilities for each position
 plot_prob <- function(input, title) {
