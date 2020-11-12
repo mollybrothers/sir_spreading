@@ -20,8 +20,7 @@ For now, a workaround is to basecall using guppy_basecaller including barcoding,
     + `per_read_modified_base_calls.db`: SQLite database
   
 2. `megalodon_aggregate_js.sh`
-    + `modified_bases.aggregate.6mA.bed`: bedMethyl file (https://www.encodeproject.org/data-standards/wgbs/)
+    + `modified_bases.aggregate.6mA.bed`: bedMethyl file (https://www.encodeproject.org/data-standards/wgbs/). Used for `percentage_methylation.R`
 
 3. `meglaodon_perreadtext_js.sh`
-    + `per_read_modified_base_calls.txt`
-(does not work yet. For now include the --write-mods-text flag in the first megalodon script. Eventually want this to be separate for computing speed.)
+    + `per_read_modified_base_calls.txt`: each row is a single adenine position on a single read. Used for `per_read_methylation.R`
