@@ -17,7 +17,7 @@ strand = "+ strand" #which strand?
 
 #the per_read_base_calls.txt file itself is too large for RStudio's memory,
 #so you'll need to use mawk on the command line to pick out the lines you want first
-dt <- fread("/Volumes/brothers_seq/Nanopore/201012_Doudna/megalodon_outputv2/chrIII_plus.txt",
+dt <- fread("/Volumes/brothers_seq/Nanopore/201012_Doudna/megalodon_outputv2/chrIII_per_read_modified_bases.txt",
             select = c(1, 2, 4, 5),
             col.names = c("read_id", "chrm", "pos", "mod_log_prob"))
 
@@ -112,5 +112,12 @@ plot_clean(HMR, HMR_bounds)
 tel3L <- probs[pos %between% c(0, 5e3), list(read_id, pos, mod_prob)]
 ggplot(tel3L, aes(x = pos, y = read_id, color = mod_prob)) +
   geom_point(shape = 15, size = 0.5) +
-  theme(axis.text.y = element_blank())+
+  theme(axis.text.y = element_blank()) +
   scale_color_gradientn(colors = pal)                         
+
+#plot tel3R
+tel3R <- probs[pos %between% c(312e3, 317e3), list(read_id, pos, mod_prob)]
+ggplot(tel3R, aes(x = pos, y = read_id, color = mod_prob)) +
+  geom_point(shape = 15, size = 0.5) +
+  theme(axis.text.y = element_blank()) +
+  scale_color_gradientn(colors = pal)
