@@ -13,7 +13,6 @@ library(tidyverse)
 library(wesanderson)
 
 chr = "III" #which chromosome?
-strand = "+ strand" #which strand?
 
 #the per_read_base_calls.txt file itself is too large for RStudio's memory,
 #so you'll need to use mawk on the command line to pick out the lines you want first
@@ -40,7 +39,7 @@ plot_prob <- function(input, title) {
     geom_point(position = "dodge") +
     labs(
       title = sprintf("%s region", title),
-      x = sprintf("%s at chr %s position", strand, chr),
+      x = sprintf("chr %s", chr),
       y = "average log_mod_prob") +
     ylim(0, 1)
 }
@@ -69,31 +68,47 @@ pal <- wes_palette("Zissou1", 100, type = "continuous")
 plot_nucs <- function(data, bounds, linkers) {
   ggplot(data, aes(x = pos, y = read_id, color = mod_prob)) +
     geom_point(shape = 15, size = 0.5) +
-    theme(axis.text.y = element_blank(), ) +
-    scale_color_gradientn(colors = pal) +
-    geom_vline(xintercept = bounds, size = 1) +
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.title.y = element_blank(),
+          axis.title.x = element_blank(),
+          legend.position = c(0.1, 0.8),
+          legend.direction = "vertical") +
+    scale_color_gradientn(colors = pal, name = "m6A probability") +
+    geom_vline(xintercept = bounds) +
     geom_vline(xintercept = linkers, size = 0.3, color = "black")
 }
 
 plot_clean <- function(data, bounds) {
   ggplot(data, aes(x = pos, y = read_id, color = mod_prob)) +
     geom_point(shape = 15, size = 0.5) +
-    theme(axis.text.y = element_blank(), ) +
-    scale_color_gradientn(colors = pal) +
-    geom_vline(xintercept = bounds, size = 1)
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.title.y = element_blank(),
+          axis.title.x = element_blank(),
+          legend.position = c(0.1, 0.8),
+          legend.direction = "vertical") +
+    scale_color_gradientn(colors = pal, name = "m6A probability") +
+    geom_vline(xintercept = bounds)
 }
 
 #plot unmethylated region
 control <- probs[pos %between% c(180e3, 185e3), list(read_id, pos, mod_prob)]
 ggplot(control, aes(x = pos, y = read_id, color = mod_prob)) +
   geom_point(shape = 15, size = 0.5) +
-  theme(axis.text.y = element_blank())+
-  scale_color_gradientn(colors = pal)
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        legend.position = c(0.1, 0.8),
+        legend.direction = "vertical") +
+  scale_color_gradientn(colors = pal, name = "m6A probability")
 
 #plot HML
-HML <- probs[pos %between% c(10e3, 15.5e3), list(read_id, pos, mod_prob)]
+HML <- probs[pos %between% c(10.5e3, 15.5e3), list(read_id, pos, mod_prob)]
 HML_bounds = c(11146, 14849)
-HML_linkers = c(#9407, 9587.5, 9067, 9747, 9923, 10166, 10331, 10585, 10748,
+HML_linkers = c(#9407, 9587.5, 9067, 9747, 9923, 10166, 10331, 
+                10585, 10748,
                 10944, 11118, 11418, 11645, 12021, 12251, 12436, 12649, 12842,
                 13017, 13396, 13558, 13829, 14011, 14221, 14883, 15229, 15406
                 #15573, 15984, 16244
@@ -114,12 +129,22 @@ plot_clean(HMR, HMR_bounds)
 tel3L <- probs[pos %between% c(0, 5e3), list(read_id, pos, mod_prob)]
 ggplot(tel3L, aes(x = pos, y = read_id, color = mod_prob)) +
   geom_point(shape = 15, size = 0.5) +
-  theme(axis.text.y = element_blank()) +
-  scale_color_gradientn(colors = pal)                         
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        legend.position = c(0.1, 0.8),
+        legend.direction = "vertical") +
+  scale_color_gradientn(colors = pal, name = "m6A probability")                         
 
 #plot tel3R
 tel3R <- probs[pos %between% c(312e3, 317e3), list(read_id, pos, mod_prob)]
 ggplot(tel3R, aes(x = pos, y = read_id, color = mod_prob)) +
   geom_point(shape = 15, size = 0.5) +
-  theme(axis.text.y = element_blank()) +
-  scale_color_gradientn(colors = pal)
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        legend.position = c(0.1, 0.8),
+        legend.direction = "vertical") +
+  scale_color_gradientn(colors = pal, name = "m6A probability")
