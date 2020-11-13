@@ -3,7 +3,7 @@
 #######################
 # Author: Molly Brothers
 # Github: mollybrothers
-# Date: 2020-11-08
+# Date: 2020-11-12
 #######################
 
 # With an input bedMethyl file:
@@ -14,7 +14,7 @@
 library(data.table)
 library(tidyverse)
 
-dt <- fread("~/sequencing/201012_Doudna/modified_bases.6mA.bed")
+dt <- fread("/Volumes/brothers_seq/Nanopore/201012_Doudna/megalodon_outputv2/modified_bases.6mA.bed")
 colnames(dt) <- c("chrom", "start", "end", "name", "score", 
                   "strand", "startCodon", "stopCodon", "color", 
                   "coverage", "percentage")
@@ -32,14 +32,14 @@ plot_methylation <- function(data, chr) {
     data,
     aes(x = start, y = percentage, alpha = coverage)
     ) +
-      theme_minimal() +
-      geom_point(position = "jitter", color = "mediumpurple4") +
-      xlab(sprintf("position on %s", chr)) +
-      ylab("% methylated reads")
+    geom_point(position = "jitter", color = "mediumpurple4") +
+    theme_minimal() +
+    labs(x = sprintf("position on %s", chr),
+           y = "% methylated reads")
 }
 
 #plot a negative control region
-control <- relevant[chrom == "X" & start > 50e3 & start < 73e3]
+control <- relevant[chrom == "X" & start > 50e3 & start < 75e3]
 plot_methylation(control, "X")
 
 #plot HML
@@ -50,3 +50,10 @@ plot_methylation(HML, "III")
 HMR <- relevant[chrom == "III" & start > 285e3 & start < 300e3]
 plot_methylation(HMR, "III")
 
+#plot telomere
+tel6R <- relevant[chrom == "VI" & start > 250e3 & start < 270e3]
+plot_methylation(tel6R, "VI")
+
+#plot chromosome
+chrXV <- relevant[chrom == "XV"]
+plot_methylation(chrXV, "XV")
