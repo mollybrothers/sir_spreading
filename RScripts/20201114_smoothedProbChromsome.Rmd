@@ -1,0 +1,50 @@
+---
+title: "Smoothed probabilities over chromosome"
+author: "Koen Van den Berge"
+date: "11/14/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+Sys.setenv(PATH = "/global/scratch/molly_brothers/201012_Doudna/megalodon_outputv2/pandoc-2.11.1.1/bin")
+library(tidyverse)
+
+chr <- c("I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X",
+         "XI", "XII", "XIII", "XIV", "XV", "XVI")
+chrFiles <- paste0("chr", chr, ".txt")
+
+
+for(ff in 1:length(chrFiles)){
+  chrDat <- readr::read_delim(chrFiles[ff],
+                            delim="\t",
+                            col_names = FALSE)
+  colnames(chrDat) <- c("readID", "chr", "strand", "pos", "mod_log_prob", "can_log_prob", "mod_base")
+  chrDat <- chrDat[,-c(2,3,6,7)] # to reduce burden on memory
+  hist(exp(chrDat$mod_log_prob), breaks=40,
+     xlab="Methylation Probability",
+     main=paste0("Chromosome ", ff))
+  
+  ## summarize at each position: calculate coverage and average prob.
+  chrDatSum <- chrDat %>%
+    group_by(pos) %>%
+    summarize(avgProb = mean(exp(mod_log_prob)),
+              coverage = n())
+  
+  
+  smoothProb <- loess(avgProb ~ pos, 
+               data = chrDatSum, 
+               weights = chrDatSum$coverage,
+               span = .05)
+  plot(smoothProb, pch=16, cex=1/3, 
+     xlab="Chromosome position", 
+     ylab="Fraction methylated reads",
+     main=paste0("Chromosome ", ff))
+  lines(x=smoothProb$x, y=smoothProb$fitted, col="red", lwd=3/2)
+  
+}
+```
+
