@@ -18,12 +18,12 @@ awk '$2 ~ /^IV$/' per_read_modified_base_calls.txt > chrIV.txt
 awk '$2 ~ /^V$/' per_read_modified_base_calls.txt > chrV.txt
 awk '$2 ~ /^VI$/' per_read_modified_base_calls.txt > chrVI.txt
 awk '$2 ~ /^VII$/' per_read_modified_base_calls.txt > chrVII.txt
-awk '$2 ~ /^VIII$/' per_read_modified_base_calls.txt > chrVII.txt
+awk '$2 ~ /^VIII$/' per_read_modified_base_calls.txt > chrVIII.txt
 awk '$2 ~ /^IX$/' per_read_modified_base_calls.txt > chrIX.txt
 awk '$2 ~ /^X$/' per_read_modified_base_calls.txt > chrX.txt
 awk '$2 ~ /^XI$/' per_read_modified_base_calls.txt > chrXI.txt
 awk '$2 ~ /^XII$/' per_read_modified_base_calls.txt > chrXII.txt
-awk '$2 ~ /^XIII$/' per_read_modified_base_calls.txt > chrXII.txt
+awk '$2 ~ /^XIII$/' per_read_modified_base_calls.txt > chrXIII.txt
 awk '$2 ~ /^XIV$/' per_read_modified_base_calls.txt > chrXIV.txt
 awk '$2 ~ /^XV$/' per_read_modified_base_calls.txt > chrXV.txt
 awk '$2 ~ /^XVI$/' per_read_modified_base_calls.txt > chrXVI.txt
