@@ -6,24 +6,36 @@
 # Date: 2020-11-12
 #########################
 
-# IN PROGRESS
+#IN PROGRESS
+
+#######################################################################################
+# the per_read_base_calls.txt file itself is too large for RStudio's memory,
+# so you'll need to use mawk on the command line to pick out the lines you want first
+# EXAMPLE:
+# cat per_read_modified_base_calls.txt | mawk '$2 ~ /^III$/ {print $0}' > chrIII.txt
+#######################################################################################
 
 library(data.table)
 library(tidyverse)
 library(wesanderson)
 
-chr = "III" #which chromosome?
+mega_directory <- "/Volumes/brothers_seq/Nanopore/201012_Doudna/201012_Doudna_megalodon_outputv2"
+chr <- "III" #which chromosome?
 
-#the per_read_base_calls.txt file itself is too large for RStudio's memory,
-#so you'll need to use mawk on the command line to pick out the lines you want first
-#EXAMPLE:
-#cat per_read_modified_base_calls.txt | mawk '$2 ~ /^III$/ {print $0}' > chrIII.txt
-dt <- fread("/Volumes/brothers_seq/Nanopore/201012_Doudna/megalodon_outputv2/chrIII_per_read_modified_bases.txt",
-            select = c(1, 2, 4, 5),
-            col.names = c("read_id", "chrm", "pos", "mod_log_prob"))
+# find all the reads with a qscore < 9 and filter out those reads from the input chr.txt file
+dt <- fread(sprintf("%s/sequencing_summary.txt", mega_directory),
+            select = c('read_id', 'mean_qscore_template'))
+
+bad_reads <- dt[mean_qscore_template <= 9, read_id]
+
+unfiltered <- fread(sprintf("%s/chr%s.txt", mega_directory, chr),
+                    select = c(1, 2, 4, 5),
+                    col.names = c("read_id", "chrm", "pos", "mod_log_prob"))
+
+filtered <- unfiltered[!(read_id %in% bad_reads)]
 
 #convert log probabilities into probabilities and order by position and read_id
-probs <- dt[mod_log_prob > -2, list(read_id, pos, mod_log_prob, 
+probs <- filtered[mod_log_prob > -2, list(read_id, pos, mod_log_prob, 
                                     mod_prob = 10 ^ mod_log_prob)][
                                       order(pos, read_id)
                                     ]
