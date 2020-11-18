@@ -11,6 +11,8 @@
 # Then, it reads through the per_read_modified_base_calls.txt file from a megalodon output and filters out
 # any lines corresponding to those read_ids
 
+import numpy as np
+
 # import sequencing_summary.txt as a numpy array
 
 # read each line. If mean_qscore_template is < 7, add the read_id to a txt file (one read_id per line)
