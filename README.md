@@ -24,3 +24,8 @@ For now, a workaround is to basecall using guppy_basecaller including barcoding,
 
 3. `meglaodon_perreadtext_js.sh`
     + `per_read_modified_base_calls.txt`: each row is a single adenine position on a single read. Used for `per_read_methylation.R`
+
+# Post-Megalodon Analysis
+
+1. `percentage_methylation.R`: make % methylation plots based on data in the bedMethyl output file from `megalodon_aggregate_js.sh`
+2. `per_read_probabilities.R`: make single-read plots of methylation probabilities based on data in the `per_read_modified_base_calls.txt` file from `megalodon_per_read_text_js.sh`. This script also filters out the reads with a basecalling qscore < 9 using data from the `sequencing_summary.txt` file output by `megalodon_js.sh`
