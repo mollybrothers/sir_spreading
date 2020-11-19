@@ -75,7 +75,7 @@ HMR_avg <- probs[pos %between% c(291e3, 296e3),
 plot_prob(HMR_avg, "HMR")
 
 #plot functions for single reads
-pal <- wes_palette("Zissou1", 100, type = "continuous")
+pal <- wes_palette("Zissou1", 2, type = "continuous")
 
 plot_nucs <- function(data, bounds, linkers) {
   ggplot(data, aes(x = pos, y = read_id, color = mod_prob)) +
