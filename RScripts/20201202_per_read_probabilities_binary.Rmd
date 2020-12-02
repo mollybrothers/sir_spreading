@@ -8,31 +8,6 @@ output: html_document
 library(data.table)
 library(tidyverse)
 library(wesanderson)
-
-mega_directory <- "/Volumes/brothers_seq/Nanopore/201125_Turkey/megalodon_output_06/"
-chr <- "III" #which chromosome?
-
-# find all the reads with a qscore < 9 and filter out those reads from the input chr.txt file
-summary <- fread(sprintf("%s/sequencing_summary.txt", mega_directory),
-            select = c('read_id', 'mean_qscore_template'))
-
-bad_reads <- summary[mean_qscore_template <= 9, read_id]
-
-unfiltered <- fread(sprintf("%s/chr%s.txt", mega_directory, chr),
-                    select = c(1, 2, 4, 5),
-                    col.names = c("read_id", "chrm", "pos", "mod_log_prob"))
-
-filtered <- unfiltered[!(read_id %in% bad_reads)]
-
-#1. convert log probabilities into probabilities
-#2. add a binary column; if mod_prob is >80, set as methylated (TRUE). if < 80, set as unmethylated (FALSE)
-#3. add start and end positions for each read_id
-#4. order by position and read_id
-probs <- filtered[, list(read_id, pos, mod_prob = 10 ^ mod_log_prob)][
-  , binary := ifelse(mod_prob > 0.8, TRUE, FALSE)][
-    , start_pos := min(pos), by = read_id][
-      , end_pos := max(pos), by = read_id][
-        order(pos, read_id)]
 ```
 # Plot functions
 ```{r}
@@ -61,8 +36,35 @@ plot_binary <- function(data) {
     scale_color_manual(values = binary_pal[3:4], name = "m6A")
 }
 ```
+# JRY11699 (no EcoGII)
+```{r}
+mega_directory <- "/Volumes/brothers_seq/Nanopore/201125_Turkey/megalodon_output_04/"
+chr <- "III" #which chromosome?
 
-# plot unmethylated region
+# find all the reads with a qscore < 9 and filter out those reads from the input chr.txt file
+summary <- fread(sprintf("%s/sequencing_summary.txt", mega_directory),
+            select = c('read_id', 'mean_qscore_template'))
+
+bad_reads <- summary[mean_qscore_template <= 9, read_id]
+
+unfiltered <- fread(sprintf("%s/chr%s.txt", mega_directory, chr),
+                    select = c(1, 2, 4, 5),
+                    col.names = c("read_id", "chrm", "pos", "mod_log_prob"))
+
+filtered <- unfiltered[!(read_id %in% bad_reads)]
+
+#1. convert log probabilities into probabilities
+#2. add a binary column; if mod_prob is >80, set as methylated (TRUE). if < 80, set as unmethylated (FALSE)
+#3. add start and end positions for each read_id
+#4. order by position and read_id
+probs <- filtered[, list(read_id, pos, mod_prob = 10 ^ mod_log_prob)][
+  , binary := ifelse(mod_prob > 0.8, TRUE, FALSE)][
+    , start_pos := min(pos), by = read_id][
+      , end_pos := max(pos), by = read_id][
+        order(pos, read_id)]
+```
+
+## plot unmethylated region
 ```{r}
 control_region <- c(180e3, 185e3)
 control <- probs[start_pos <= control_region[1]][end_pos >= control_region[2]][
@@ -70,7 +72,7 @@ control <- probs[start_pos <= control_region[1]][end_pos >= control_region[2]][
 plot_binary(control)
 ```
 
-# plot HML
+## plot HML
 ```{r}
 HML_region <- c(10.5e3, 15.5e3)
 HML_silencers <- c(11146, 14849)
@@ -87,7 +89,143 @@ hmlp <- plot_binary(HML)
 hmlp + geom_vline(xintercept = HML_silencers) #+
   #geom_vline(xintercept = HML_linkers, size = 0.3, color = "black")
 ```
-# plot HMR
+## plot HMR
+```{r}
+HMR_region <- c(291e3, 296e3)
+HMR_silencers <- c(292388, 295034)
+HMR_linkers <- c(291100, 291312, 291644, 291863, 292129, 292322,
+                292498, 292921, 293078, 293227, 293440, 293633, 293841, 294155,
+                294515, 294699, 295239, 295555, 295743, 295906)
+
+HMR <- probs[start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
+  pos %between% HMR_region]
+hmrp <- plot_binary(HMR)
+hmrp + geom_vline(xintercept = HMR_silencers)
+```
+
+# JRY12840 (*SIR3-EcoGII*)
+
+```{r}
+mega_directory <- "/Volumes/brothers_seq/Nanopore/201125_Turkey/megalodon_output_06/"
+chr <- "III" #which chromosome?
+
+# find all the reads with a qscore < 9 and filter out those reads from the input chr.txt file
+summary <- fread(sprintf("%s/sequencing_summary.txt", mega_directory),
+            select = c('read_id', 'mean_qscore_template'))
+
+bad_reads <- summary[mean_qscore_template <= 9, read_id]
+
+unfiltered <- fread(sprintf("%s/chr%s.txt", mega_directory, chr),
+                    select = c(1, 2, 4, 5),
+                    col.names = c("read_id", "chrm", "pos", "mod_log_prob"))
+
+filtered <- unfiltered[!(read_id %in% bad_reads)]
+
+#1. convert log probabilities into probabilities
+#2. add a binary column; if mod_prob is >80, set as methylated (TRUE). if < 80, set as unmethylated (FALSE)
+#3. add start and end positions for each read_id
+#4. order by position and read_id
+probs <- filtered[, list(read_id, pos, mod_prob = 10 ^ mod_log_prob)][
+  , binary := ifelse(mod_prob > 0.8, TRUE, FALSE)][
+    , start_pos := min(pos), by = read_id][
+      , end_pos := max(pos), by = read_id][
+        order(pos, read_id)]
+```
+
+## plot unmethylated region
+```{r}
+control_region <- c(180e3, 185e3)
+control <- probs[start_pos <= control_region[1]][end_pos >= control_region[2]][
+  pos %between% control_region]
+plot_binary(control)
+```
+
+## plot HML
+```{r}
+HML_region <- c(10.5e3, 15.5e3)
+HML_silencers <- c(11146, 14849)
+HML_linkers <- c(#9407, 9587.5, 9067, 9747, 9923, 10166, 10331, 
+  10585, 10748,
+  10944, 11118, 11418, 11645, 12021, 12251, 12436, 12649, 12842,
+  13017, 13396, 13558, 13829, 14011, 14221, 14883, 15229, 15406
+  #15573, 15984, 16244
+)
+
+HML <- probs[start_pos <= HML_region[1]][end_pos >= HML_region[2]][
+  pos %between% HML_region]
+hmlp <- plot_binary(HML)
+hmlp + geom_vline(xintercept = HML_silencers) #+
+  #geom_vline(xintercept = HML_linkers, size = 0.3, color = "black")
+```
+## plot HMR
+```{r}
+HMR_region <- c(291e3, 296e3)
+HMR_silencers <- c(292388, 295034)
+HMR_linkers <- c(291100, 291312, 291644, 291863, 292129, 292322,
+                292498, 292921, 293078, 293227, 293440, 293633, 293841, 294155,
+                294515, 294699, 295239, 295555, 295743, 295906)
+
+HMR <- probs[start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
+  pos %between% HMR_region]
+hmrp <- plot_binary(HMR)
+hmrp + geom_vline(xintercept = HMR_silencers)
+```
+
+# JRY12838 (*sir3∆::EcoGII*)
+
+```{r}
+mega_directory <- "/Volumes/brothers_seq/Nanopore/201125_Turkey/megalodon_output_05/"
+chr <- "III" #which chromosome?
+
+# find all the reads with a qscore < 9 and filter out those reads from the input chr.txt file
+summary <- fread(sprintf("%s/sequencing_summary.txt", mega_directory),
+            select = c('read_id', 'mean_qscore_template'))
+
+bad_reads <- summary[mean_qscore_template <= 9, read_id]
+
+unfiltered <- fread(sprintf("%s/chr%s.txt", mega_directory, chr),
+                    select = c(1, 2, 4, 5),
+                    col.names = c("read_id", "chrm", "pos", "mod_log_prob"))
+
+filtered <- unfiltered[!(read_id %in% bad_reads)]
+
+#1. convert log probabilities into probabilities
+#2. add a binary column; if mod_prob is >80, set as methylated (TRUE). if < 80, set as unmethylated (FALSE)
+#3. add start and end positions for each read_id
+#4. order by position and read_id
+probs <- filtered[, list(read_id, pos, mod_prob = 10 ^ mod_log_prob)][
+  , binary := ifelse(mod_prob > 0.8, TRUE, FALSE)][
+    , start_pos := min(pos), by = read_id][
+      , end_pos := max(pos), by = read_id][
+        order(pos, read_id)]
+```
+
+## plot unmethylated region
+```{r}
+control_region <- c(180e3, 185e3)
+control <- probs[start_pos <= control_region[1]][end_pos >= control_region[2]][
+  pos %between% control_region]
+plot_binary(control)
+```
+
+## plot HML
+```{r}
+HML_region <- c(10.5e3, 15.5e3)
+HML_silencers <- c(11146, 14849)
+HML_linkers <- c(#9407, 9587.5, 9067, 9747, 9923, 10166, 10331, 
+  10585, 10748,
+  10944, 11118, 11418, 11645, 12021, 12251, 12436, 12649, 12842,
+  13017, 13396, 13558, 13829, 14011, 14221, 14883, 15229, 15406
+  #15573, 15984, 16244
+)
+
+HML <- probs[start_pos <= HML_region[1]][end_pos >= HML_region[2]][
+  pos %between% HML_region]
+hmlp <- plot_binary(HML)
+hmlp + geom_vline(xintercept = HML_silencers) #+
+  #geom_vline(xintercept = HML_linkers, size = 0.3, color = "black")
+```
+## plot HMR
 ```{r}
 HMR_region <- c(291e3, 296e3)
 HMR_silencers <- c(292388, 295034)
