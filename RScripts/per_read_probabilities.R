@@ -3,10 +3,10 @@
 #########################
 # Author: Molly Brothers
 # Github: mollybrothers
-# Date: 2020-11-18
+# Date: 2020-12-01
 #########################
 
-#IN PROGRESS
+#TO DO: figure out best way to plot 'binary' methylation calls for single reads...
 
 #######################################################################################
 # the per_read_base_calls.txt file itself is too large for RStudio's memory,
@@ -19,7 +19,7 @@ library(data.table)
 library(tidyverse)
 library(wesanderson)
 
-mega_directory <- "/Volumes/brothers_seq/Nanopore/201012_Doudna/201012_Doudna_megalodon_outputv2"
+mega_directory <- "/Volumes/brothers_seq/Nanopore/201125_Turkey/megalodon_output_06/"
 chr <- "III" #which chromosome?
 
 # find all the reads with a qscore < 9 and filter out those reads from the input chr.txt file
@@ -40,15 +40,14 @@ probs <- filtered[mod_log_prob > -2, list(read_id, pos, mod_log_prob,
                                       order(pos, read_id)
                                     ]
 
-#extract each unique read_id to set the order for single read plots
-read_names <- unique(probs$read_id)
-probs$read_id = factor(probs$read_id, levels = read_names)
+#############################
+#PLOT AVERAGE PROBABILITIES
+#############################
 
-#plot average probabilities for each position
 plot_prob <- function(input, title) {
   ggplot(input, aes(x = pos, y = avg_prob)) +
     theme_classic() +
-    geom_point(position = "dodge") +
+    geom_point(position = "jitter") +
     labs(
       title = sprintf("%s region", title),
       x = sprintf("chr %s", chr),
@@ -74,7 +73,15 @@ HMR_avg <- probs[pos %between% c(291e3, 296e3),
              ]
 plot_prob(HMR_avg, "HMR")
 
-#plot functions for single reads
+####################
+#PLOT SINGLE READS
+####################
+
+#extract each unique read_id to set the order for single read plots
+read_names <- unique(probs$read_id)
+probs$read_id = factor(probs$read_id, levels = read_names)
+
+#plot functions
 pal <- wes_palette("Zissou1", 2, type = "continuous")
 
 plot_nucs <- function(data, bounds, linkers) {
@@ -84,8 +91,7 @@ plot_nucs <- function(data, bounds, linkers) {
           axis.ticks.y = element_blank(),
           axis.title.y = element_blank(),
           axis.title.x = element_blank(),
-          legend.position = c(0.1, 0.8),
-          legend.direction = "vertical") +
+          panel.grid = element_blank()) +
     scale_color_gradientn(colors = pal, name = "m6A probability") +
     geom_vline(xintercept = bounds) +
     geom_vline(xintercept = linkers, size = 0.3, color = "black")
@@ -94,12 +100,12 @@ plot_nucs <- function(data, bounds, linkers) {
 plot_clean <- function(data, bounds) {
   ggplot(data, aes(x = pos, y = read_id, color = mod_prob)) +
     geom_point(shape = 15, size = 0.5) +
-    theme(axis.text.y = element_blank(),
+    theme(panel.grid = element_blank(),
+          axis.text.y = element_blank(),
           axis.ticks.y = element_blank(),
           axis.title.y = element_blank(),
           axis.title.x = element_blank(),
-          legend.position = c(0.1, 0.8),
-          legend.direction = "vertical") +
+          panel.grid = element_blank()) +
     scale_color_gradientn(colors = pal, name = "m6A probability") +
     geom_vline(xintercept = bounds)
 }
@@ -112,8 +118,7 @@ ggplot(control, aes(x = pos, y = read_id, color = mod_prob)) +
         axis.ticks.y = element_blank(),
         axis.title.y = element_blank(),
         axis.title.x = element_blank(),
-        legend.position = c(0.1, 0.8),
-        legend.direction = "vertical") +
+        panel.grid = element_blank()) +
   scale_color_gradientn(colors = pal, name = "m6A probability")
 
 #plot HML
@@ -160,3 +165,51 @@ ggplot(tel3R, aes(x = pos, y = read_id, color = mod_prob)) +
         legend.position = c(0.1, 0.8),
         legend.direction = "vertical") +
   scale_color_gradientn(colors = pal, name = "m6A probability")
+
+################
+#PLOT BINARIES
+################
+
+#if mod_prob is > 80, set as methylated (1). if < 80, set as unmethylated (0).
+binary <- probs[, binary := ifelse(mod_prob > 0.8, 1, 0)]
+
+plot_clean_binaries <- function(data, bounds) {
+  ggplot(data, aes(x = pos, y = read_id, color = binary)) +
+    geom_point(shape = 15, size = 0.5) +
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.title.y = element_blank(),
+          axis.title.x = element_blank(),
+          panel.grid = element_blank()) +
+    scale_color_gradientn(colors = pal, name = "m6A probability") +
+    geom_vline(xintercept = bounds)
+}
+
+control <- binary[pos %between% c(180e3, 185e3), list(read_id, pos, binary)]
+ggplot(control, aes(x = pos, y = read_id, color = binary)) +
+  geom_point(shape = 15, size = 0.5) +
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        panel.grid = element_blank()) +
+  scale_color_gradientn(colors = pal, name = "m6A probability")
+
+#plot HML
+HML <- binary[pos %between% c(10.5e3, 15.5e3), list(read_id, pos, binary)]
+HML_bounds = c(11146, 14849)
+HML_linkers = c(#9407, 9587.5, 9067, 9747, 9923, 10166, 10331, 
+  10585, 10748,
+  10944, 11118, 11418, 11645, 12021, 12251, 12436, 12649, 12842,
+  13017, 13396, 13558, 13829, 14011, 14221, 14883, 15229, 15406
+  #15573, 15984, 16244
+)
+plot_clean_binaries(HML, HML_bounds)
+
+#plot HMR
+HMR <- binary[pos %between% c(291e3, 296e3), list(read_id, pos, binary)]
+HMR_bounds = c(292388, 295034)
+HMR_linkers = c(291100, 291312, 291644, 291863, 292129, 292322,
+                292498, 292921, 293078, 293227, 293440, 293633, 293841, 294155,
+                294515, 294699, 295239, 295555, 295743, 295906)
+plot_clean_binaries(HMR, HMR_bounds)
