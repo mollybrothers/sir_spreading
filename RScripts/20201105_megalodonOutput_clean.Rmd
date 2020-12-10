@@ -2,12 +2,16 @@
 title: "Sir methylation"
 author: "Koen Van den Berge"
 date: "11/5/2020"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 # BED file
 
 ```{r}
+library(ggplot2)
 library(rafalib)
 df <- read.table("~/data/molly/modified_bases.6mA.bed")
 colnames(df) <- c("chrom", "start", "end", "name", "score", "strand", "startCodon", "stopCodon", "color", "coverage", "percentage")
@@ -30,6 +34,208 @@ dfHMR2 <- df[df$chrom == "III" & df$start > 293000 & df$end < 294000,]
 plot(x=dfHMR2$start, y=dfHMR2$percentage, pch=16, main="HMR region", cex=dfHMR2$coverage/100,
      xlab="Position on chr3", ylab="Percentage of methylated reads")
 ```
+
+# Periodicity visualization: Doudna run 
+
+```{r}
+nucDat <- openxlsx::read.xlsx("../../data/HMR_HML_nucleosome positions.xlsx")
+```
+
+
+## HMR
+
+```{r}
+nucDatHMR <- nucDat[nucDat$region == "HMR",]
+dfHMRNuc <- dfHMR[dfHMR$start > min(nucDatHMR$Start) & dfHMR$stop < max(nucDatHMR$Stop),]
+plot(x=dfHMRNuc$start, y=dfHMRNuc$percentage, cex=log(dfHMRNuc$coverage)/10, pch=16)
+abline(v=nucDatHMR$dyad, col="red")
+
+pListHMR <- list()
+for(nn in 1:(nrow(nucDatHMR)-1)){
+  curStart <- nucDatHMR$dyad[nn]
+  curStop <- nucDatHMR$dyad[nn+1]
+  curDf <- dfHMRNuc[dfHMRNuc$start>=curStart & dfHMRNuc$end<=curStop,]
+  curDf$normPos <- (curDf$start - min(curDf$start))
+  curDf$normPos <- curDf$normPos / max(curDf$normPos)
+  
+  pListHMR[[nn]] <- ggplot(curDf, aes(x=normPos, y=percentage)) +
+    geom_point(col="grey", alpha=.4) +
+    geom_smooth(aes(weight=coverage)) +
+    theme_bw() +
+    ggtitle(paste0("chrIII: ",round(min(curDf$start)/1e3,2),"k-",round(max(curDf$stop)/1e3,2),"k")) +
+    xlab("Dyad distance") +
+    ylab("Percentage methylated")
+
+}
+cowplot::plot_grid(plotlist=pListHMR)
+ggsave("../../plots/dyadMethylationHMR_Doudna.pdf",
+       width=16, height=10)
+```
+
+
+##HML
+
+```{r}
+nucDatHML <- nucDat[nucDat$region == "HML",]
+dfHMLNuc <- dfHML[dfHML$start > min(nucDatHML$Start) & dfHML$stop < max(nucDatHML$Stop),]
+plot(x=dfHMLNuc$start, y=dfHMLNuc$percentage, cex=log(dfHMLNuc$coverage)/10, pch=16)
+abline(v=nucDatHML$dyad, col="red")
+
+pListHML <- list()
+for(nn in 1:(nrow(nucDatHML)-1)){
+  curStart <- nucDatHML$dyad[nn]
+  curStop <- nucDatHML$dyad[nn+1]
+  curDf <- dfHMLNuc[dfHMLNuc$start>=curStart & dfHMLNuc$end<=curStop,]
+  curDf$normPos <- (curDf$start - min(curDf$start))
+  curDf$normPos <- curDf$normPos / max(curDf$normPos)
+  
+  pListHML[[nn]] <- ggplot(curDf, aes(x=normPos, y=percentage)) +
+    geom_point(col="grey", alpha=.4) +
+    geom_smooth(aes(weight=coverage)) +
+    theme_bw() +
+    ggtitle(paste0("chrIII: ",round(min(curDf$start)/1e3,2),"k-",round(max(curDf$stop)/1e3,2),"k")) +
+    xlab("Dyad distance") +
+    ylab("Percentage methylated")
+
+}
+cowplot::plot_grid(plotlist=pListHML)
+ggsave("../../plots/dyadMethylationHML_Doudna.pdf",
+       width=16, height=10)
+```
+
+# Periodicity visualization: Turkey run  sample 06
+
+```{r}
+dfTurkey <- read.table("~/data/molly/megalodon_output_06/modified_bases.aggregate06.6mA.bed")
+colnames(dfTurkey) <- c("chrom", "start", "end", "name", "score", "strand", "startCodon", "stopCodon", "color", "coverage", "percentage")
+```
+
+
+## HMR region
+
+```{r}
+dfHMRNucTurkey <- dfTurkey[dfTurkey$chrom == "III" & dfTurkey$start > min(nucDatHMR$Start) & dfTurkey$stop < max(nucDatHMR$Stop),]
+plot(x=dfHMRNucTurkey$start, y=dfHMRNucTurkey$percentage, cex=log(dfHMRNucTurkey$coverage)/10, pch=16)
+abline(v=nucDatHMR$dyad, col="red")
+
+pListHMRTurkey <- list()
+for(nn in 1:(nrow(nucDatHMR)-1)){
+  curStart <- nucDatHMR$dyad[nn]
+  curStop <- nucDatHMR$dyad[nn+1]
+  curDf <- dfHMRNucTurkey[dfHMRNucTurkey$start>=curStart & dfHMRNucTurkey$end<=curStop,]
+  curDf$normPos <- (curDf$start - min(curDf$start))
+  curDf$normPos <- curDf$normPos / max(curDf$normPos)
+  
+  pListHMRTurkey[[nn]] <- ggplot(curDf, aes(x=normPos, y=percentage)) +
+    geom_point(col="grey", alpha=.4) +
+    geom_smooth(aes(weight=coverage)) +
+    theme_bw() +
+    ggtitle(paste0("chrIII: ",round(min(curDf$start)/1e3,2),"k-",round(max(curDf$stop)/1e3,2),"k")) +
+    xlab("Dyad distance") +
+    ylab("Percentage methylated")
+
+}
+cowplot::plot_grid(plotlist=pListHMRTurkey)
+ggsave("../../plots/dyadMethylationHMR_turkey06.pdf",
+       width=16, height=10)
+```
+
+## HML region
+
+```{r}
+dfHMLNucTurkey <- dfTurkey[dfTurkey$chrom == "III" & dfTurkey$start > min(nucDatHML$Start) & dfTurkey$stop < max(nucDatHML$Stop),]
+plot(x=dfHMLNucTurkey$start, y=dfHMLNucTurkey$percentage, cex=log(dfHMLNucTurkey$coverage)/10, pch=16)
+abline(v=nucDatHMR$dyad, col="red")
+
+pListHMLTurkey <- list()
+for(nn in 1:(nrow(nucDatHML)-1)){
+  curStart <- nucDatHML$dyad[nn]
+  curStop <- nucDatHML$dyad[nn+1]
+  curDf <- dfHMLNucTurkey[dfHMLNucTurkey$start>=curStart & dfHMLNucTurkey$end<=curStop,]
+  curDf$normPos <- (curDf$start - min(curDf$start))
+  curDf$normPos <- curDf$normPos / max(curDf$normPos)
+  
+  pListHMLTurkey[[nn]] <- ggplot(curDf, aes(x=normPos, y=percentage)) +
+    geom_point(col="grey", alpha=.4) +
+    geom_smooth(aes(weight=coverage)) +
+    theme_bw() +
+    ggtitle(paste0("chrIII: ",round(min(curDf$start)/1e3,2),"k-",round(max(curDf$stop)/1e3,2),"k")) +
+    xlab("Dyad distance") +
+    ylab("Percentage methylated")
+
+}
+cowplot::plot_grid(plotlist=pListHMLTurkey)
+ggsave("../../plots/dyadMethylationHML_turkey06.pdf",
+       width=16, height=10)
+```
+
+# Periodicity visualization: Turkey run  sample 07
+
+```{r}
+dfTurkey <- read.table("~/data/molly/megalodon_output_07/modified_bases.aggregate07.6mA.bed")
+colnames(dfTurkey) <- c("chrom", "start", "end", "name", "score", "strand", "startCodon", "stopCodon", "color", "coverage", "percentage")
+```
+
+
+## HMR region
+
+```{r}
+dfHMRNucTurkey <- dfTurkey[dfTurkey$chrom == "III" & dfTurkey$start > min(nucDatHMR$Start) & dfTurkey$stop < max(nucDatHMR$Stop),]
+plot(x=dfHMRNucTurkey$start, y=dfHMRNucTurkey$percentage, cex=log(dfHMRNucTurkey$coverage)/10, pch=16)
+abline(v=nucDatHMR$dyad, col="red")
+
+pListHMRTurkey <- list()
+for(nn in 1:(nrow(nucDatHMR)-1)){
+  curStart <- nucDatHMR$dyad[nn]
+  curStop <- nucDatHMR$dyad[nn+1]
+  curDf <- dfHMRNucTurkey[dfHMRNucTurkey$start>=curStart & dfHMRNucTurkey$end<=curStop,]
+  curDf$normPos <- (curDf$start - min(curDf$start))
+  curDf$normPos <- curDf$normPos / max(curDf$normPos)
+  
+  pListHMRTurkey[[nn]] <- ggplot(curDf, aes(x=normPos, y=percentage)) +
+    geom_point(col="grey", alpha=.4) +
+    geom_smooth(aes(weight=coverage)) +
+    theme_bw() +
+    ggtitle(paste0("chrIII: ",round(min(curDf$start)/1e3,2),"k-",round(max(curDf$stop)/1e3,2),"k")) +
+    xlab("Dyad distance") +
+    ylab("Percentage methylated")
+
+}
+cowplot::plot_grid(plotlist=pListHMRTurkey)
+ggsave("../../plots/dyadMethylationHMR_turkey07.pdf",
+       width=16, height=10)
+```
+
+## HML region
+
+```{r}
+dfHMLNucTurkey <- dfTurkey[dfTurkey$chrom == "III" & dfTurkey$start > min(nucDatHML$Start) & dfTurkey$stop < max(nucDatHML$Stop),]
+plot(x=dfHMLNucTurkey$start, y=dfHMLNucTurkey$percentage, cex=log(dfHMLNucTurkey$coverage)/10, pch=16)
+abline(v=nucDatHMR$dyad, col="red")
+
+pListHMLTurkey <- list()
+for(nn in 1:(nrow(nucDatHML)-1)){
+  curStart <- nucDatHML$dyad[nn]
+  curStop <- nucDatHML$dyad[nn+1]
+  curDf <- dfHMLNucTurkey[dfHMLNucTurkey$start>=curStart & dfHMLNucTurkey$end<=curStop,]
+  curDf$normPos <- (curDf$start - min(curDf$start))
+  curDf$normPos <- curDf$normPos / max(curDf$normPos)
+  
+  pListHMLTurkey[[nn]] <- ggplot(curDf, aes(x=normPos, y=percentage)) +
+    geom_point(col="grey", alpha=.4) +
+    geom_smooth(aes(weight=coverage)) +
+    theme_bw() +
+    ggtitle(paste0("chrIII: ",round(min(curDf$start)/1e3,2),"k-",round(max(curDf$stop)/1e3,2),"k")) +
+    xlab("Dyad distance") +
+    ylab("Percentage methylated")
+
+}
+cowplot::plot_grid(plotlist=pListHMLTurkey)
+ggsave("../../plots/dyadMethylationHML_turkey07.pdf",
+       width=16, height=10)
+```
+
+
 
 # Extract single reads and methylation probabilities
 
@@ -119,43 +325,34 @@ for(ii in 1:length(posProbList)){
 }
 abline(v=292e3, lty=2)
 abline(v=295e3, lty=2)
-
-## setting a threshold on methylation
-rafalib::mypar(mfrow=c(1,1))
-#pal <- wesanderson::wes_palette("Zissou1", n=256, type="continuous")
-par(bty="l")
-plot(x=seq(285e3, 300e3, length=length(posProbList)),
-     y=1:length(posProbList),
-     type = "n",
-     xlab = "Position on ChrIII",
-     ylab= "Read colored by methylation probability",
-     main = "75% Methylation probability threshold")
-for(ii in 1:length(posProbList)){
-  curDf <- posProbList[[ii]]
-  curDf <- curDf[curDf$prob > .75,]
-  curPos <- curDf$pos
-  points(x=curPos, y=rep(ii, length(curPos)),
-         pch=16, cex=1/20)
-}
-abline(v=292e3, lty=2)
-abline(v=295e3, lty=2)
-
-rafalib::mypar(mfrow=c(1,1))
-#pal <- wesanderson::wes_palette("Zissou1", n=256, type="continuous")
-par(bty="l")
-plot(x=seq(285e3, 300e3, length=length(posProbList)),
-     y=1:length(posProbList),
-     type = "n",
-     xlab = "Position on ChrIII",
-     ylab= "Read colored by methylation probability",
-     main = "95% Methylation probability threshold")
-for(ii in 1:length(posProbList)){
-  curDf <- posProbList[[ii]]
-  curDf <- curDf[curDf$prob > .95,]
-  curPos <- curDf$pos
-  points(x=curPos, y=rep(ii, length(curPos)),
-         pch=16, cex=1/20)
-}
-abline(v=292e3, lty=2)
-abline(v=295e3, lty=2)
 ```
+
+# Lower and upper thresholds
+
+```{r}
+
+for(tt in 0:7){
+  binaryPal <- wesanderson::wes_palette("Zissou1", n=2, type="continuous")
+  rafalib::mypar(mfrow=c(1,1))
+  #pal <- wesanderson::wes_palette("Zissou1", n=256, type="continuous")
+  par(bty="l")
+  plot(x=seq(285e3, 300e3, length=length(posProbList)),
+       y=1:length(posProbList),
+       type = "n",
+       xlab = "Position on ChrIII",
+       ylab= "Read colored by methylation probability",
+       main = paste0("Lower: ",(0.4-(tt*0.05))*100,"%, upper: ", (0.6+(tt*0.05))*100,"%"))
+  for(ii in 1:length(posProbList)){
+    curDf <- posProbList[[ii]]
+    curDf <- curDf[curDf$prob >= 0.6+(tt*0.05) | curDf$prob <= 0.4-(tt*0.05),]
+    curPos <- curDf$pos
+    curMet <- as.numeric(curDf$prob >= .8)
+    points(x=curPos, y=rep(ii, length(curPos)), col=binaryPal[curMet+1],
+           pch=16, cex=1/20)
+  }
+  abline(v=292e3, lty=2)
+  abline(v=295e3, lty=2)
+}
+
+```
+
