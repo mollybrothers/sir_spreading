@@ -23,16 +23,16 @@ meth_cols <- c("chrom", "start", "coverage", "percentage")
 filtered_meth <- meth[coverage > 10, ..meth_cols]
 
 #read in nucleosome occupancy data from Chereji et al 2018
-nucs <- fread("/Volumes/brothers_seq/not_my_data/GSE97290_Henikoff_Chereji_2018/GSM2561057_Occupancy_H3_CC_rep_1_perbase.bedGraph")
-colnames(nucs) <- c("chrom", "base", "occupancy")
+nucs <- fread("/Volumes/brothers_seq/not_my_data/GSE97290_Henikoff_Chereji_2018/Chereji_Occupancy_rep1_singlebp.bedGraph")
+colnames(nucs) <- c("chrom", "start", "end", "occupancy")
 
 #plot percentage methylation as a column chart
 HMR <- filtered_meth[chrom == "III" & start > 291e3 & start < 294e3]
-HMR_nucs <- nucs[chrom == "chrIII" & base > 291e3 & base < 294e3]
+HMR_nucs <- nucs[chrom == "chrIII" & start > 291e3 & start < 294e3]
 
 ggplot() +
   geom_col(HMR, mapping = aes(x = start, y = percentage), color = "mediumpurple4") +
-  geom_col(HMR_nucs, mapping = aes(x = base, y = occupancy * 20), color = "black") +
+  geom_col(HMR_nucs, mapping = aes(x = start, y = occupancy * 20), color = "black") +
   theme_minimal() +
   labs(title = "SIR3-EcoGII (JRY13027)",
        x = "position on chr III",
