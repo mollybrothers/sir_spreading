@@ -7,8 +7,8 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --gres=gpu:2
-#SBATCH --output=megalodontests.out
-#SBATCH --error=megalodontests.err
+#SBATCH --output=megalodon.out
+#SBATCH --error=megalodon.err
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=molly_brothers@berkeley.edu
 #SBATCH --time=20:00:00
@@ -26,8 +26,8 @@ module load samtools
 GUPPY="/global/home/users/molly_brothers/sources/ont-guppy/bin/guppy_basecall_server"
 GUPPY_PARAMS="-d /global/home/users/molly_brothers/tools/rerio/basecall_models/"
 GUPPY_CONFIG="res_dna_r941_min_modbases-all-context_v001.cfg"
-INPUT="/global/scratch/molly_brothers/201012_Doudna/raw_data_multifast5"
-OUTPUT="/global/scratch/molly_brothers/201012_Doudna/megalodon_tests"
+INPUT="/global/scratch/molly_brothers/201218_Mariah/raw_data_multifast5"
+OUTPUT="/global/scratch/molly_brothers/201018_Mariah/megalodon_output_06"
 MOD_MOTIF="Y A 0"
 FILES_OUT="mod_mappings per_read_mods"
 GENOME="/global/scratch/molly_brothers/genomes/genome_mat_to_N.fa"
