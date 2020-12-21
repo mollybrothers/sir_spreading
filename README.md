@@ -12,7 +12,7 @@ Megalodon is run from a conda environment specified in the `guppy_conda.yml` fil
 Modified basecalling within megalodon uses the rerio basecalling config file `res_dna_r941_min_modbases-all-context_v001.cfg` (https://github.com/nanoporetech/rerio). Due to an oddity, you must copy the guppy barcoding directory into rerio or megalodon will not run correctly (https://github.com/nanoporetech/rerio/issues/10). This might be fixed in the future.
 
 As of typing this up, Megalodon does not support demultiplexing. It might in the future (https://github.com/nanoporetech/megalodon/issues/43).
-For now, a workaround is to basecall using guppy_basecaller including barcoding, which will give you a `barcoding_summary.txt` file. Extract the readIDs corresponding to each barcode using `get_barcodes.py`. Then, run megalodon using the `--read-ids-filename` option. You can then run megalodon separately for each barcode.
+For now, a workaround is to basecall using guppy_basecaller and guppy_barcoding, which will give you a `barcoding_summary.txt` file (see `guppy-js.sh` script). Extract the readIDs corresponding to each barcode using `get_barcodes.py`. Then, run megalodon using the `--read-ids-filename` option. You can then run megalodon separately for each barcode.
 
 ## output from each megalodon step (in `savio_jobscripts`):
 1. `megalodon_js.sh`
@@ -36,16 +36,27 @@ For now, a workaround is to basecall using guppy_basecaller including barcoding,
 ## 200814_McClintock (megalodon v 2.2.5)
 ### Strains:
 1. JRY11699 (no EcoGII): barcode01
-2. JRY12838 (sir3∆::EcoGII): barcode02
-3. JRY12840 (SIR3-EcoGII): barcode03
+2. JRY12838 (_sir3∆::EcoGII_): barcode02
+3. JRY12840 (_SIR3-EcoGII_): barcode03
 
 ## 201012_Doudna (megalodon v 2.2.4)
 ### Strains:
-1. JRY13027 (SIR3-EcoGII)
+1. JRY13027 (_SIR3-EcoGII_)
 
 ## 201125_Turkey (megalodon v 2.2.8)
 ### Strains:
 1. JRY11699 (no EcoGII): barcode04
-2. JRY12838 (sir3∆::EcoGII): barcode05
-3. JRY12840 (SIR3-EcoGII): barcode06
-4. JRY13027 (SIR3-EcoGII): barcode07
+2. JRY12838 (_sir3∆::EcoGII_): barcode05
+3. JRY12840 (_SIR3-EcoGII_): barcode06
+4. JRY13027 (_SIR3-EcoGII_): barcode07
+
+## 201218_Mariah (megalodon v 2.2.8)
+### Strains:
+1. JRY13110 (_sir3-8_) – 25C: barcode04
+2. JRY13110 (_sir3-8_) – 37C: barcode05
+3. JRY13114 (_sir3-8-EcoGII_) – 25C: barcode06
+4. JRY13114 (_sir3-8-EcoGII_) – 37C: barcode07
+5. JRY13115 (_sir3-8-EcoGII_) – 25C: barcode08
+6. JRY13115 (_sir3-8-EcoGII_) – 37C: barcode09
+7. JRY13027 (_SIR3-EcoGII_) – 25C: barcode10
+8. JRY13027 (_SIR3-EcoGII_) – 37C: barcode11
