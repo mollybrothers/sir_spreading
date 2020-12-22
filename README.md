@@ -19,6 +19,7 @@ For now, a workaround is to basecall using guppy_basecaller and guppy_barcoding,
     + `mod_mappings.bam`: BAM file including the tags `Mm` and `Ml`, which contain information on modification probabilities for each A in each read.
     + `per_read_modified_base_calls.db`: SQLite database
     + `sequencing_summary.txt`: summary of the guppy run. Used for filtering reads on Qscores in post-megalodon analyses (does not contain modification information)
+    + `basecalls.fastq`: basecalls from guppy (canonical bases only) in fastq form
   
 2. `megalodon_aggregate_js.sh`
     + `modified_bases.aggregate.6mA.bed`: bedMethyl file (https://www.encodeproject.org/data-standards/wgbs/). Used for `percentage_methylation.R`
