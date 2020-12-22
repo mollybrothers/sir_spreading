@@ -5,13 +5,13 @@
 #SBATCH --partition=savio2_1080ti
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=4
-#SBATCH --gres=gpu:2
-#SBATCH --output=megalodon.out
-#SBATCH --error=megalodon.err
+#SBATCH --cpus-per-task=2
+#SBATCH --gres=gpu:1
+#SBATCH --output=megalodon_06.out
+#SBATCH --error=megalodon_06.err
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=molly_brothers@berkeley.edu
-#SBATCH --time=20:00:00
+#SBATCH --time=40:00:00
 
 ##commands to run:
 
@@ -27,13 +27,13 @@ GUPPY="/global/home/users/molly_brothers/sources/ont-guppy/bin/guppy_basecall_se
 GUPPY_PARAMS="-d /global/home/users/molly_brothers/tools/rerio/basecall_models/"
 GUPPY_CONFIG="res_dna_r941_min_modbases-all-context_v001.cfg"
 INPUT="/global/scratch/molly_brothers/201218_Mariah/raw_data_multifast5"
-OUTPUT="/global/scratch/molly_brothers/201018_Mariah/megalodon_output_06"
+OUTPUT="/global/scratch/molly_brothers/201218_Mariah/megalodon_output_06"
 MOD_MOTIF="Y A 0"
-FILES_OUT="mod_mappings per_read_mods"
+FILES_OUT="basecalls mod_mappings per_read_mods"
 GENOME="/global/scratch/molly_brothers/genomes/genome_mat_to_N.fa"
 PROCESSES="$SLURM_CPUS_ON_NODE"
-##NUM_READS="50"
-##READ_IDS="/global/scratch/molly_brothers/200814_McClintock/try2/basecall/barcode/barcode03_readIDs.txt"
+##NUM_READS="100"
+READ_IDS="/global/scratch/molly_brothers/201218_Mariah/barcode06_readIDs.txt"
 
 megalodon $INPUT \
 --output-directory $OUTPUT \
@@ -44,8 +44,8 @@ megalodon $INPUT \
 --reference $GENOME \
 --outputs $FILES_OUT \
 --processes $PROCESSES \
---devices 0 1 \
+--devices 0 \
+--read-ids-filename $READ_IDS
 ##--num-reads $NUM_READS
-##--read-ids-filename $READ_IDS
 
 echo 'done'
