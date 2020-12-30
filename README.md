@@ -26,6 +26,8 @@ For now, a workaround is to basecall using guppy_basecaller and guppy_barcoding,
 
 3. `meglaodon_perreadtext_js.sh`
     + `per_read_modified_base_calls.txt`: each row is a single adenine position on a single read. Used for `per_read_probabilities.R`
+    
+    A [conversation](https://github.com/nanoporetech/rerio/issues/12) with the megalodon developer made clear that the `per_read_modified_base_calls.txt` file contains **all** the data, i.e., data on all adenine nucleotides on all reads considered. In comparison, the `.bed` files are summarized/aggregated methylation calls for each adenine nucleotide. Here, the coverage per adenine is lower than in the `per_read_modified_base_calls.txt` file since by default a non-methylated position is considered a position with methylation probability $<0.2$, while a methylated position has a methylation probability $>0.8$.
 
 # Post-Megalodon Analysis
 

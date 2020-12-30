@@ -15,15 +15,17 @@ library(tidyverse)
 
 #read in percentage methylation data
 meth <- fread("/Volumes/brothers_seq/Nanopore/201012_Doudna/201012_Doudna_megalodon_output_00/modified_bases.6mA.bed")
+#meth <- fread("/global/scratch/molly_brothers/201012_Doudna/megalodon_output_00/modified_bases.6mA.bed")
 colnames(meth) <- c("chrom", "start", "end", "name", "score", 
-                  "strand", "startCodon", "stopCodon", "color", 
-                  "coverage", "percentage")
+                    "strand", "startCodon", "stopCodon", "color", 
+                    "coverage", "percentage")
 
 meth_cols <- c("chrom", "start", "coverage", "percentage")
 filtered_meth <- meth[coverage > 10, ..meth_cols]
 
 #read in nucleosome occupancy data from Chereji et al 2018
 nucs <- fread("/Volumes/brothers_seq/not_my_data/GSE97290_Henikoff_Chereji_2018/Chereji_Occupancy_rep1_singlebp.bedGraph")
+#nucs <- fread("/global/scratch/molly_brothers/not_my_data/GSE97290_Henikoff_Chereji_2018/Chereji_Occupancy_rep1_singlebp.bedGraph")
 colnames(nucs) <- c("chrom", "start", "end", "occupancy")
 
 #plot percentage methylation as a column chart
