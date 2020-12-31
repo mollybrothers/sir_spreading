@@ -38,28 +38,38 @@ For now, a workaround is to basecall using guppy_basecaller and guppy_barcoding,
 # Info on experiments
 ## 200814_McClintock (megalodon v 2.2.5)
 ### Strains:
-1. JRY11699 (no EcoGII): barcode01
-2. JRY12838 (_sir3∆::EcoGII_): barcode02
-3. JRY12840 (_SIR3-EcoGII_): barcode03
++ JRY11699 (no EcoGII): barcode01
++ JRY12838 (_sir3∆::EcoGII_): barcode02
++ JRY12840 (_SIR3-EcoGII_): barcode03
 
 ## 201012_Doudna (megalodon v 2.2.4)
 ### Strains:
-1. JRY13027 (_SIR3-EcoGII_)
++ JRY13027 (_SIR3-EcoGII_)
 
 ## 201125_Turkey (megalodon v 2.2.8)
 ### Strains:
-1. JRY11699 (no EcoGII): barcode04
-2. JRY12838 (_sir3∆::EcoGII_): barcode05
-3. JRY12840 (_SIR3-EcoGII_): barcode06
-4. JRY13027 (_SIR3-EcoGII_): barcode07
++ JRY11699 (no EcoGII): barcode04
++ JRY12838 (_sir3∆::EcoGII_): barcode05
++ JRY12840 (_SIR3-EcoGII_): barcode06
++ JRY13027 (_SIR3-EcoGII_): barcode07
 
 ## 201218_Mariah (megalodon v 2.2.8)
+Unfortunately bad run. Reads too long (N50 33kb) and pore occupancy started low and were quickly depleted. Unfortunately unuseable data.
 ### Strains:
-1. JRY13110 (_sir3-8_) – 25C: barcode04
-2. JRY13110 (_sir3-8_) – 37C: barcode05
-3. JRY13114 (_sir3-8-EcoGII_) – 25C: barcode06
-4. JRY13114 (_sir3-8-EcoGII_) – 37C: barcode07
-5. JRY13115 (_sir3-8-EcoGII_) – 25C: barcode08
-6. JRY13115 (_sir3-8-EcoGII_) – 37C: barcode09
-7. JRY13027 (_SIR3-EcoGII_) – 25C: barcode10
-8. JRY13027 (_SIR3-EcoGII_) – 37C: barcode11
++ JRY13110 (_sir3-8_) – 25C: barcode04
++ JRY13110 (_sir3-8_) – 37C: barcode05
++ JRY13114 (_sir3-8-EcoGII_) – 25C: barcode06
++ JRY13114 (_sir3-8-EcoGII_) – 37C: barcode07
++ JRY13115 (_sir3-8-EcoGII_) – 25C: barcode08
++ JRY13115 (_sir3-8-EcoGII_) – 37C: barcode09
++ JRY13027 (_SIR3-EcoGII_) – 25C: barcode10
++ JRY13027 (_SIR3-EcoGII_) – 37C: barcode11
+
+## 201223_Elf (megalodon v 2.2.8)
+### Strains:
++ JRY13114 (_sir3-8-EcoGII_) – 25C: barcode01
++ JRY13114 (_sir3-8-EcoGII_) – 37C: barcode02
++ JRY13115 (_sir3-8-EcoGII_) – 25C: barcode03
++ JRY13115 (_sir3-8-EcoGII_) – 37C: barcode04
++ JRY13027 (_SIR3-EcoGII_) – 25C: barcode05
++ JRY13027 (_SIR3-EcoGII_) – 37C: barcode06
