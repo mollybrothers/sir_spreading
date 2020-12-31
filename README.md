@@ -71,5 +71,5 @@ Unfortunately bad run. Reads too long (N50 33kb) and pore occupancy started low 
 + JRY13114 (_sir3-8-EcoGII_) – 37C: barcode02
 + JRY13115 (_sir3-8-EcoGII_) – 25C: barcode03
 + JRY13115 (_sir3-8-EcoGII_) – 37C: barcode04
-+ JRY13027 (_SIR3-EcoGII_) – 25C: barcode05
-+ JRY13027 (_SIR3-EcoGII_) – 37C: barcode06
++ JRY12840 (_SIR3-EcoGII_) – 25C: barcode05
++ JRY12840 (_SIR3-EcoGII_) – 37C: barcode06
