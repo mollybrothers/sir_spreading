@@ -29,7 +29,7 @@ guppy_basecaller --input_path $INPUT1 --save_path $OUTPUT1 --flowcell $CELL --ki
 
 echo 'making fastq directory'
 mkdir $OUTPUT1/fastq
-mv $OUTPUT1/*.fastq $OUTPUT1/fastq
+mv $OUTPUT1/*.fastq* $OUTPUT1/fastq
 
 echo 'making guppy_logs directory'
 mkdir $OUTPUT1/guppy_logs
