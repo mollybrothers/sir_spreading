@@ -42,15 +42,19 @@ For now, a workaround is to basecall using guppy_basecaller and guppy_barcoding,
 + JRY12838 (_sir3∆::EcoGII_): barcode02
 + JRY12840 (_SIR3-EcoGII_): barcode03
 
-### N50: 21kb
-### Yield: 6Gb
+Flowcell: FLO-MIN106
+Kit: SQK-RBK004
+N50: 21kb
+Yield: 6Gb
 
 ## 201012_Doudna (megalodon v 2.2.4)
 ### Strains:
 + JRY13027 (_SIR3-EcoGII_)
 
-### N50: 3kb
-### Yield: 13Gb
+Flowcell: FLO-MIN106
+Kit: SQK-LSK109
+N50: 3kb
+Yield: 13Gb
 
 ## 201125_Turkey (megalodon v 2.2.8)
 ### Strains:
@@ -59,8 +63,10 @@ For now, a workaround is to basecall using guppy_basecaller and guppy_barcoding,
 + JRY12840 (_SIR3-EcoGII_): barcode06
 + JRY13027 (_SIR3-EcoGII_): barcode07
 
-### N50: 22kb
-### Yield: 12Gb
+Flowcell: FLO-MIN106
+Kit: SQK-RBK004
+N50: 22kb
+Yield: 12Gb
 
 ## 201218_Mariah (megalodon v 2.2.8)
 Unfortunately bad run. Reads too long (N50 33kb) and pore occupancy started low and quickly depleted. Unfortunately unusable data.
@@ -74,11 +80,13 @@ Unfortunately bad run. Reads too long (N50 33kb) and pore occupancy started low 
 + JRY13027 (_SIR3-EcoGII_) – 25C: barcode10
 + JRY13027 (_SIR3-EcoGII_) – 37C: barcode11
 
-### N50: 33kb
-### Yield: 6Gb
+Flowcell: FLO-MIN106
+Kit: SQK-RBK004
+N50: 33kb
+Yield: 6Gb
 
 ## 201223_Elf (megalodon v 2.2.8)
-Data here is still not great, but qualitatively you can tell that the sir3-8-EcoGII strains have no methylation at 37C and do have methylation at 25C
+Data here is still not great in terms of coverage and pore occupancy, but qualitatively you can tell that the sir3-8-EcoGII strains have no methylation at 37C and do have methylation at 25C
 ### Strains:
 + JRY13114 (_sir3-8-EcoGII_) – 25C: barcode01
 + JRY13114 (_sir3-8-EcoGII_) – 37C: barcode02
@@ -87,5 +95,7 @@ Data here is still not great, but qualitatively you can tell that the sir3-8-Eco
 + JRY12840 (_SIR3-EcoGII_) – 25C: barcode05
 + JRY12840 (_SIR3-EcoGII_) – 37C: barcode06
 
-### N50: 3kb
-### Yield: 3Gb
+Flowcell: FLO-MIN106
+Kit: SQK-RBK004
+N50: 3kb
+Yield: 3Gb
