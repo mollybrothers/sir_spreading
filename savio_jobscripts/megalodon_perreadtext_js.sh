@@ -2,7 +2,7 @@
 #
 #SBATCH --job-name=megalodon_perreadtext
 #SBATCH --account=fc_nanosir
-#SBATCH --partition=savio2_htc
+#SBATCH --partition=savio1
 #SBATCH --output=perreadtext.out
 #SBATCH --error=perreadtext.err
 #SBATCH --mail-type=END,FAIL
