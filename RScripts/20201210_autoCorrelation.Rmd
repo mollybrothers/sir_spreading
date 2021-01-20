@@ -1,0 +1,313 @@
+---
+title: "Autocorrelation on single reads"
+author: "Koen Van den Berge"
+date: "12/10/2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+
+# TO DO:
+
+ 1. Create a file such as `per_read_modified_base_calls.txt` but with binary methylation calls using the default cut-offs, i.e., filter out probabilities >20% and <80%, like the bedMethyl files but not aggregated.
+ 2. Use this file to calculate autocorrelation between the binary calls on single reads.
+ 3. See if/how we can aggregate the autocorrelation across reads to identify relevant autocorrelation lags, if any.
+ 4. Aggregate methylation calls between dyads and proceed doing the same but at the between-dyad level. 
+ 5. Check if autocorrelation on observed data is different as compared to permuted data to assess correlations.
+
+
+
+```{r}
+# see here (https://nanoporetech.github.io/megalodon/file_formats.html) for variable names
+library(data.table)
+binaryCalls <- fread(file = "/Users/koenvandenberge/data/molly/megalodon_output_06/per_read_modified_base_calls_binary.txt.gz",
+                     nrows = 1e5)
+colnames(binaryCalls) <- c("readID", "chr", "strand", "pos",
+                           "mod_log_prob", "can_log_prob", "mod_base")
+binaryCalls$methylation <- ifelse(binaryCalls$mod_log_prob > -0.2231436, 1, 0)
+table(binaryCalls$methylation)
+```
+
+
+# EDA
+
+```{r}
+library(tidyverse)
+readCalls <- binaryCalls %>% 
+  group_by(readID) %>%
+  summarize(avgMeth = mean(methylation),
+            length = n())
+hist(readCalls$avgMeth, breaks=20)
+logit <- function(x) log(x / (1-x))
+plot(x=readCalls$length, y=logit(readCalls$avgMeth), log="x",
+     xlab = "Number of bases with confident methylation calls in a read",
+     ylab = "Logit average methylation")
+```
+
+
+# Autocorrelation
+
+Below we look at autocorrelation for random reads.
+It is clear that there is strong autocorrelation. This is very obvious when comparing the autocorrelation function of the observed data versus that of permuted reads.
+
+Note the interesting observation that the ACF function appears bimodal. Clould this be related to nucleosome positions? Since the spacing is unequal across reads, does the multi-modality relate to a particular genomic distance?
+
+## For random reads
+
+```{r}
+rafalib::mypar(mfrow=c(4,4),
+              mar=c(1,2.5,3.2,1))
+#for(rr in 1:27){
+for(rr in 100:127){
+  curAvgMeth <- readCalls$avgMeth[rr]
+  if(curAvgMeth >0 & curAvgMeth < 1){
+    rid <- readCalls$readID[rr]
+    curDf <- binaryCalls[binaryCalls$readID == rid,]
+    curRange <- range(curDf$pos)
+    curChr <- unique(curDf$chr)
+    acf(curDf$methylation, ylim=c(0,1), xlim=c(0,30),
+        main=paste0("chr", curChr,": ", round(curRange[1]/1e3, digits = 2),
+                    " - ", round(curRange[2]/1e3, digits = 2), "kb"))
+  } else next
+}
+```
+
+## Understand autocorrelation plots by implementing them myself
+
+```{r}
+rafalib::mypar(mfrow=c(4,4),
+              mar=c(1,2.5,3.2,1))
+#for(rr in 1:27){
+for(rr in 100:127){
+  curAvgMeth <- readCalls$avgMeth[rr]
+  if(curAvgMeth >0 & curAvgMeth < 1){
+    rid <- readCalls$readID[rr]
+    curDf <- binaryCalls[binaryCalls$readID == rid,]
+    curRange <- range(curDf$pos)
+    curChr <- unique(curDf$chr)
+    y <- curDf$methylation
+    y <- y - mean(y)
+    maxLag <- 30
+    n <- length(y)
+    acf <- c()
+    for(ll in 1:maxLag){
+      acf[ll] <- cor(y[1:(n-ll)], y[(ll+1):n])
+    }
+    plot(x=1:maxLag, y=acf, type='h', ylim=c(0,1),
+         main=paste0("chr", curChr,": ", round(curRange[1]/1e3, digits = 2),
+                    " - ", round(curRange[2]/1e3, digits = 2), "kb"))
+  } else next
+}
+```
+
+
+## Autocorrelation function on permutations of random reads
+
+```{r}
+rafalib::mypar(mfrow=c(4,4))
+for(rr in 1:27){
+  curAvgMeth <- readCalls$avgMeth[rr]
+  if(curAvgMeth >0 & curAvgMeth < 1){
+    acf(sample(binaryCalls$methylation[binaryCalls$readID == readCalls$readID[rr]]),
+        ylim=c(0,1))
+  } else next
+}
+```
+
+# Autocorrelation at relevant scales: considering linker regions
+
+There is high autocorrelation on the methylation signal on single reads, at the level of single methylated adenine nucleotides. Note that, this could however be expected. Indeed, Molly suggested that the actual biologically relevant resolution might be the resolution of linker regions inbetween nucleosomes.
+In order to identify these linker regions, we could use the nucleosome occupancy data from Chereji *et al.* (2018) and, for example, set a threshold on when a region is 'not occupied by nucleosomes', and then calculating autocorrelation between those regions.
+
+## Import aggreated methylation bed file
+
+```{r}
+meth <- fread("~/data/molly/modified_bases.6mA.bed")
+colnames(meth) <- c("chrom", "start", "end", "name", "score", 
+                    "strand", "startCodon", "stopCodon", "color", 
+                    "coverage", "percentage")
+
+meth_cols <- c("chrom", "start", "coverage", "percentage")
+filtered_meth <- meth[coverage > 10, ..meth_cols]
+```
+
+## Import hereji et al 2018 nucleosome occupancy data
+
+```{r}
+nucs <- fread("~/data/molly/Chereji_Occupancy_rep1_singlebp.bedGraph")
+colnames(nucs) <- c("chrom", "start", "end", "occupancy")
+
+#plot percentage methylation as a column chart
+HMR <- filtered_meth[chrom == "III" & start > 291e3 & start < 294e3]
+HMR_nucs <- nucs[chrom == "chrIII" & start > 291e3 & start < 294e3]
+
+ggplot() +
+  geom_col(HMR, mapping = aes(x = start, y = percentage), color = "mediumpurple4") +
+  geom_col(HMR_nucs, mapping = aes(x = start, y = occupancy * 20), color = "black") +
+  theme_minimal() +
+  labs(title = "SIR3-EcoGII (JRY13027)",
+       x = "position on chr III",
+       y = "% methylated reads")
+
+plot(x=HMR$start, y=rep(-3,3,length.out=nrow(HMR)), 
+     type="n", ylim=c(-3,3), 
+     ylab="Scaled average methylation / occupancy",
+     xlab="Chromosome position")
+# Methylation
+loMethyl <- loess(percentage/100 ~ start, data=HMR, weights=HMR$coverage, enp.target = 50)
+lines(x=loMethyl$x[order(loMethyl$x)], y=scale(loMethyl$fitted[order(loMethyl$x)]), 
+      col="orange", lwd=4)
+# Nucleosome occupancy
+loOccup <- loess(occupancy/max(occupancy) ~ start, data=HMR_nucs, enp.target = 50)
+lines(x=loOccup$x, y=scale(loOccup$fitted), col="darkseagreen3", lwd=4)
+legend("topleft", c("Methylation", "Nucleosome occupancy"), 
+       col=c("orange", "darkseagreen3"), lty=1, cex=1,
+       bty='n', lwd=4)
+
+```
+
+## Define linker regions by thresholding nucleosome occupancy data on HMR region
+
+```{r}
+# Set arbitrary threshold for defining linnker regions
+plot(HMR_nucs$start, HMR_nucs$occupancy, pch=16, cex=1/3)
+abline(h=0.5, lty=2, col="red")
+
+# Aggregate methylation calls at the level of linker regions
+FtoT <- which(diff(HMR_nucs$occupancy < 1/2) == 1)
+TtoF <-  which(diff(HMR_nucs$occupancy < 1/2) == -1)
+dfLink <- data.frame(start = FtoT,
+                     end = TtoF)
+# only keep linker regions with at least 5bp in size
+dfLink <- dfLink[(dfLink$end - dfLink$start) >=5,]
+
+plot(HMR_nucs$start, HMR_nucs$occupancy, pch=16, cex=1/3)
+abline(h=0.5, lty=2, col="red")
+abline(v=HMR_nucs$start[dfLink$start], col="blue")
+abline(v=HMR_nucs$start[dfLink$end], col="green")
+```
+
+
+```{r, eval=TRUE}
+binaryCalls <- fread(file = "/Users/koenvandenberge/data/molly/megalodon_output_06/per_read_modified_base_calls_binary.txt.gz",
+                     nrows = 6e6, skip=11e6)
+colnames(binaryCalls) <- c("readID", "chr", "strand", "pos",
+                           "mod_log_prob", "can_log_prob", "mod_base")
+table(binaryCalls$chr)
+binaryCalls$methylation <- ifelse(binaryCalls$mod_log_prob > -0.2231436, 1, 0)
+binaryCalls3 <- binaryCalls[binaryCalls$chr == "III",]
+
+## organize reads
+readInfo <- binaryCalls3 %>%
+  group_by(readID) %>%
+  summarize(start=min(pos),
+            end=max(pos),
+            chr=unique(chr))
+
+startLink <- HMR_nucs$start[dfLink$start[1]]
+endLink <- HMR_nucs$start[dfLink$end[nrow(dfLink)]]
+# overlappingReads <- readInfo[(readInfo$end >= 291e3 & readInfo$start <=294e3) | (readInfo$start < 294e3 & readInfo$start > 290e3),]
+overlappingReads <- readInfo[(readInfo$end >= 291e3 & readInfo$start <=294e3),]
+
+readAvMethList <- list()
+for(rr in 1:nrow(overlappingReads)){
+  curData <- binaryCalls3[binaryCalls3$readID == overlappingReads$readID[rr],]
+  avMethLinkers <- c()
+  for(bb in 1:nrow(dfLink)){
+    curStart <- HMR_nucs$start[dfLink$start[bb]]
+    curEnd <- HMR_nucs$end[dfLink$end[bb]]
+    curId <- curData$pos >= curStart & curData$pos <= curEnd
+    if(sum(curId) > 0){
+      curBinData <- curData[curData$pos >= curStart & curData$pos <= curEnd,]
+      avMethLinkers[bb] <- mean(curBinData$methylation)
+      names(avMethLinkers)[bb] <- nrow(curBinData) #coverage
+    } else {
+      avMethLinkers[bb] <- NA
+    }
+  }
+  readAvMethList[[rr]] <- avMethLinkers
+}
+
+avMethMat <- do.call(rbind, readAvMethList)
+colSums(is.na(avMethMat)) # often no data in defined linker regions
+
+# focus on 24 reads with data in all linker regions
+readAvMethListComplete <- readAvMethList[rowSums(is.na(avMethMat)) == 0]
+rafalib::mypar(mfrow=c(2,2))
+for(ll in 1:length(readAvMethListComplete)){
+  y <- readAvMethListComplete[[ll]]
+  if(var(y)>0){
+      acf(y)
+  }
+}
+
+
+# # all reads
+# rafalib::mypar(mfrow=c(4,4))
+# for(ll in 1:length(readAvMethList)){
+#   y <- readAvMethList[[ll]]
+#   y <- y[!is.na(y)]
+#   if(length(y) > 3 & var(y)>0){
+#       acf(y)
+#   }
+# }
+
+```
+
+# Define linker regions using dyad positions inferred by Rine Lab
+
+```{r}
+nucDat <- openxlsx::read.xlsx("../../data/HMR_HML_nucleosome positions.xlsx")
+nucDatHMR <- nucDat[nucDat$region == "HMR",]
+
+overlappingReadsDyad <- readInfo[(readInfo$end >= min(nucDatHMR$dyad) & readInfo$start <= max(nucDatHMR$dyad)),]
+dfLinkDyad <- data.frame(start = nucDatHMR$dyad[-nrow(nucDatHMR)]+1,
+                         stop = nucDatHMR$dyad[2:nrow(nucDatHMR)])
+
+
+readAvMethListDyad <- list()
+for(rr in 1:nrow(overlappingReadsDyad)){
+  curData <- binaryCalls3[binaryCalls3$readID == overlappingReadsDyad$readID[rr],]
+  avMethLinkers <- c()
+  for(bb in 1:nrow(dfLinkDyad)){
+    curStart <- dfLinkDyad$start[bb]
+    curEnd <- dfLinkDyad$stop[bb]
+    curId <- curData$pos >= curStart & curData$pos <= curEnd
+    if(sum(curId) > 0){
+      curBinData <- curData[curData$pos >= curStart & curData$pos <= curEnd,]
+      avMethLinkers[bb] <- mean(curBinData$methylation)
+      names(avMethLinkers)[bb] <- nrow(curBinData) #coverage
+    } else {
+      avMethLinkers[bb] <- NA
+    }
+  }
+  readAvMethListDyad[[rr]] <- avMethLinkers
+}
+
+avMethMatDyad <- do.call(rbind, readAvMethListDyad)
+colSums(is.na(avMethMatDyad)) # often no data in defined linker regions
+
+# focus on 62 reads with data in all linker regions
+readAvMethListDyadComplete <- readAvMethListDyad[rowSums(is.na(avMethMatDyad)) == 0]
+rafalib::mypar(mfrow=c(2,2))
+for(ll in 1:length(readAvMethListDyadComplete)){
+  y <- readAvMethListDyadComplete[[ll]]
+  if(var(y)>0){
+      acf(y)
+  }
+}
+
+# when permuting the data
+rafalib::mypar(mfrow=c(2,2))
+for(ll in 1:length(readAvMethListDyadComplete)){
+  y <- readAvMethListDyadComplete[[ll]]
+  if(var(y)>0){
+      acf(sample(y))
+  }
+}
+```
+
+
+
