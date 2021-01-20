@@ -121,6 +121,8 @@ for(rr in 1:27){
 There is high autocorrelation on the methylation signal on single reads, at the level of single methylated adenine nucleotides. Note that, this could however be expected. Indeed, Molly suggested that the actual biologically relevant resolution might be the resolution of linker regions inbetween nucleosomes.
 In order to identify these linker regions, we could use the nucleosome occupancy data from Chereji *et al.* (2018) and, for example, set a threshold on when a region is 'not occupied by nucleosomes', and then calculating autocorrelation between those regions.
 
+**CHECK**: Does conditioning matter? Does correlation change when looking at (a) a position close to the silencer regions with a position further out in the HMR locus, versus (b) a position in the middle of the HMR locus with a position close to the silencer region? It could be that, for example, if the position close to the silencer region is methylated, there's a reasonable probability that a position in the middle of the locus is also methylated. However, the reverse may be less clear. It's possible that if the position in the middle of the locus is not methylated, the position close to the silencer region will never be methylated, for example.
+
 ## Import aggreated methylation bed file
 
 ```{r}
@@ -243,6 +245,21 @@ for(ll in 1:length(readAvMethListComplete)){
   }
 }
 
+# aggregate acf across all reads
+acfMat <- matrix(NA, nrow=length(readAvMethListComplete),
+                 ncol=11)
+rafalib::mypar(mfrow=c(1,1))
+for(ll in 1:length(readAvMethListComplete)){
+  y <- readAvMethListComplete[[ll]]
+  if(var(y)>0){
+    acfMat[ll,] <- acf(y)$acf[1:11,1,1]
+  }
+}
+plot(x=0:10, y=colMeans(acfMat), type='h',
+     xlab="Lag", ylab="Average ACF",
+     main="ACF averaged across all complete reads")
+abline(h=0, lty=2)
+
 
 # # all reads
 # rafalib::mypar(mfrow=c(4,4))
@@ -298,6 +315,22 @@ for(ll in 1:length(readAvMethListDyadComplete)){
       acf(y)
   }
 }
+
+# aggregate acf across all reads
+acfMat <- matrix(NA, nrow=length(readAvMethListDyadComplete),
+                 ncol=15)
+rafalib::mypar(mfrow=c(1,1))
+for(ll in 1:length(readAvMethListDyadComplete)){
+  y <- readAvMethListDyadComplete[[ll]]
+  if(var(y)>0){
+    acfMat[ll,] <- acf(y)$acf[1:15,1,1]
+  }
+}
+plot(x=0:14, y=colMeans(acfMat), type='h',
+     xlab="Lag", ylab="Average ACF",
+     main="ACF averaged across all complete reads")
+abline(h=0, lty=2)
+
 
 # when permuting the data
 rafalib::mypar(mfrow=c(2,2))
