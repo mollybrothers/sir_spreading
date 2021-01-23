@@ -11,10 +11,13 @@
 # this script will plot the percentage of methylation
 # at each position as a scatterplot
 
+# TO DO:
+# make font size larger on axes, add L and B lines for HML, R and B lines for HMR
+
 library(data.table)
 library(tidyverse)
 
-dt <- fread("/Volumes/brothers_seq/Nanopore/201125_Turkey/megalodon_output_05/modified_bases.aggregate05.6mA.bed")
+dt <- fread("/Volumes/brothers_seq/Nanopore/201125_Turkey/megalodon_output_06/modified_bases.aggregate06.6mA.bed")
 colnames(dt) <- c("chrom", "start", "end", "name", "score", 
                   "strand", "startCodon", "stopCodon", "color", 
                   "coverage", "percentage")
@@ -33,8 +36,11 @@ plot_methylation <- function(data, chr) {
     aes(x = start, y = percentage)
     ) +
     geom_point(position = "jitter", color = "mediumpurple4", alpha = 1/4) +
+    ylim(0,100) +
     theme_minimal() +
-    labs(title = "unfused EcoGII (JRY12838)",
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank()) +
+    labs(title = "SIR3-EcoGII (JRY12840)",
          x = sprintf("position on chr %s", chr),
          y = "% methylated reads")
 }
