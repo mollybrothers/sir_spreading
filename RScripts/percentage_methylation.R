@@ -3,7 +3,7 @@
 #########################
 # Author: Molly Brothers
 # Github: mollybrothers
-# Date: 2020-12-01
+# Date: 2021-01-26
 #########################
 
 # With an input bedMethyl file:
@@ -11,18 +11,16 @@
 # this script will plot the percentage of methylation
 # at each position as a scatterplot
 
-# TO DO:
-# make font size larger on axes, add L and B lines for HML, R and B lines for HMR
-
 library(data.table)
 library(tidyverse)
+library(stringr)
 
-dt <- fread("/Volumes/brothers_seq/Nanopore/201125_Turkey/megalodon_output_06/modified_bases.aggregate06.6mA.bed")
+dt <- fread("/Volumes/brothers_seq/Nanopore/201012_Doudna/megalodon_output_00/modified_bases.6mA.bed")
 colnames(dt) <- c("chrom", "start", "end", "name", "score", 
                   "strand", "startCodon", "stopCodon", "color", 
                   "coverage", "percentage")
 
-#get a new data table only containing chrom, start, coverage, and percentage
+#get a new data.table only containing chrom, start, coverage, and percentage
 #filter out mitochondrial DNA (MT) and coverage < 10
 
 select_cols <- c("chrom", "start", "coverage", "percentage")
@@ -38,9 +36,9 @@ plot_methylation <- function(data, chr) {
     geom_point(position = "jitter", color = "mediumpurple4", alpha = 1/4) +
     ylim(0,100) +
     theme_minimal() +
-    theme(panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank()) +
-    labs(title = "SIR3-EcoGII (JRY12840)",
+    theme(panel.grid.minor = element_blank(),
+          text = element_text(size=15)) +
+    labs(title = "SIR3-EcoGII (JRY13027)",
          x = sprintf("position on chr %s", chr),
          y = "% methylated reads")
 }
@@ -52,6 +50,33 @@ plot_methylation(control, "X")
 #plot HML
 HML <- relevant[chrom == "III" & start > 0 & start < 25e3]
 plot_methylation(HML, "III")
+dim(HML)
+
+HML$window <- cut(HML$start, breaks = 150)
+HMLmean <- aggregate(HML$percentage, by = list(HML$window), function(x){ mean(x[x != 0])})
+HMLsd<- aggregate(HML$percentage, by = list(HML$window), function(x){ sd(x[x != 0])})
+
+HMLfinal <- data.frame(interval = HMLmean[,1], mean = HMLmean[,2], upper = HMLmean[,2]+HMLsd[, 2], lower = HMLmean[,2]-HMLsd[, 2])
+HMLfinal$interval <- gsub("[(]", "", HMLfinal$interval)
+HMLfinal$interval <- gsub("]", "", HMLfinal$interval)
+HMLfinal$start <- as.numeric(unlist(lapply(str_split(HMLfinal$interval, ","), "[", 1)))
+HMLfull <- HML[HML$percentage == 100, ]
+
+HML$window <- gsub("[(]", "", HML$window)
+HML$window <- gsub("]", "", HML$window)
+HML$window <- as.numeric(unlist(lapply(str_split(HML$window, ","), "[", 1)))
+
+
+ggplot(HMLfinal, aes(x = start, y = mean)) +
+  geom_point(color = "mediumpurple4") +
+  geom_point(data = HMLfull, aes(x = start, y = percentage), color = "mediumpurple4", inherit.aes = FALSE) +
+  geom_errorbar(aes(ymin = lower, ymax = upper), color = "mediumpurple4", inherit.aes = TRUE) + 
+  scale_x_continuous(breaks = seq(0, 25000, 2000)) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 45, size = 10, vjust = 1, hjust = 1)) +
+  labs(title = "SIR3-EcoGII (JRY13027)",
+       x = "position on chr III",
+       y = "% methylated reads")
 
 #plot HMR
 HMR <- relevant[chrom == "III" & start > 285e3 & start < 300e3]
