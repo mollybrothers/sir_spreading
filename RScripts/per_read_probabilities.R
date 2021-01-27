@@ -3,10 +3,8 @@
 #########################
 # Author: Molly Brothers
 # Github: mollybrothers
-# Date: 2020-12-02
+# Date: 2021-01-27
 #########################
-
-#TO DO: figure out best way to plot 'binary' methylation calls for single reads...
 
 #######################################################################################
 # the per_read_base_calls.txt file itself is too large for RStudio's memory,
@@ -19,16 +17,16 @@ library(data.table)
 library(tidyverse)
 library(wesanderson)
 
-mega_directory <- "/Volumes/brothers_seq/Nanopore/201125_Turkey/megalodon_output_06/"
+mega_directory <- "/Volumes/brothers_seq/Nanopore/201125_Turkey/megalodon_output_07/"
 chr <- "III" #which chromosome?
 
 # find all the reads with a qscore < 9 and filter out those reads from the input chr.txt file
-summary <- fread(sprintf("%s/sequencing_summary.txt", mega_directory),
+summary <- fread(sprintf("%ssequencing_summary.txt", mega_directory),
             select = c('read_id', 'mean_qscore_template'))
 
 bad_reads <- summary[mean_qscore_template <= 9, read_id]
 
-unfiltered <- fread(sprintf("%s/chr%s.txt", mega_directory, chr),
+unfiltered <- fread(sprintf("%schr%s.txt", mega_directory, chr),
                     select = c(1, 2, 4, 5),
                     col.names = c("read_id", "chrm", "pos", "mod_log_prob"))
 
@@ -39,14 +37,14 @@ filtered <- unfiltered[!(read_id %in% bad_reads)]
 #3. add start and end positions for each read_id
 #4. order by position and read_id
 probs <- filtered[, list(read_id, pos, mod_prob = 10 ^ mod_log_prob)][
-  , binary := ifelse(mod_prob > 0.8, TRUE, FALSE)][
+  , binary := ifelse(mod_prob > 0.8, "m6A", "A")][
     , start_pos := min(pos), by = read_id][
       , end_pos := max(pos), by = read_id][
         order(pos, read_id)]
 
-#############################
-#PLOT AVERAGE PROBABILITIES
-#############################
+##################################
+####PLOT AVERAGE PROBABILITIES####
+##################################
 
 plot_prob <- function(input, title) {
   ggplot(input, aes(x = pos, y = avg_prob)) +
@@ -77,9 +75,9 @@ HMR_avg <- probs[pos %between% c(291e3, 296e3),
              ]
 plot_prob(HMR_avg, "HMR")
 
-####################
-#PLOT SINGLE READS
-####################
+#########################
+####PLOT SINGLE READS####
+#########################
 
 #extract each unique read_id to set the order for single read plots
 #NOTE: might not need to do this anymore if only looking at reads that span the entire query region
@@ -108,12 +106,17 @@ plot_binary <- function(data) {
           axis.ticks.y = element_blank(),
           axis.title.y = element_blank(),
           axis.title.x = element_blank(),
-          panel.grid = element_blank()) +
-    scale_color_manual(values = binary_pal[3:4], name = "m6A")
+          panel.grid = element_blank(),
+          panel.background = element_blank(),
+          text = element_text(size = 15, color = "black", family = "Arial"),
+          legend.position = "top",
+          legend.title = element_blank(),
+          legend.key = element_blank()) +
+    scale_color_manual(values = c("grey90", "mediumpurple4"))
 }
 
 #plot unmethylated region
-control_region <- c(180e3, 185e3)
+control_region <- c(95e3, 100e3)
 control <- probs[start_pos <= control_region[1]][end_pos >= control_region[2]][
   pos %between% control_region]
 plot_probs(control)
@@ -133,6 +136,7 @@ HML <- probs[start_pos <= HML_region[1]][end_pos >= HML_region[2]][
   pos %between% HML_region]
 plot_probs(HML)
 hmlp <- plot_binary(HML)
+hmlp
 hmlp + geom_vline(xintercept = HML_silencers) #+
   #geom_vline(xintercept = HML_linkers, size = 0.3, color = "black")
 
@@ -146,4 +150,6 @@ HMR_linkers = c(291100, 291312, 291644, 291863, 292129, 292322,
 HMR <- probs[start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
   pos %between% HMR_region]
 plot_probs(HMR)
-plot_binary(HMR)
+hmrp <- plot_binary(HMR)
+hmrp
+hmrp + geom_vline(xintercept = HMR_silencers)
