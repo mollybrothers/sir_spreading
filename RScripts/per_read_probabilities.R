@@ -18,7 +18,7 @@ library(tidyverse)
 library(wesanderson)
 
 mega_directory <- "/Volumes/brothers_seq/Nanopore/201125_Turkey/megalodon_output_07/"
-chr <- "III" #which chromosome?
+chr <- "VI" #which chromosome?
 
 # find all the reads with a qscore < 9 and filter out those reads from the input chr.txt file
 summary <- fread(sprintf("%ssequencing_summary.txt", mega_directory),
@@ -153,3 +153,9 @@ plot_probs(HMR)
 hmrp <- plot_binary(HMR)
 hmrp
 hmrp + geom_vline(xintercept = HMR_silencers)
+
+#plot tel6R
+tel6R_region <- c(265e3, 270e3)
+tel6R <- probs[start_pos <= tel6R_region[1]][end_pos >= tel6R_region[2]][
+  pos %between% tel6R_region]
+plot_binary(tel6R)
