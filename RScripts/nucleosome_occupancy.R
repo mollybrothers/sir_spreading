@@ -48,9 +48,9 @@ methyl_vs_nucs <- function (methyl_data, nuc_data) {
        type="n", ylim=c(-3,4), 
        ylab="Scaled average methylation / occupancy",
        xlab="Chromosome position")
-  legend("topleft", c("Methylation", "Nucleosome occupancy"), 
-         col=c("mediumpurple4", "grey50"), lty=1, cex=1,
-         bty='n', lwd=3)
+  #legend("topleft", c("Methylation", "Nucleosome occupancy"), 
+         #col=c("mediumpurple4", "grey50"), lty=1, cex=1,
+         #bty='n', lwd=3)
   
   # Methylation
   loMethyl <- loess(percentage/100 ~ start, 
