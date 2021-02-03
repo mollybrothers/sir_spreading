@@ -39,9 +39,9 @@ nucs <- fread("/Volumes/brothers_seq/not_my_data/GSE97290_Henikoff_Chereji_2018/
 # nucs <- fread("~/data/molly/Chereji_Occupancy_rep1_singlebp.bedGraph")
 colnames(nucs) <- c("chrom", "start", "end", "occupancy")
 
-#################################################
-####PLOT METHYLATION VS. NUCLEOSOME OCCUPANCY####
-#################################################
+#######################################################
+####LOESS PLOT METHYLATION VS. NUCLEOSOME OCCUPANCY####
+#######################################################
 
 methyl_vs_nucs <- function (methyl_data, nuc_data) {
   plot(x=methyl_data$start, y=rep(-3,3,length.out=nrow(methyl_data)), 
@@ -102,3 +102,16 @@ dfGrid <- data.frame(start = seq(291000, 294000), length.out=1000)
 predMet <- predict(loMethyl, newdata=dfGrid)
 predOccup <- predict(loOccup, newdata=dfGrid)
 plot(x=predMet, y=predOccup)
+
+####################################################
+####PLOT AVERAGE METHYLATION IN NUCS AND LINKERS####
+####################################################
+NtoL <- which(diff(HMR_nucs$occupancy < 0.5) == 1)
+LtoN <- which(diff(HMR_nucs$occupancy < 0.5) == -1)
+
+nuc_rows <- data.table(start = c(1,LtoN), end = c(NtoL, nrow(HMR_nucs)))
+linker_rows <- data.table(start = NtoL, end = LtoN)
+
+nuc_rows <- nuc_rows[(nuc_rows$end - nuc_rows$start) >=10,]
+linker_rows <- linker_rows[(linker_rows$end - linker_rows$start) >=10,]
+  
