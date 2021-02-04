@@ -114,4 +114,27 @@ linker_rows <- data.table(start = NtoL, end = LtoN)
 
 nuc_rows <- nuc_rows[(nuc_rows$end - nuc_rows$start) >=10,]
 linker_rows <- linker_rows[(linker_rows$end - linker_rows$start) >=10,]
+
+avg_meth_nucl <- c()
+for (i in 1:nrow(nuc_rows)) {
+  sub_nucs <- HMR_nucs[nuc_rows$start[i]:nuc_rows$end[i]]
+  begin <- min(sub_nucs$start)
+  finish <- max(sub_nucs$end)
   
+  sub_meth <- HMR_meth[start > begin & start < finish]
+  avg_meth_nucl[i] <- mean(sub_meth$percentage)
+}
+
+avg_meth_linker <- c()
+for (i in 1:nrow(linker_rows)) {
+  sub_linkers <- HMR_nucs[linker_rows$start[i]:linker_rows$end[i]]
+  begin <- min(sub_linkers$start)
+  finish <- max(sub_linkers$end)
+  
+  sub_meth <- HMR_meth[start > begin & start < finish]
+  avg_meth_linker[i] <- mean(sub_meth$percentage)
+}
+
+#TO DO: TRY THE SAME THING WITH HML and add to the avg_meth_linker and avg_meth_nucl lists (more observations)
+#TO DO: figure out how to combine these into one plot and preferable show each data point instead of just using a box plot
+                           
