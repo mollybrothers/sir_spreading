@@ -67,31 +67,78 @@ methyl_vs_nucs <- function (methyl_data, nuc_data) {
   lines(x=loOccup$x, y=scale(loOccup$fitted), col="grey70", lwd=3)
 }
 
+####################################################
+####PLOT AVERAGE METHYLATION IN NUCS AND LINKERS####
+####################################################
+methyl_boxplot <- function (nucs_data, meth_data) {
+  NtoL <- which(diff(nucs_data$occupancy < 0.4) == 1)
+  LtoN <- which(diff(nucs_data$occupancy < 0.4) == -1)
+  
+  nuc_rows <- data.table(start = c(1,LtoN), end = c(NtoL, nrow(nucs_data)))
+  linker_rows <- data.table(start = NtoL, end = LtoN)
+  
+  nuc_rows <- nuc_rows[(nuc_rows$end - nuc_rows$start) >=10,]
+  linker_rows <- linker_rows[(linker_rows$end - linker_rows$start) >=10,]
+  
+  avg_meth_nucl <- c()
+  for (i in 1:nrow(nuc_rows)) {
+    sub_nucs <- nucs_data[nuc_rows$start[i]:nuc_rows$end[i]]
+    begin <- min(sub_nucs$start)
+    finish <- max(sub_nucs$end)
+    
+    sub_meth <- meth_data[start > begin & start < finish]
+    avg_meth_nucl[i] <- mean(sub_meth$percentage)
+  }
+  
+  avg_meth_linker <- c()
+  for (i in 1:nrow(linker_rows)) {
+    sub_linkers <- nucs_data[linker_rows$start[i]:linker_rows$end[i]]
+    begin <- min(sub_linkers$start)
+    finish <- max(sub_linkers$end)
+    
+    sub_meth <- meth_data[start > begin & start < finish]
+    avg_meth_linker[i] <- mean(sub_meth$percentage)
+  }
+  
+  plottest <- data.table(region = c(rep("nucleosome",length(avg_meth_nucl)),
+                                    rep("linker",length(avg_meth_linker))),
+                         avg_methylation = c(avg_meth_nucl, avg_meth_linker))
+  
+  ggplot(plottest, aes(x = region, y = avg_methylation)) +
+    geom_boxplot() +
+    geom_point() +
+    ylim(c(0,80))
+  
+}
+
 #control
-#why does the control region show methylation?
 ctrl_meth <- filtered_meth[chrom == "III" & start > 96e3 & start < 99e3]
 ctrl_nucs <- nucs[chrom == "chrIII" & start > 96e3 & start < 99e3]
-methyl_vs_nucs(ctrl_meth, ctrl_nucs)
+#methyl_vs_nucs(ctrl_meth, ctrl_nucs)
+methyl_boxplot(ctrl_nucs, ctrl_meth)
 
 #HMR
 HMR_meth <- filtered_meth[chrom == "III" & start > 291e3 & start < 294e3]
 HMR_nucs <- nucs[chrom == "chrIII" & start > 291e3 & start < 294e3]
-methyl_vs_nucs(HMR_meth, HMR_nucs)
+#methyl_vs_nucs(HMR_meth, HMR_nucs)
+methyl_boxplot(HMR_nucs, HMR_meth)
 
 #HML
 HML_meth <- filtered_meth[chrom == "III" & start > 11e3 & start < 14e3]
 HML_nucs <- nucs[chrom == "chrIII" & start > 11e3 & start < 14e3]
-methyl_vs_nucs(HML_meth, HML_nucs)
+#methyl_vs_nucs(HML_meth, HML_nucs)
+methyl_boxplot(HML_nucs, HML_meth)
 
 #tel6R
 tel6R_meth <- filtered_meth[chrom == "VI" & start > 265e3 & start < 268e3]
 tel6R_nucs <- nucs[chrom == "chrVI" & start > 265e3 & start < 268e3]
-methyl_vs_nucs(tel6R_meth, tel6R_nucs)
+#methyl_vs_nucs(tel6R_meth, tel6R_nucs)
+methyl_boxplot(tel6R_nucs, tel6R_meth)
 
-#tel8L
+#tel10L
 tel10L_meth <- filtered_meth[chrom == "X" & start > 0 & start < 5e3]
 tel10L_nucs <- nucs[chrom == "chrX" & start > 0 & start < 5e3]
-methyl_vs_nucs(tel10L_meth, tel10L_nucs)
+#methyl_vs_nucs(tel10L_meth, tel10L_nucs)
 
 #####################################
 ####SCATTER PLOT OF FITTED VALUES####
@@ -102,39 +149,3 @@ dfGrid <- data.frame(start = seq(291000, 294000), length.out=1000)
 predMet <- predict(loMethyl, newdata=dfGrid)
 predOccup <- predict(loOccup, newdata=dfGrid)
 plot(x=predMet, y=predOccup)
-
-####################################################
-####PLOT AVERAGE METHYLATION IN NUCS AND LINKERS####
-####################################################
-NtoL <- which(diff(HMR_nucs$occupancy < 0.5) == 1)
-LtoN <- which(diff(HMR_nucs$occupancy < 0.5) == -1)
-
-nuc_rows <- data.table(start = c(1,LtoN), end = c(NtoL, nrow(HMR_nucs)))
-linker_rows <- data.table(start = NtoL, end = LtoN)
-
-nuc_rows <- nuc_rows[(nuc_rows$end - nuc_rows$start) >=10,]
-linker_rows <- linker_rows[(linker_rows$end - linker_rows$start) >=10,]
-
-avg_meth_nucl <- c()
-for (i in 1:nrow(nuc_rows)) {
-  sub_nucs <- HMR_nucs[nuc_rows$start[i]:nuc_rows$end[i]]
-  begin <- min(sub_nucs$start)
-  finish <- max(sub_nucs$end)
-  
-  sub_meth <- HMR_meth[start > begin & start < finish]
-  avg_meth_nucl[i] <- mean(sub_meth$percentage)
-}
-
-avg_meth_linker <- c()
-for (i in 1:nrow(linker_rows)) {
-  sub_linkers <- HMR_nucs[linker_rows$start[i]:linker_rows$end[i]]
-  begin <- min(sub_linkers$start)
-  finish <- max(sub_linkers$end)
-  
-  sub_meth <- HMR_meth[start > begin & start < finish]
-  avg_meth_linker[i] <- mean(sub_meth$percentage)
-}
-
-#TO DO: TRY THE SAME THING WITH HML and add to the avg_meth_linker and avg_meth_nucl lists (more observations)
-#TO DO: figure out how to combine these into one plot and preferable show each data point instead of just using a box plot
-                           
