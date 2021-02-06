@@ -1,10 +1,10 @@
 #!/bin/R
 
-#########################
-# Author: Molly Brothers
+#################################################
+# Author: Molly Brothers and Koen Van den Berge
 # Github: mollybrothers
-# Date: 2021-01-28
-#########################
+# Date: 2021-02-06:
+#################################################
 
 # IN PROGRESS
 # goal of this script is to compare directly in the same plot nucleosome occupancy data and % methylation
