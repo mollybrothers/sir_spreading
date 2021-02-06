@@ -43,8 +43,11 @@ For now, a workaround is to basecall using guppy_basecaller and guppy_barcoding,
 + JRY12840 (_SIR3-EcoGII_): barcode03
 
 Flowcell: FLO-MIN106
+
 Kit: SQK-RBK004
+
 N50: 21kb
+
 Yield: 6Gb
 
 ## 201012_Doudna (megalodon v 2.2.4)
@@ -52,8 +55,11 @@ Yield: 6Gb
 + JRY13027 (_SIR3-EcoGII_)
 
 Flowcell: FLO-MIN106
+
 Kit: SQK-LSK109
+
 N50: 3kb
+
 Yield: 13Gb
 
 ## 201125_Turkey (megalodon v 2.2.8)
@@ -64,8 +70,11 @@ Yield: 13Gb
 + JRY13027 (_SIR3-EcoGII_): barcode07
 
 Flowcell: FLO-MIN106
+
 Kit: SQK-RBK004
+
 N50: 22kb
+
 Yield: 12Gb
 
 ## 201218_Mariah (megalodon v 2.2.8)
@@ -81,8 +90,11 @@ Unfortunately bad run. Reads too long (N50 33kb) and pore occupancy started low 
 + JRY13027 (_SIR3-EcoGII_) – 37C: barcode11
 
 Flowcell: FLO-MIN106
+
 Kit: SQK-RBK004
+
 N50: 33kb
+
 Yield: 6Gb
 
 ## 201223_Elf (megalodon v 2.2.8)
@@ -96,6 +108,26 @@ Data here is still not great in terms of coverage and pore occupancy, but qualit
 + JRY12840 (_SIR3-EcoGII_) – 37C: barcode06
 
 Flowcell: FLO-MIN106
+
 Kit: SQK-RBK004
+
 N50: 3kb
+
 Yield: 3Gb
+
+## 210205_Ocular (megalodon v.)
+### Strains:
++ JRY9316 (no EcoGII) - 25C: barcode07
++ JRY13114 (_sir3-8-EcoGII_) - 25C: barcode08
++ JRY13027 (_SIR3-EcoGII_) - 25C: barcode09
++ JRY9316 (no EcoGII) - 37C: barcode10
++ JRY13114 (_sir3-8-EcoGII_) - 37C: barcode11
++ JRY13027 (_SIR3-EcoGII_) - 37C: barcode12
+
+Flowcell: FLO-MIN106
+
+Kit: SQK-LSK109 + EXP-NBD104
+
+N50:
+
+Yield:
