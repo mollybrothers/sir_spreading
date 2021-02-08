@@ -4,7 +4,7 @@
 
 # Running Megalodon
 https://github.com/nanoporetech/megalodon
-our current running version: 2.2.8
+our current running version: 2.2.10
 
 ## necessary configurations
 Megalodon is run from a conda environment specified in the `guppy_conda.yml` file
@@ -85,7 +85,7 @@ Data here is still not great in terms of coverage and pore occupancy, but qualit
 
 Flowcell: FLO-MIN106 / Kit: SQK-RBK004 / N50: 3kb / Yield: 3Gb
 
-## 210205_Ocular (megalodon v. 2.2.8)
+## 210205_Ocular (megalodon v. 2.2.10)
 Fragment size is a little smaller than I would have wanted (15-20kb), due to spinning the Covaris g-TUBE faster than I was supposed to. BUT the nanopore ran great and I got plenty of data.
 ### Strains:
 + JRY9316 (no EcoGII) - 25C: barcode07
