@@ -100,6 +100,7 @@ for(rr in 100:127){
                     " - ", round(curRange[2]/1e3, digits = 2), "kb"))
   } else next
 }
+
 ```
 
 
@@ -252,7 +253,7 @@ rafalib::mypar(mfrow=c(1,1))
 for(ll in 1:length(readAvMethListComplete)){
   y <- readAvMethListComplete[[ll]]
   if(var(y)>0){
-    acfMat[ll,] <- acf(y)$acf[1:11,1,1]
+    acfMat[ll,] <- acf(y, plot=FALSE)$acf[1:11,1,1]
   }
 }
 plot(x=0:10, y=colMeans(acfMat), type='h',
@@ -323,7 +324,7 @@ rafalib::mypar(mfrow=c(1,1))
 for(ll in 1:length(readAvMethListDyadComplete)){
   y <- readAvMethListDyadComplete[[ll]]
   if(var(y)>0){
-    acfMat[ll,] <- acf(y)$acf[1:15,1,1]
+    acfMat[ll,] <- acf(y, plot=FALSE)$acf[1:15,1,1]
   }
 }
 plot(x=0:14, y=colMeans(acfMat), type='h',
@@ -333,14 +334,251 @@ abline(h=0, lty=2)
 
 
 # when permuting the data
+acfMatPermuted <- matrix(NA, nrow=length(readAvMethListDyadComplete),
+                 ncol=15)
 rafalib::mypar(mfrow=c(2,2))
 for(ll in 1:length(readAvMethListDyadComplete)){
   y <- readAvMethListDyadComplete[[ll]]
   if(var(y)>0){
-      acf(sample(y))
+      acfMatPermuted[ll,] <- acf(sample(y), plot=FALSE)$acf[1:15,1,1]
   }
 }
+plot(x=0:14, y=colMeans(acfMatPermuted), type='h',
+     xlab="Lag", ylab="Average ACF",
+     main="Permuted: ACF averaged across all complete reads")
+abline(h=0, lty=2)
+
 ```
 
+
+# Negative autocorrelation due to looking outside the HMR region?
+
+Note that, as the lag of the autocorrelation increases, we are looking at ever shorter sequences that reside at the extremes of the HMR region. In the example above, we have a total of $29$ linker regions which we identified using the dyad positions. However, if the outermost dyads are actually outside the HMR region, which is unmethylated, but the read within HMR is methylated, then this is what could have caused the negative autocorrelations we're observing above.
+
+Below, we therefore restrict to only looking within the HMR region.
+
+```{r}
+nucDat <- openxlsx::read.xlsx("../../data/HMR_HML_nucleosome positions.xlsx")
+nucDatHMR <- nucDat[nucDat$region == "HMR",]
+## only look at linker regions within HMR silencer regions
+## HMR E is at III:292674-292769
+## HMR I is at III:294805-294864
+nucDatHMR <- nucDatHMR[nucDatHMR$Start >= 292674,]
+nucDatHMR <- nucDatHMR[nucDatHMR$Stop <= 294864,]
+nrow(nucDatHMR) #only 9 linker regions
+
+overlappingReadsDyad <- readInfo[(readInfo$end >= min(nucDatHMR$dyad) & readInfo$start <= max(nucDatHMR$dyad)),]
+dfLinkDyad <- data.frame(start = nucDatHMR$dyad[-nrow(nucDatHMR)]+1,
+                         stop = nucDatHMR$dyad[2:nrow(nucDatHMR)])
+
+
+readAvMethListDyad <- list()
+for(rr in 1:nrow(overlappingReadsDyad)){
+  curData <- binaryCalls3[binaryCalls3$readID == overlappingReadsDyad$readID[rr],]
+  avMethLinkers <- c()
+  for(bb in 1:nrow(dfLinkDyad)){
+    curStart <- dfLinkDyad$start[bb]
+    curEnd <- dfLinkDyad$stop[bb]
+    curId <- curData$pos >= curStart & curData$pos <= curEnd
+    if(sum(curId) > 0){
+      curBinData <- curData[curData$pos >= curStart & curData$pos <= curEnd,]
+      avMethLinkers[bb] <- mean(curBinData$methylation)
+      names(avMethLinkers)[bb] <- nrow(curBinData) #coverage
+    } else {
+      avMethLinkers[bb] <- NA
+    }
+  }
+  readAvMethListDyad[[rr]] <- avMethLinkers
+}
+
+avMethMatDyad <- do.call(rbind, readAvMethListDyad)
+colSums(is.na(avMethMatDyad)) # often no data in defined linker regions
+
+# focus on 117 reads with data in all linker regions, looks pretty random...
+readAvMethListDyadComplete <- readAvMethListDyad[rowSums(is.na(avMethMatDyad)) == 0]
+rafalib::mypar(mfrow=c(2,2))
+for(ll in 1:length(readAvMethListDyadComplete)){
+  y <- readAvMethListDyadComplete[[ll]]
+  if(var(y)>0){
+      acf(y)
+  }
+}
+
+rafalib::mypar(mfrow=c(1,2))
+hist(unlist(readAvMethListDyadComplete), breaks=20,
+     xlab="Avg methylatin in linker region",
+     main="All reads spanning HMR")
+avgMethRead <- unlist(lapply(readAvMethListDyadComplete, mean))
+hist(avgMethRead, breaks=20,
+     xlab="Avg methylatin of read",
+     main="All reads spanning HMR")
+
+# aggregate acf across all reads
+acfMat <- matrix(NA, nrow=length(readAvMethListDyadComplete),
+                 ncol=8)
+rafalib::mypar(mfrow=c(1,2))
+for(ll in 1:length(readAvMethListDyadComplete)){
+  y <- readAvMethListDyadComplete[[ll]]
+  if(var(y)>0){
+    acfMat[ll,] <- acf(y, plot=FALSE)$acf[1:8,1,1]
+  }
+}
+plot(x=0:7, y=colMeans(acfMat, na.rm=TRUE), type='h',
+     xlab="Lag", ylab="Average ACF",
+     main="Avg ACF")
+abline(h=0, lty=2)
+
+
+# when permuting the data
+acfMatPermuted <- matrix(NA, nrow=length(readAvMethListDyadComplete),
+                 ncol=8)
+for(ll in 1:length(readAvMethListDyadComplete)){
+  y <- readAvMethListDyadComplete[[ll]]
+  if(var(y)>0){
+      acfMatPermuted[ll,] <- acf(sample(y), plot=FALSE)$acf[1:8,1,1]
+  }
+}
+plot(x=0:7, y=colMeans(acfMatPermuted, na.rm=TRUE), type='h',
+     xlab="Lag", ylab="Average ACF",
+     main="Permuted: Avg ACF",
+     ylim=c(-0.2, 1))
+abline(h=0, lty=2)
+
+### By average methylation in the read
+acfMatLow <- acfMat[avgMethRead <= 0.4,]
+acfMatMed <- acfMat[avgMethRead > 0.4 & avgMethRead <= 0.6,]
+acfMatHigh <- acfMat[avgMethRead > 0.6,]
+rafalib::mypar(mfrow=c(1,3))
+plot(x=0:7, y=colMeans(acfMatLow, na.rm=TRUE), type='h',
+     xlab="Lag", ylab="Average ACF",
+     main="Low methylation")
+abline(h=0, lty=2)
+plot(x=0:7, y=colMeans(acfMatMed, na.rm=TRUE), type='h',
+     xlab="Lag", ylab="Average ACF",
+     main="Medium methylation")
+abline(h=0, lty=2)
+plot(x=0:7, y=colMeans(acfMatHigh, na.rm=TRUE), type='h',
+     xlab="Lag", ylab="Average ACF",
+     main="High methylation")
+abline(h=0, lty=2)
+
+## Heatmap of co-methylation
+library(pheatmap)
+avMethMat <- do.call(rbind, readAvMethListDyadComplete)
+pheatmap(cor(avMethMat), cluster_rows=FALSE, cluster_cols=FALSE)
+avMethMatCentered <- avMethMat - rowMeans(avMethMat)
+pheatmap(cor(avMethMatCentered), cluster_rows=FALSE, cluster_cols=FALSE)
+
+```
+
+
+## Start from locus in the middle of HMR
+
+
+```{r}
+nucDat <- openxlsx::read.xlsx("../../data/HMR_HML_nucleosome positions.xlsx")
+nucDatHMR <- nucDat[nucDat$region == "HMR",]
+## only look at linker regions within HMR silencer regions
+## HMR E is at III:292674-292769
+## HMR I is at III:294805-294864
+nucDatHMR <- nucDatHMR[nucDatHMR$Start >= 293200,]
+nucDatHMR <- nucDatHMR[nucDatHMR$Stop <= 294864,]
+nrow(nucDatHMR) #only 9 linker regions
+
+overlappingReadsDyad <- readInfo[(readInfo$end >= min(nucDatHMR$dyad) & readInfo$start <= max(nucDatHMR$dyad)),]
+dfLinkDyad <- data.frame(start = nucDatHMR$dyad[-nrow(nucDatHMR)]+1,
+                         stop = nucDatHMR$dyad[2:nrow(nucDatHMR)])
+
+
+readAvMethListDyad <- list()
+for(rr in 1:nrow(overlappingReadsDyad)){
+  curData <- binaryCalls3[binaryCalls3$readID == overlappingReadsDyad$readID[rr],]
+  avMethLinkers <- c()
+  for(bb in 1:nrow(dfLinkDyad)){
+    curStart <- dfLinkDyad$start[bb]
+    curEnd <- dfLinkDyad$stop[bb]
+    curId <- curData$pos >= curStart & curData$pos <= curEnd
+    if(sum(curId) > 0){
+      curBinData <- curData[curData$pos >= curStart & curData$pos <= curEnd,]
+      avMethLinkers[bb] <- mean(curBinData$methylation)
+      names(avMethLinkers)[bb] <- nrow(curBinData) #coverage
+    } else {
+      avMethLinkers[bb] <- NA
+    }
+  }
+  readAvMethListDyad[[rr]] <- avMethLinkers
+}
+
+avMethMatDyad <- do.call(rbind, readAvMethListDyad)
+colSums(is.na(avMethMatDyad)) # often no data in defined linker regions
+
+# focus on 117 reads with data in all linker regions, looks pretty random...
+readAvMethListDyadComplete <- readAvMethListDyad[rowSums(is.na(avMethMatDyad)) == 0]
+rafalib::mypar(mfrow=c(2,2))
+for(ll in 1:length(readAvMethListDyadComplete)){
+  y <- readAvMethListDyadComplete[[ll]]
+  if(var(y)>0){
+      acf(y)
+  }
+}
+
+hist(unlist(readAvMethListDyadComplete), breaks=20,
+     xlab="Avg methylatin in linker region",
+     main="All reads spanning HMR")
+avgMethRead <- unlist(lapply(readAvMethListDyadComplete, mean))
+hist(avgMethRead, breaks=20,
+     xlab="Avg methylatin of read",
+     main="All reads spanning HMR")
+
+# aggregate acf across all reads
+acfMat <- matrix(NA, nrow=length(readAvMethListDyadComplete),
+                 ncol=nrow(nucDatHMR)-1)
+rafalib::mypar(mfrow=c(1,2))
+for(ll in 1:length(readAvMethListDyadComplete)){
+  y <- readAvMethListDyadComplete[[ll]]
+  if(var(y)>0){
+    acfMat[ll,] <- acf(y, plot=FALSE)$acf[1:(nrow(nucDatHMR)-1),1,1]
+  }
+}
+plot(x=0:(nrow(nucDatHMR)-2), y=colMeans(acfMat, na.rm=TRUE), type='h',
+     xlab="Lag", ylab="Average ACF",
+     main="Avg ACF")
+abline(h=0, lty=2)
+
+
+# when permuting the data
+acfMatPermuted <- matrix(NA, nrow=length(readAvMethListDyadComplete),
+                 ncol=(nrow(nucDatHMR)-1))
+for(ll in 1:length(readAvMethListDyadComplete)){
+  y <- readAvMethListDyadComplete[[ll]]
+  if(var(y)>0){
+      acfMatPermuted[ll,] <- acf(sample(y), plot=FALSE)$acf[1:(nrow(nucDatHMR)-1),1,1]
+  }
+}
+plot(x=0:(nrow(nucDatHMR)-2), y=colMeans(acfMatPermuted, na.rm=TRUE), type='h',
+     xlab="Lag", ylab="Average ACF",
+     main="Permuted: Avg ACF",
+     ylim=c(-0.2, 1))
+abline(h=0, lty=2)
+
+### By average methylation in the read
+acfMatLow <- acfMat[avgMethRead <= 0.4,]
+acfMatMed <- acfMat[avgMethRead > 0.4 & avgMethRead <= 0.6,]
+acfMatHigh <- acfMat[avgMethRead > 0.6,]
+rafalib::mypar(mfrow=c(1,3))
+plot(x=0:(nrow(nucDatHMR)-2), y=colMeans(acfMatLow, na.rm=TRUE), type='h',
+     xlab="Lag", ylab="Average ACF",
+     main="Low methylation")
+abline(h=0, lty=2)
+plot(x=0:(nrow(nucDatHMR)-2), y=colMeans(acfMatMed, na.rm=TRUE), type='h',
+     xlab="Lag", ylab="Average ACF",
+     main="Medium methylation")
+abline(h=0, lty=2)
+plot(x=0:(nrow(nucDatHMR)-2), y=colMeans(acfMatHigh, na.rm=TRUE), type='h',
+     xlab="Lag", ylab="Average ACF",
+     main="High methylation")
+abline(h=0, lty=2)
+
+```
 
 
