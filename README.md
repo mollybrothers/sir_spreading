@@ -85,7 +85,7 @@ Data here is still not great in terms of coverage and pore occupancy, but qualit
 
 Flowcell: FLO-MIN106 / Kit: SQK-RBK004 / N50: 3kb / Yield: 3Gb
 
-## 210205_Ocular (megalodon v.)
+## 210205_Ocular (megalodon v. 2.2.8)
 Fragment size is a little smaller than I would have wanted (15-20kb), due to spinning the Covaris g-TUBE faster than I was supposed to. BUT the nanopore ran great and I got plenty of data.
 ### Strains:
 + JRY9316 (no EcoGII) - 25C: barcode07
@@ -95,4 +95,4 @@ Fragment size is a little smaller than I would have wanted (15-20kb), due to spi
 + JRY13114 (_sir3-8-EcoGII_) - 37C: barcode11
 + JRY13027 (_SIR3-EcoGII_) - 37C: barcode12
 
-Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: / Yield:
+Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 7.5kb / Yield: 15.5Gb
