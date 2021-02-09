@@ -4,7 +4,7 @@
 
 # Running Megalodon
 https://github.com/nanoporetech/megalodon
-our current running version: 2.2.10
+our current running version: 2.2.8
 
 ## necessary configurations
 Megalodon is run from a conda environment specified in the `guppy_conda.yml` file
@@ -36,7 +36,7 @@ For now, a workaround is to basecall using guppy_basecaller and guppy_barcoding,
 2. `per_read_probabilities.R`: make single-read plots of methylation probabilities based on data in the `per_read_modified_base_calls.txt` file from `megalodon_per_read_text_js.sh`. This script also filters out the reads with a basecalling qscore < 9 using data from the `sequencing_summary.txt` file output by `megalodon_js.sh`
 
 # Info on experiments
-## 200814_McClintock (megalodon v 2.2.5)
+## 200814_McClintock (megalodon v2.2.5)
 ### Strains:
 + JRY11699 (no EcoGII): barcode01
 + JRY12838 (_sir3∆::EcoGII_): barcode02
@@ -44,13 +44,13 @@ For now, a workaround is to basecall using guppy_basecaller and guppy_barcoding,
 
 Flowcell: FLO-MIN106 / Kit: SQK-RBK004 / N50: 21kb / Yield: 6Gb
 
-## 201012_Doudna (megalodon v 2.2.4)
+## 201012_Doudna (megalodon v2.2.4)
 ### Strains:
 + JRY13027 (_SIR3-EcoGII_)
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 / N50: 3kb / Yield: 13Gb
 
-## 201125_Turkey (megalodon v 2.2.8)
+## 201125_Turkey (megalodon v2.2.8)
 ### Strains:
 + JRY11699 (no EcoGII): barcode04
 + JRY12838 (_sir3∆::EcoGII_): barcode05
@@ -59,7 +59,7 @@ Flowcell: FLO-MIN106 / Kit: SQK-LSK109 / N50: 3kb / Yield: 13Gb
 
 Flowcell: FLO-MIN106 / Kit: SQK-RBK004 / N50: 22kb / Yield: 12Gb
 
-## 201218_Mariah (megalodon v 2.2.8)
+## 201218_Mariah (megalodon v2.2.8)
 Unfortunately bad run. Reads too long (N50 33kb) and pore occupancy started low and quickly depleted. Unfortunately unusable data.
 ### Strains:
 + JRY13110 (_sir3-8_) – 25C: barcode04
@@ -73,7 +73,7 @@ Unfortunately bad run. Reads too long (N50 33kb) and pore occupancy started low 
 
 Flowcell: FLO-MIN106 / Kit: SQK-RBK004 / N50: 33kb / Yield: 6Gb
 
-## 201223_Elf (megalodon v 2.2.8)
+## 201223_Elf (megalodon v2.2.8)
 Data here is still not great in terms of coverage and pore occupancy, but qualitatively you can tell that the sir3-8-EcoGII strains have no methylation at 37C and do have methylation at 25C
 ### Strains:
 + JRY13114 (_sir3-8-EcoGII_) – 25C: barcode01
@@ -85,7 +85,7 @@ Data here is still not great in terms of coverage and pore occupancy, but qualit
 
 Flowcell: FLO-MIN106 / Kit: SQK-RBK004 / N50: 3kb / Yield: 3Gb
 
-## 210205_Ocular (megalodon v. 2.2.10)
+## 210205_Ocular (megalodon v2.2.8)
 Fragment size is a little smaller than I would have wanted (15-20kb), due to spinning the Covaris g-TUBE faster than I was supposed to. BUT the nanopore ran great and I got plenty of data.
 ### Strains:
 + JRY9316 (no EcoGII) - 25C: barcode07
@@ -95,4 +95,15 @@ Fragment size is a little smaller than I would have wanted (15-20kb), due to spi
 + JRY13114 (_sir3-8-EcoGII_) - 37C: barcode11
 + JRY13027 (_SIR3-EcoGII_) - 37C: barcode12
 
-Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 7.5kb / Yield: 15.5Gb
+Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 7.5kb / Yield: 15.7Gb
+
+## 210208_Rescue (megalodon v2.2.8)
+### Strains:
++ JRY13114 (_sir3-8-EcoGII_) - 0min: barcode01
++ JRY13114 (_sir3-8-EcoGII_) - 5min: barcode02
++ JRY13114 (_sir3-8-EcoGII_) - 15min: barcode03
++ JRY13114 (_sir3-8-EcoGII_) - 45min: barcode04
++ JRY13114 (_sir3-8-EcoGII_) - 90min: barcode05
++ JRY13114 (_sir3-8-EcoGII_) - 150min: barcode06
+
+Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50:  / Yield: 
