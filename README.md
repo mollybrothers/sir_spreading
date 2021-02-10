@@ -97,7 +97,7 @@ Fragment size is a little smaller than I would have wanted (15-20kb), due to spi
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 7.5kb / Yield: 15.7Gb
 
-## 210208_Rescue (megalodon v2.2.8)
+## 210208_Rescue (megalodon v2.2.10)
 ### Strains:
 + JRY13114 (_sir3-8-EcoGII_) - 0min: barcode01
 + JRY13114 (_sir3-8-EcoGII_) - 5min: barcode02
