@@ -17,8 +17,8 @@ library(data.table)
 library(tidyverse)
 library(wesanderson)
 
-mega_directory <- "/Volumes/brothers_seq/Nanopore/201125_Turkey/megalodon_output_07/"
-chr <- "VI" #which chromosome?
+mega_directory <- "/Volumes/brothers_seq/Nanopore/210205_Ocular/megalodon_output_08/"
+chr <- "III" #which chromosome?
 
 # find all the reads with a qscore < 9 and filter out those reads from the input chr.txt file
 summary <- fread(sprintf("%ssequencing_summary.txt", mega_directory),

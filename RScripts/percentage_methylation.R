@@ -3,7 +3,7 @@
 #########################
 # Author: Molly Brothers
 # Github: mollybrothers
-# Date: 2021-01-27
+# Date: 2021-02-10
 #########################
 
 # With an input bedMethyl file:
@@ -15,7 +15,7 @@ library(data.table)
 library(tidyverse)
 library(stringr)
 
-dt <- fread("/Volumes/brothers_seq/Nanopore/201012_Doudna/megalodon_output_00/modified_bases.6mA.bed")
+dt <- fread("/Volumes/brothers_seq/Nanopore/210205_Ocular/megalodon_output_11/modified_bases.aggregate11.6mA.bed")
 colnames(dt) <- c("chrom", "start", "end", "name", "score", 
                   "strand", "startCodon", "stopCodon", "color", 
                   "coverage", "percentage")
@@ -28,7 +28,7 @@ relevant <- dt[chrom != "MT" & coverage > 10, ..select_cols]
 
 #plot percentage of methylation in a particular region as a scatter plot
 #opacity of dot corresponds to amount of coverage
-plot_title = "SIR3-EcoGII (JRY13027)"
+plot_title = "sir3-8-EcoGII 37C (JRY13114)"
 
 plot_methylation_dot <- function(data, chr) {
   ggplot(data, aes(x = start, y = percentage)) +
