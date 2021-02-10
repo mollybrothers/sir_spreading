@@ -106,4 +106,4 @@ Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 7.5kb / Yield: 15.7Gb
 + JRY13114 (_sir3-8-EcoGII_) - 90min: barcode05
 + JRY13114 (_sir3-8-EcoGII_) - 150min: barcode06
 
-Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50:  / Yield: 
+Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 10.6kb / Yield: 16Gb
