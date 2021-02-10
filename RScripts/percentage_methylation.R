@@ -17,8 +17,8 @@ library(stringr)
 
 dt_37C <- fread("/Volumes/brothers_seq/Nanopore/210205_Ocular/megalodon_output_11/modified_bases.aggregate11.6mA.bed")
 colnames(dt_37C) <- c("chrom", "start", "end", "name", "score", 
-                  "strand", "startCodon", "stopCodon", "color", 
-                  "coverage", "percentage")
+                      "strand", "startCodon", "stopCodon", "color", 
+                      "coverage", "percentage")
 dt_25C <- fread("/Volumes/brothers_seq/Nanopore/210205_Ocular/megalodon_output_08/modified_bases.aggregate08.6mA.bed")
 colnames(dt_25C) <- c("chrom", "start", "end", "name", "score", 
                       "strand", "startCodon", "stopCodon", "color", 

@@ -22,7 +22,7 @@ chr <- "III" #which chromosome?
 
 # find all the reads with a qscore < 9 and filter out those reads from the input chr.txt file
 summary <- fread(sprintf("%ssequencing_summary.txt", mega_directory),
-            select = c('read_id', 'mean_qscore_template'))
+                 select = c('read_id', 'mean_qscore_template'))
 
 bad_reads <- summary[mean_qscore_template <= 9, read_id]
 
@@ -58,21 +58,21 @@ plot_prob <- function(input, title) {
 }
 
 control_avg <- probs[pos %between% c(100e3, 105e3),
-                 .(avg_prob = mean(mod_prob)),
-                 by = pos
-                 ]
+                     .(avg_prob = mean(mod_prob)),
+                     by = pos
+]
 plot_prob(control_avg, "control")
 
 HML_avg <- probs[pos %between% c(11e3, 16e3),
-             .(avg_prob = mean(mod_prob)),
-             by = pos
-             ]
+                 .(avg_prob = mean(mod_prob)),
+                 by = pos
+]
 plot_prob(HML_avg, "HML")
 
 HMR_avg <- probs[pos %between% c(291e3, 296e3),
-             .(avg_prob = mean(mod_prob)),
-             by = pos
-             ]
+                 .(avg_prob = mean(mod_prob)),
+                 by = pos
+]
 plot_prob(HMR_avg, "HMR")
 
 #########################
@@ -138,7 +138,7 @@ plot_probs(HML)
 hmlp <- plot_binary(HML)
 hmlp
 hmlp + geom_vline(xintercept = HML_silencers) #+
-  #geom_vline(xintercept = HML_linkers, size = 0.3, color = "black")
+#geom_vline(xintercept = HML_linkers, size = 0.3, color = "black")
 
 #plot HMR
 HMR_region <- c(291e3, 296e3)
