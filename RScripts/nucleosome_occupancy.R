@@ -3,10 +3,9 @@
 #################################################
 # Author: Molly Brothers and Koen Van den Berge
 # Github: mollybrothers
-# Date: 2021-02-06:
+# Date: 2021-02-11:
 #################################################
 
-# IN PROGRESS
 # goal of this script is to compare directly in the same plot nucleosome occupancy data and % methylation
 # to reveal linker-region preference of SIR3-EcoGII methylation
 
@@ -67,18 +66,14 @@ methyl_vs_nucs <- function (methyl_data, nuc_data) {
   lines(x=loOccup$x, y=scale(loOccup$fitted), col="grey70", lwd=3)
 }
 
-####################################################
-####PLOT AVERAGE METHYLATION IN NUCS AND LINKERS####
-####################################################
-methyl_boxplot <- function (nucs_data, meth_data) {
-  NtoL <- which(diff(nucs_data$occupancy < 0.4) == 1)
+#############################################################
+####FIND AND PLOT AVERAGE METHYLATION IN NUCS AND LINKERS####
+#############################################################
+average_methylation_nucs <- function(nucs_data, meth_data){  
   LtoN <- which(diff(nucs_data$occupancy < 0.4) == -1)
-  
+  NtoL <- which(diff(nucs_data$occupancy < 0.4) == 1)
   nuc_rows <- data.table(start = c(1,LtoN), end = c(NtoL, nrow(nucs_data)))
-  linker_rows <- data.table(start = NtoL, end = LtoN)
-  
   nuc_rows <- nuc_rows[(nuc_rows$end - nuc_rows$start) >=10,]
-  linker_rows <- linker_rows[(linker_rows$end - linker_rows$start) >=10,]
   
   avg_meth_nucl <- c()
   for (i in 1:nrow(nuc_rows)) {
@@ -89,6 +84,15 @@ methyl_boxplot <- function (nucs_data, meth_data) {
     sub_meth <- meth_data[start > begin & start < finish]
     avg_meth_nucl[i] <- mean(sub_meth$percentage)
   }
+  return(avg_meth_nucl)
+}
+
+
+average_methylation_linkers <- function(nucs_data, meth_data) {
+  LtoN <- which(diff(nucs_data$occupancy < 0.4) == -1)
+  NtoL <- which(diff(nucs_data$occupancy < 0.4) == 1)
+  linker_rows <- data.table(start = NtoL, end = LtoN)
+  linker_rows <- linker_rows[(linker_rows$end - linker_rows$start) >=10,]
   
   avg_meth_linker <- c()
   for (i in 1:nrow(linker_rows)) {
@@ -99,45 +103,70 @@ methyl_boxplot <- function (nucs_data, meth_data) {
     sub_meth <- meth_data[start > begin & start < finish]
     avg_meth_linker[i] <- mean(sub_meth$percentage)
   }
+  return(avg_meth_linker)
+}
+
+methyl_boxplot <- function (nucs_methyl, linkers_methyl) {  
+  combined <- data.table(region = c(rep("nucleosomes",length(nucs_methyl)),
+                                    rep("linkers",length(linkers_methyl))),
+                         avg_methylation = c(nucs_methyl, linkers_methyl))
   
-  plottest <- data.table(region = c(rep("nucleosome",length(avg_meth_nucl)),
-                                    rep("linker",length(avg_meth_linker))),
-                         avg_methylation = c(avg_meth_nucl, avg_meth_linker))
-  
-  ggplot(plottest, aes(x = region, y = avg_methylation)) +
-    geom_boxplot() +
+  ggplot(combined, aes(x = region, y = avg_methylation)) +
+    geom_boxplot(fill = "lavender") +
     geom_point() +
-    ylim(c(0,80))
+    ylim(c(0,80)) +
+    theme(
+      panel.background = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      axis.line = element_line(color = "black"),
+      text = element_text(size = 15, color = "black", family = "Arial")) +
+    labs(x = "region",
+         y = "average % methylated reads")
   
 }
+
+############
+####DATA####
+############
 
 #control
 ctrl_meth <- filtered_meth[chrom == "III" & start > 96e3 & start < 99e3]
 ctrl_nucs <- nucs[chrom == "chrIII" & start > 96e3 & start < 99e3]
+ctrl_linkers_meth <- average_methylation_linkers(ctrl_nucs, ctrl_meth)
+ctrl_nucs_meth <- average_methylation_nucs(ctrl_nucs, ctrl_meth)
 #methyl_vs_nucs(ctrl_meth, ctrl_nucs)
-methyl_boxplot(ctrl_nucs, ctrl_meth)
+methyl_boxplot(ctrl_nucs_meth, ctrl_linkers_meth)
 
 #HMR
-HMR_meth <- filtered_meth[chrom == "III" & start > 291e3 & start < 294e3]
 HMR_nucs <- nucs[chrom == "chrIII" & start > 291e3 & start < 294e3]
+HMR_meth <- filtered_meth[chrom == "III" & start > 291e3 & start < 294e3]
+HMR_nucs_meth <- average_methylation_nucs(HMR_nucs, HMR_meth)
+HMR_linkers_meth <- average_methylation_linkers(HMR_nucs, HMR_meth)
 #methyl_vs_nucs(HMR_meth, HMR_nucs)
-methyl_boxplot(HMR_nucs, HMR_meth)
+methyl_boxplot(HMR_nucs_meth, HMR_linkers_meth)
 
 #HML
-HML_meth <- filtered_meth[chrom == "III" & start > 11e3 & start < 14e3]
 HML_nucs <- nucs[chrom == "chrIII" & start > 11e3 & start < 14e3]
+HML_meth <- filtered_meth[chrom == "III" & start > 11e3 & start < 14e3]
+HML_nucs_meth <- average_methylation_nucs(HML_nucs, HML_meth)
+HML_linkers_meth <- average_methylation_linkers(HML_nucs, HML_meth)
 #methyl_vs_nucs(HML_meth, HML_nucs)
-methyl_boxplot(HML_nucs, HML_meth)
+methyl_boxplot(HML_nucs_meth, HML_linkers_meth)
+
+all_linkers <- c(HMR_linkers_meth, HML_linkers_meth)
+all_nucs <- c(HMR_nucs_meth, HML_nucs_meth)
+methyl_boxplot(all_nucs, all_linkers)
 
 #tel6R
-tel6R_meth <- filtered_meth[chrom == "VI" & start > 265e3 & start < 268e3]
 tel6R_nucs <- nucs[chrom == "chrVI" & start > 265e3 & start < 268e3]
+tel6R_meth <- filtered_meth[chrom == "VI" & start > 265e3 & start < 268e3]\
 #methyl_vs_nucs(tel6R_meth, tel6R_nucs)
 methyl_boxplot(tel6R_nucs, tel6R_meth)
 
 #tel10L
-tel10L_meth <- filtered_meth[chrom == "X" & start > 0 & start < 5e3]
 tel10L_nucs <- nucs[chrom == "chrX" & start > 0 & start < 5e3]
+tel10L_meth <- filtered_meth[chrom == "X" & start > 0 & start < 5e3]
 #methyl_vs_nucs(tel10L_meth, tel10L_nucs)
 
 #####################################
