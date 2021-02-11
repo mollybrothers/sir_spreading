@@ -95,6 +95,37 @@ plot_methylation_bars <- function(data, data2, chr) {
          y = "average % methylated reads")
 }
 
+plot_methylation_bars_alone <- function(data, chr) {
+  #break data into 200bp bins, find the mean and sd of % methylated reads in each bin
+  numbreaks <- as.integer((max(data$start) - min(data$start)) / 200)
+  data$window <- cut(data$start, breaks = numbreaks)
+  data_mean <- aggregate(data$percentage, by = list(data$window), function(x){ mean(x)})
+  data_sd <- aggregate(data$percentage, by = list(data$window), function(x){ sd(x)})
+  
+  #make a data.frame of the stats found above and clean up for plotting
+  data_stats <- data.frame(interval = data_mean[,1], mean = data_mean[,2], upper = data_mean[,2]+data_sd[, 2], lower = data_mean[,2]-data_sd[, 2])
+  data_stats$interval <- gsub("[(]", "", data_stats$interval)
+  data_stats$interval <- gsub("[,].*", "", data_stats$interval)
+  data_stats$interval <- as.numeric(data_stats$interval)
+  
+  #get the points that have 100% reads methylated
+  data_full <- data[data$percentage == 100, ]
+  
+  #plot the bins and the points that are at 100%
+  ggplot(mapping = aes(x = interval, y = mean)) +
+    geom_point(data = data_stats, color = "mediumpurple4") +
+    geom_point(data = data_full, mapping = aes(x = start, y = percentage), color = "mediumpurple4", inherit.aes = FALSE) +
+    geom_errorbar(data = data_stats, mapping = aes(ymin = lower, ymax = upper), color = "mediumpurple4", inherit.aes = TRUE) + 
+    theme(panel.background = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.grid.major = element_blank(),
+          axis.line = element_line(color = "black"),
+          text = element_text(size = 15, color = "black", family = "Arial")) +
+    labs(title = plot_title,
+         x = sprintf("position on chr %s", chr),
+         y = "average % methylated reads")
+}
+
 #plot a negative control region
 control_25C <- relevant_25C[chrom == "III" & start > 80e3 & start < 105e3]
 control_37C <- relevant_37C[chrom == "III" & start > 80e3 & start < 105e3]
