@@ -3,7 +3,7 @@
 #########################
 # Author: Molly Brothers
 # Github: mollybrothers
-# Date: 2021-02-10
+# Date: 2021-02-11
 #########################
 
 # With an input bedMethyl file:
@@ -15,7 +15,7 @@ library(data.table)
 library(tidyverse)
 library(stringr)
 
-dt_37C <- fread("/Volumes/brothers_seq/Nanopore/210205_Ocular/megalodon_output_11/modified_bases.aggregate11.6mA.bed")
+dt_37C <- fread("/Volumes/brothers_seq/Nanopore/210208_Rescue/megalodon_output_06/modified_bases.aggregate06.6mA.bed")
 colnames(dt_37C) <- c("chrom", "start", "end", "name", "score", 
                       "strand", "startCodon", "stopCodon", "color", 
                       "coverage", "percentage")
@@ -33,7 +33,7 @@ relevant_25C <- dt_25C[chrom != "MT" & coverage > 10, ..select_cols]
 
 #plot percentage of methylation in a particular region as a scatter plot
 #opacity of dot corresponds to amount of coverage
-plot_title = "sir3-8-EcoGII (JRY13114)"
+plot_title = "sir3-8-EcoGII (t150)"
 
 plot_methylation_dot <- function(data, chr) {
   ggplot(data, aes(x = start, y = percentage)) +
@@ -129,20 +129,23 @@ plot_methylation_bars_alone <- function(data, chr) {
 #plot a negative control region
 control_25C <- relevant_25C[chrom == "III" & start > 80e3 & start < 105e3]
 control_37C <- relevant_37C[chrom == "III" & start > 80e3 & start < 105e3]
+plot_methylation_bars_alone(control_37C, "III")
 plot_methylation_bars(control_25C, control_37C, "III")
 plot_methylation_dot(control, "III")
 
 #plot HML
 HML_25C <- relevant_25C[chrom == "III" & start > 0 & start < 25e3]
 HML_37C <- relevant_37C[chrom == "III" & start > 0 & start < 25e3]
+plot_methylation_bars_alone(HML_37C, "III")
 plot_methylation_bars(HML_25C, HML_37C, "III")
 plot_methylation_dot(HML, "III")
 
 #plot HMR
 HMR_25C <- relevant_25C[chrom == "III" & start > 280e3 & start < 305e3]
 HMR_37C <- relevant_37C[chrom == "III" & start > 280e3 & start < 305e3]
+plot_methylation_bars_alone(HMR_37C, "III")
 plot_methylation_bars(HMR_25C, HMR_37C, "III")
-plot_methylation_dot(HMR, "III")
+plot_methylation_dot(HMR_37C, "III")
 
 #plot telomere
 tel6R_25C <- relevant_25C[chrom == "VI" & start > 250e3 & start < 270e3]
