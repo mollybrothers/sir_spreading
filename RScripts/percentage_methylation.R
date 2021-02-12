@@ -15,25 +15,42 @@ library(data.table)
 library(tidyverse)
 library(stringr)
 
-dt_37C <- fread("/Volumes/brothers_seq/Nanopore/210208_Rescue/megalodon_output_06/modified_bases.aggregate06.6mA.bed")
-colnames(dt_37C) <- c("chrom", "start", "end", "name", "score", 
-                      "strand", "startCodon", "stopCodon", "color", 
-                      "coverage", "percentage")
-dt_25C <- fread("/Volumes/brothers_seq/Nanopore/210205_Ocular/megalodon_output_08/modified_bases.aggregate08.6mA.bed")
-colnames(dt_25C) <- c("chrom", "start", "end", "name", "score", 
-                      "strand", "startCodon", "stopCodon", "color", 
-                      "coverage", "percentage")
+columns <- c("chrom", "start", "end", "name", "score", 
+             "strand", "startCodon", "stopCodon", "color", 
+             "coverage", "percentage")
+
+dt_1 <- fread("/Volumes/brothers_seq/Nanopore/210208_Rescue/megalodon_output_01/modified_bases.aggregate01.6mA.bed")
+colnames(dt_1) <- columns
+
+dt_2 <- fread("/Volumes/brothers_seq/Nanopore/210208_Rescue/megalodon_output_02/modified_bases.aggregate02.6mA.bed")
+colnames(dt_2) <- columns
+
+dt_3 <- fread("/Volumes/brothers_seq/Nanopore/210208_Rescue/megalodon_output_03/modified_bases.aggregate03.6mA.bed")
+colnames(dt_3) <- columns
+
+dt_4 <- fread("/Volumes/brothers_seq/Nanopore/210208_Rescue/megalodon_output_04/modified_bases.aggregate04.6mA.bed")
+colnames(dt_4) <- columns
+
+dt_5 <- fread("/Volumes/brothers_seq/Nanopore/210208_Rescue/megalodon_output_05/modified_bases.aggregate05.6mA.bed")
+colnames(dt_5) <- columns
+
+dt_6 <- fread("/Volumes/brothers_seq/Nanopore/210208_Rescue/megalodon_output_06/modified_bases.aggregate06.6mA.bed")
+colnames(dt_6) <- columns
 
 #get a new data.table only containing chrom, start, coverage, and percentage
 #filter out mitochondrial DNA (MT) and coverage < 10
 
 select_cols <- c("chrom", "start", "coverage", "percentage")
-relevant_37C <- dt_37C[chrom != "MT" & coverage > 10, ..select_cols]
-relevant_25C <- dt_25C[chrom != "MT" & coverage > 10, ..select_cols]
+relevant_1 <- dt_1[chrom != "MT" & coverage > 10, ..select_cols]
+relevant_2 <- dt_2[chrom != "MT" & coverage > 10, ..select_cols]
+relevant_3 <- dt_3[chrom != "MT" & coverage > 10, ..select_cols]
+relevant_4 <- dt_4[chrom != "MT" & coverage > 10, ..select_cols]
+relevant_5 <- dt_5[chrom != "MT" & coverage > 10, ..select_cols]
+relevant_6 <- dt_6[chrom != "MT" & coverage > 10, ..select_cols]
 
 #plot percentage of methylation in a particular region as a scatter plot
 #opacity of dot corresponds to amount of coverage
-plot_title = "sir3-8-EcoGII (t150)"
+plot_title = "sir3-8-EcoGII t150"
 
 plot_methylation_dot <- function(data, chr) {
   ggplot(data, aes(x = start, y = percentage)) +
@@ -134,16 +151,24 @@ plot_methylation_bars(control_25C, control_37C, "III")
 plot_methylation_dot(control, "III")
 
 #plot HML
-HML_25C <- relevant_25C[chrom == "III" & start > 0 & start < 25e3]
-HML_37C <- relevant_37C[chrom == "III" & start > 0 & start < 25e3]
-plot_methylation_bars_alone(HML_37C, "III")
+HML_1 <- relevant_1[chrom == "III" & start > 0 & start < 25e3]
+HML_2 <- relevant_2[chrom == "III" & start > 0 & start < 25e3]
+HML_3 <- relevant_3[chrom == "III" & start > 0 & start < 25e3]
+HML_4 <- relevant_4[chrom == "III" & start > 0 & start < 25e3]
+HML_5 <- relevant_5[chrom == "III" & start > 0 & start < 25e3]
+HML_6 <- relevant_6[chrom == "III" & start > 0 & start < 25e3]
+plot_methylation_bars_alone(HML_6, "III") + geom_vline(xintercept = c(11146, 14849))
 plot_methylation_bars(HML_25C, HML_37C, "III")
 plot_methylation_dot(HML, "III")
 
 #plot HMR
-HMR_25C <- relevant_25C[chrom == "III" & start > 280e3 & start < 305e3]
-HMR_37C <- relevant_37C[chrom == "III" & start > 280e3 & start < 305e3]
-plot_methylation_bars_alone(HMR_37C, "III")
+HMR_1 <- relevant_1[chrom == "III" & start > 280e3 & start < 305e3]
+HMR_2 <- relevant_2[chrom == "III" & start > 280e3 & start < 305e3]
+HMR_3 <- relevant_3[chrom == "III" & start > 280e3 & start < 305e3]
+HMR_4 <- relevant_4[chrom == "III" & start > 280e3 & start < 305e3]
+HMR_5 <- relevant_5[chrom == "III" & start > 280e3 & start < 305e3]
+HMR_6 <- relevant_6[chrom == "III" & start > 280e3 & start < 305e3]
+plot_methylation_bars_alone(HMR_6, "III") + geom_vline(xintercept = c(292388, 295034))
 plot_methylation_bars(HMR_25C, HMR_37C, "III")
 plot_methylation_dot(HMR_37C, "III")
 
