@@ -17,7 +17,7 @@ library(data.table)
 library(tidyverse)
 library(wesanderson)
 
-mega_directory <- "/Volumes/brothers_seq/Nanopore/210205_Ocular/megalodon_output_08/"
+mega_directory <- "/Volumes/brothers_seq/Nanopore/210208_Rescue/megalodon_output_04/"
 chr <- "III" #which chromosome?
 
 # find all the reads with a qscore < 9 and filter out those reads from the input chr.txt file
@@ -119,8 +119,8 @@ plot_binary <- function(data) {
 control_region <- c(95e3, 100e3)
 control <- probs[start_pos <= control_region[1]+300][end_pos >= control_region[2]-300][
   pos %between% control_region]
-plot_probs(control)
 plot_binary(control)
+plot_probs(control)
 
 #plot HML
 HML_region <- c(10.5e3, 15.5e3)
@@ -132,13 +132,13 @@ HML_linkers = c(#9407, 9587.5, 9067, 9747, 9923, 10166, 10331,
   #15573, 15984, 16244
 )
 
-HML <- probs[start_pos <= HML_silencers[1]][end_pos >= HML_silencers[2]][
+HML <- probs[start_pos <= HML_region[1]][end_pos >= HML_region[2]][
   pos %between% HML_region]
-plot_probs(HML)
 hmlp <- plot_binary(HML)
 hmlp
 hmlp + geom_vline(xintercept = HML_silencers) #+
 #geom_vline(xintercept = HML_linkers, size = 0.3, color = "black")
+plot_probs(HML)
 
 #plot HMR
 HMR_region <- c(291e3, 296e3)
@@ -147,12 +147,17 @@ HMR_linkers = c(291100, 291312, 291644, 291863, 292129, 292322,
                 292498, 292921, 293078, 293227, 293440, 293633, 293841, 294155,
                 294515, 294699, 295239, 295555, 295743, 295906)
 
-HMR <- probs[start_pos <= HMR_silencers[1]][end_pos >= HMR_silencers[2]][
+HMR <- probs[start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
   pos %between% HMR_region]
-plot_probs(HMR)
 hmrp <- plot_binary(HMR)
 hmrp
 hmrp + geom_vline(xintercept = HMR_silencers)
+plot_probs(HMR)
+
+#plot tel3L
+tel3L_region <- c(0, 5e3)
+tel3L <- probs[pos %between% tel3L_region]
+plot_binary(tel3L)
 
 #plot tel6R
 tel6R_region <- c(265e3, 270e3)
