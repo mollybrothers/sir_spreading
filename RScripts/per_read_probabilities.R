@@ -3,7 +3,7 @@
 #########################
 # Author: Molly Brothers
 # Github: mollybrothers
-# Date: 2021-01-27
+# Date: 2021-02-14 <3
 #########################
 
 #######################################################################################
@@ -17,8 +17,8 @@ library(data.table)
 library(tidyverse)
 library(wesanderson)
 
-mega_directory <- "/Volumes/brothers_seq/Nanopore/210208_Rescue/megalodon_output_04/"
-chr <- "III" #which chromosome?
+mega_directory <- "/Volumes/brothers_seq/Nanopore/201125_Turkey/megalodon_output_07/"
+chr <- "VI" #which chromosome?
 
 # find all the reads with a qscore < 9 and filter out those reads from the input chr.txt file
 summary <- fread(sprintf("%ssequencing_summary.txt", mega_directory),
@@ -35,12 +35,18 @@ filtered <- unfiltered[!(read_id %in% bad_reads)]
 #1. convert log probabilities into probabilities
 #2. add a binary column; if mod_prob is >80, set as methylated (TRUE). if < 80, set as unmethylated (FALSE)
 #3. add start and end positions for each read_id
-#4. order by position and read_id
+#4. find the average methylation of each read
+#5. order by average number of A's methylated then read_id
 probs <- filtered[, list(read_id, pos, mod_prob = 10 ^ mod_log_prob)][
   , binary := ifelse(mod_prob > 0.8, "m6A", "A")][
     , start_pos := min(pos), by = read_id][
       , end_pos := max(pos), by = read_id][
-        order(pos, read_id)]
+        , avg_methyl := mean(binary == "m6A"), by = read_id][
+          order(-avg_methyl, read_id)]
+
+#extract each unique read_id to set the order (in same order as in the data table to start with) for single read plots
+read_names <- unique(probs$read_id)
+probs$read_id = factor(probs$read_id, levels = read_names)
 
 ##################################
 ####PLOT AVERAGE PROBABILITIES####
@@ -79,11 +85,6 @@ plot_prob(HMR_avg, "HMR")
 ####PLOT SINGLE READS####
 #########################
 
-#extract each unique read_id to set the order for single read plots
-#NOTE: might not need to do this anymore if only looking at reads that span the entire query region
-read_names <- unique(probs$read_id)
-probs$read_id = factor(probs$read_id, levels = read_names)
-
 #plot functions
 probs_pal <- wes_palette("Zissou1", 2, type = "continuous")
 binary_pal <- wes_palettes$Moonrise1
@@ -117,7 +118,7 @@ plot_binary <- function(data) {
 
 #plot unmethylated region
 control_region <- c(95e3, 100e3)
-control <- probs[start_pos <= control_region[1]+300][end_pos >= control_region[2]-300][
+control <- probs[start_pos <= control_region[1]][end_pos >= control_region[2]][
   pos %between% control_region]
 plot_binary(control)
 plot_probs(control)
@@ -155,11 +156,12 @@ hmrp + geom_vline(xintercept = HMR_silencers)
 plot_probs(HMR)
 
 #plot tel3L
-tel3L_region <- c(0, 5e3)
-tel3L <- probs[pos %between% tel3L_region]
+tel3L_region <- c(300, 5e3)
+tel3L <- probs[start_pos <= tel3L_region[1]][end_pos >= tel3L_region[2]][
+  pos %between% tel3L_region]
 plot_binary(tel3L)
 
 #plot tel6R
 tel6R_region <- c(265e3, 270e3)
-tel6R <- probs[pos %between% tel6R_region]
+tel6R <- probs[start_pos <= tel6R_region[1]][end_pos >= tel6R_region[2]][pos %between% tel6R_region]
 plot_binary(tel6R)
