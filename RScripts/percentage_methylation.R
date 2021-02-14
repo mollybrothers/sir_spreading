@@ -50,7 +50,7 @@ relevant_6 <- dt_6[chrom != "MT" & coverage > 10, ..select_cols]
 
 #plot percentage of methylation in a particular region as a scatter plot
 #opacity of dot corresponds to amount of coverage
-plot_title = "sir3-8-EcoGII t150"
+plot_title = "sir3-8-EcoGII"
 
 plot_methylation_dot <- function(data, chr) {
   ggplot(data, aes(x = start, y = percentage)) +
@@ -158,7 +158,7 @@ HML_4 <- relevant_4[chrom == "III" & start > 0 & start < 25e3]
 HML_5 <- relevant_5[chrom == "III" & start > 0 & start < 25e3]
 HML_6 <- relevant_6[chrom == "III" & start > 0 & start < 25e3]
 plot_methylation_bars_alone(HML_6, "III") + geom_vline(xintercept = c(11146, 14849))
-plot_methylation_bars(HML_25C, HML_37C, "III")
+plot_methylation_bars(HML_1, HML_2, "III")
 plot_methylation_dot(HML, "III")
 
 #plot HMR
