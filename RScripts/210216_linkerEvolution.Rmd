@@ -1,0 +1,291 @@
+---
+title: "Evolution of average methylation across linker regions"
+author: "Koen Van den Berge & Molly Brothers"
+date: "2/16/2021"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+# Import time course aggregated data
+
+```{r}
+library(data.table)
+
+dir <- "/Users/koenvandenberge/data/molly/Rescue/"
+columns <- c("chrom", "start", "end", "name", "score", 
+             "strand", "startCodon", "stopCodon", "color", 
+             "coverage", "percentage")
+
+dt1 <- fread(paste0(dir,"modified_bases.aggregate01.6mA.bed"))
+colnames(dt1) <- columns
+dt2 <- fread(paste0(dir,"modified_bases.aggregate02.6mA.bed"))
+colnames(dt2) <- columns
+dt3 <- fread(paste0(dir,"modified_bases.aggregate03.6mA.bed"))
+colnames(dt3) <- columns
+dt4 <- fread(paste0(dir,"modified_bases.aggregate04.6mA.bed"))
+colnames(dt4) <- columns
+dt5 <- fread(paste0(dir,"modified_bases.aggregate05.6mA.bed"))
+colnames(dt5) <- columns
+dt6 <- fread(paste0(dir,"modified_bases.aggregate06.6mA.bed"))
+colnames(dt6) <- columns
+
+
+select_cols <- c("chrom", "start", "coverage", "percentage")
+dt1 <- dt1[chrom != "MT" & coverage > 10, ..select_cols]
+dt2 <- dt2[chrom != "MT" & coverage > 10, ..select_cols]
+dt3 <- dt3[chrom != "MT" & coverage > 10, ..select_cols]
+dt4 <- dt4[chrom != "MT" & coverage > 10, ..select_cols]
+dt5 <- dt5[chrom != "MT" & coverage > 10, ..select_cols]
+dt6 <- dt6[chrom != "MT" & coverage > 10, ..select_cols]
+```
+
+
+# Using linker regions based on Hereji et al 2018 nucleosome occupancy data
+
+## HMR
+
+```{r}
+## HMR E is at III:292674-292769
+## HMR I is at III:294805-294864
+nucs <- fread("~/data/molly/Chereji_Occupancy_rep1_singlebp.bedGraph")
+colnames(nucs) <- c("chrom", "start", "end", "occupancy")
+HMR_nucs <- nucs[chrom == "chrIII" & start >= 292674 & start < 294864]
+
+# Set arbitrary threshold for defining linker regions
+plot(HMR_nucs$start, HMR_nucs$occupancy, pch=16, cex=1/3)
+abline(h=0.5, lty=2, col="red")
+
+# Aggregate methylation calls at the level of linker regions
+FtoT <- which(diff(HMR_nucs$occupancy < 0.5) == 1)
+TtoF <-  which(diff(HMR_nucs$occupancy < 0.5) == -1)
+dfLink <- data.frame(start = HMR_nucs$start[FtoT[-length(TtoF)]],
+                     end = HMR_nucs$start[TtoF[-1]])
+# only keep linker regions with at least 5bp in size
+dfLink <- dfLink[(dfLink$end - dfLink$start) >=5,]
+
+plot(HMR_nucs$start, HMR_nucs$occupancy, pch=16, cex=1/3)
+abline(h=0.5, lty=2, col="red")
+abline(v=dfLink$start, col="blue")
+abline(v=dfLink$end, col="green")
+
+linkerTimeDf <- matrix(NA, nrow=nrow(dfLink), ncol=6,
+                       dimnames=list(paste0("linker",1:nrow(dfLink)),
+                                     paste0("time",1:6)))
+for(ll in 1:nrow(dfLink)){
+  # loop over linker regions
+  curStart <- dfLink$start[ll]
+  curEnd <- dfLink$end[ll]
+  for(tt in 1:6){
+    # loop over timepoints
+    curDat <- get(paste0("dt",tt))
+    linkerDat <- curDat[which(curDat$chrom == "III" & 
+                       curDat$start >= curStart &
+                       curDat$start < curEnd),]
+    if(nrow(linkerDat) == 0){
+      linkerTimeDf[ll, tt] <- NA
+      next
+    }
+    avMeth <- mean(linkerDat$percentage)
+    linkerTimeDf[ll, tt] <- avMeth
+  }
+}
+
+pal <- wesanderson::wes_palette("Zissou1", nrow(linkerTimeDf), "continuous")
+plot(x=1:6, y=seq(min(linkerTimeDf,na.rm=TRUE), max(linkerTimeDf,na.rm=TRUE), length=6),
+     type='n', bty='l', xlab="Time", ylab="Methylation percentage", xaxt='n')
+for(ll in 1:nrow(linkerTimeDf)) lines(x=1:6, y=linkerTimeDf[ll,], col=pal[ll], type='b', lwd=2)
+axis(1, at=1:6, labels=c("0min", "5min", "15min", "45min", "90min", "150min"))
+legend("topleft", c("E silencer", "I silencer"),
+       lty=1, lwd=2, col=c(pal[1], pal[length(pal)]), bty='n')
+```
+
+## HML
+
+```{r}
+HML_nucs <- nucs[chrom == "chrIII" & start > 11230 & start < 14720]
+
+# Set arbitrary threshold for defining linnker regions
+plot(HML_nucs$start, HML_nucs$occupancy, pch=16, cex=1/3)
+abline(h=0.5, lty=2, col="red")
+
+# Aggregate methylation calls at the level of linker regions
+FtoT <- which(diff(HML_nucs$occupancy < .5) == 1)
+TtoF <-  which(diff(HML_nucs$occupancy < .5) == -1)
+dfLink <- data.frame(start = HML_nucs$start[FtoT[-length(TtoF)]],
+                     end = HML_nucs$start[TtoF[-1]])
+# only keep linker regions with at least 5bp in size
+dfLink <- dfLink[abs(dfLink$end - dfLink$start) >=5,]
+
+plot(HML_nucs$start, HML_nucs$occupancy, pch=16, cex=1/3)
+abline(h=0.4, lty=2, col="red")
+abline(v=dfLink$start, col="blue")
+abline(v=dfLink$end, col="green")
+
+linkerTimeDfHML <- matrix(NA, nrow=nrow(dfLink), ncol=6,
+                       dimnames=list(paste0("linker",1:nrow(dfLink)),
+                                     paste0("time",1:6)))
+for(ll in 1:nrow(dfLink)){
+  # loop over linker regions
+  curStart <- dfLink$start[ll]
+  curEnd <- dfLink$end[ll]
+  for(tt in 1:6){
+    # loop over timepoints
+    curDat <- get(paste0("dt",tt))
+    linkerDat <- curDat[which(curDat$chrom == "III" & 
+                       curDat$start >= curStart &
+                       curDat$start < curEnd),]
+    if(nrow(linkerDat) == 0){
+      linkerTimeDfHML[ll, tt] <- NA
+      next
+    }
+    avMeth <- mean(linkerDat$percentage)
+    linkerTimeDfHML[ll, tt] <- avMeth
+  }
+}
+
+pal <- wesanderson::wes_palette("Zissou1", nrow(linkerTimeDfHML), "continuous")
+plot(x=1:6, y=seq(min(linkerTimeDfHML,na.rm=TRUE), max(linkerTimeDfHML,na.rm=TRUE), length=6),
+     type='n', bty='l', xlab="Time", ylab="Methylation percentage", xaxt='n')
+for(ll in 1:nrow(linkerTimeDfHML)) lines(x=1:6, y=linkerTimeDfHML[ll,], col=pal[ll], type='b', lwd=2)
+axis(1, at=1:6, labels=c("0min", "5min", "15min", "45min", "90min", "150min"))
+legend("topleft", c("E silencer", "I silencer"),
+       lty=1, lwd=2, col=c(pal[1], pal[length(pal)]), bty='n')
+```
+
+# Using linker regions based on Rine Lab dyad positions
+
+## HMR
+
+```{r}
+nucDat <- openxlsx::read.xlsx("../../data/HMR_HML_nucleosome positions.xlsx")
+nucDatHMR <- nucDat[nucDat$region == "HMR",]
+## only look at linker regions within HMR silencer regions
+## HMR E is at III:292674-292769
+## HMR I is at III:294805-294864
+nucDatHMR <- nucDatHMR[nucDatHMR$Start >= 292674,]
+nucDatHMR <- nucDatHMR[nucDatHMR$Stop <= 294864,]
+nrow(nucDatHMR) # 9 dyad positions
+
+## add silencer regions as reference
+dfLinkDyad <- data.frame(start = nucDatHMR$dyad[-nrow(nucDatHMR)]+1,
+                         stop = nucDatHMR$dyad[2:nrow(nucDatHMR)])
+dfLinkDyad <- rbind(c(292674, 292769),
+                    dfLinkDyad,
+                    c(294805, 294864))
+
+linkerTimeDfHMR_dyad <- matrix(NA, nrow=nrow(dfLinkDyad), ncol=6,
+                       dimnames=list(paste0("linker",1:nrow(dfLinkDyad)),
+                                     paste0("time",1:6)))
+for(ll in 1:nrow(dfLinkDyad)){
+  # loop over linker regions
+  curStart <- dfLinkDyad$start[ll]
+  curEnd <- dfLinkDyad$stop[ll]
+  for(tt in 1:6){
+    # loop over timepoints
+    curDat <- get(paste0("dt",tt))
+    linkerDat <- curDat[which(curDat$chrom == "III" & 
+                       curDat$start >= curStart &
+                       curDat$start < curEnd),]
+    if(nrow(linkerDat) == 0){
+      linkerTimeDfHMR_dyad[ll, tt] <- NA
+      next
+    }
+    avMeth <- mean(linkerDat$percentage)
+    linkerTimeDfHMR_dyad[ll, tt] <- avMeth
+  }
+}
+
+
+pal <- wesanderson::wes_palette("Zissou1", nrow(linkerTimeDfHMR_dyad), "continuous")
+plot(x=1:6, y=seq(min(linkerTimeDfHMR_dyad,na.rm=TRUE), max(linkerTimeDfHMR_dyad,na.rm=TRUE), length=6),
+     type='n', bty='l', xlab="Time", ylab="Methylation percentage", xaxt='n', main="HMR")
+for(ll in 1:nrow(linkerTimeDfHMR_dyad)) lines(x=1:6, y=linkerTimeDfHMR_dyad[ll,], col=pal[ll], type='b', lwd=2)
+axis(1, at=1:6, labels=c("0min", "5min", "15min", "45min", "90min", "150min"))
+legend("topleft", c("E silencer", "I silencer"),
+       lty=1, lwd=2, col=c(pal[1], pal[length(pal)]), bty='n')
+```
+
+### Normalize by methylation level at last time point
+
+
+```{r}
+pal <- wesanderson::wes_palette("Zissou1", nrow(linkerTimeDfHMR_dyad), "continuous")
+plot(x=1:6, y=seq(0, 1, length=6),
+     type='n', bty='l', xlab="Time", ylab="Methylation percentage relative to max.", 
+     xaxt='n', main="HMR")
+for(ll in 1:nrow(linkerTimeDfHMR_dyad)) lines(x=1:6, y=linkerTimeDfHMR_dyad[ll,] / max(linkerTimeDfHMR_dyad[ll,]), col=pal[ll], type='b', lwd=2)
+axis(1, at=1:6, labels=c("0min", "5min", "15min", "45min", "90min", "150min"))
+legend("topleft", c("E silencer", "I silencer"),
+       lty=1, lwd=2, col=c(pal[1], pal[length(pal)]), bty='n')
+```
+
+
+## HML
+
+```{r}
+nucDat <- openxlsx::read.xlsx("../../data/HMR_HML_nucleosome positions.xlsx")
+nucDatHML <- nucDat[nucDat$region == "HML",]
+## only look at linker regions within HML silencer regions
+# HML-E is at III:11237-11268
+# HML-I is at III:14600-14711
+nucDatHML <- nucDatHML[nucDatHML$Start >= 11237,]
+nucDatHML <- nucDatHML[nucDatHML$Stop <= 14711,]
+nrow(nucDatHML) # 13 linker regions
+
+## add silencer regions as reference
+dfLinkDyad <- data.frame(start = nucDatHML$dyad[-nrow(nucDatHML)]+1,
+                         stop = nucDatHML$dyad[2:nrow(nucDatHML)])
+dfLinkDyad <- rbind(c(11237, 11268),
+                    dfLinkDyad,
+                    c(14600, 14711))
+
+linkerTimeDfHML_dyad <- matrix(NA, nrow=nrow(dfLinkDyad), ncol=6,
+                       dimnames=list(paste0("linker",1:nrow(dfLinkDyad)),
+                                     paste0("time",1:6)))
+for(ll in 1:nrow(dfLinkDyad)){
+  # loop over linker regions
+  curStart <- dfLinkDyad$start[ll]
+  curEnd <- dfLinkDyad$stop[ll]
+  for(tt in 1:6){
+    # loop over timepoints
+    curDat <- get(paste0("dt",tt))
+    linkerDat <- curDat[which(curDat$chrom == "III" & 
+                       curDat$start >= curStart &
+                       curDat$start < curEnd),]
+    if(nrow(linkerDat) == 0){
+      linkerTimeDfHML_dyad[ll, tt] <- NA
+      next
+    }
+    avMeth <- mean(linkerDat$percentage)
+    linkerTimeDfHML_dyad[ll, tt] <- avMeth
+  }
+}
+
+
+pal <- wesanderson::wes_palette("Zissou1", nrow(linkerTimeDfHML_dyad), "continuous")
+# pal <- viridis::viridis(n=nrow(linkerTimeDfHML_dyad))
+plot(x=1:6, y=seq(min(linkerTimeDfHML_dyad,na.rm=TRUE), max(linkerTimeDfHML_dyad,na.rm=TRUE), length=6),
+     type='n', bty='l', xlab="Time", ylab="Methylation percentage", xaxt='n', main="HML")
+for(ll in 1:nrow(linkerTimeDfHML_dyad)) lines(x=1:6, y=linkerTimeDfHML_dyad[ll,], col=pal[ll], type='b', lwd=2)
+axis(1, at=1:6, labels=c("0min", "5min", "15min", "45min", "90min", "150min"))
+legend("topleft", c("E silencer", "I silencer"),
+       lty=1, lwd=2, col=c(pal[1], pal[length(pal)]), bty='n')
+```
+
+
+
+### Normalize by methylation level at last time point
+
+
+```{r}
+pal <- wesanderson::wes_palette("Zissou1", nrow(linkerTimeDfHML_dyad), "continuous")
+plot(x=1:6, y=seq(0, 1, length=6),
+     type='n', bty='l', xlab="Time", ylab="Methylation percentage relative to max.", 
+     xaxt='n', main="HML")
+for(ll in 1:nrow(linkerTimeDfHML_dyad)) lines(x=1:6, y=linkerTimeDfHML_dyad[ll,] / max(linkerTimeDfHML_dyad[ll,]), col=pal[ll], type='b', lwd=2)
+axis(1, at=1:6, labels=c("0min", "5min", "15min", "45min", "90min", "150min"))
+legend("topleft", c("E silencer", "I silencer"),
+       lty=1, lwd=2, col=c(pal[1], pal[length(pal)]), bty='n')
+```

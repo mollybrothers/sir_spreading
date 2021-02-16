@@ -160,7 +160,7 @@ methyl_boxplot(all_nucs, all_linkers)
 
 #tel6R
 tel6R_nucs <- nucs[chrom == "chrVI" & start > 265e3 & start < 268e3]
-tel6R_meth <- filtered_meth[chrom == "VI" & start > 265e3 & start < 268e3]\
+tel6R_meth <- filtered_meth[chrom == "VI" & start > 265e3 & start < 268e3]
 #methyl_vs_nucs(tel6R_meth, tel6R_nucs)
 methyl_boxplot(tel6R_nucs, tel6R_meth)
 
