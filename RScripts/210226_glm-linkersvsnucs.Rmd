@@ -1,0 +1,88 @@
+---
+title: "210226_glm-linkersvsnucs"
+author: "Molly Brothers"
+date: "2/26/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(tidyverse)
+```
+
+# Read In Data
+
+```{r data}
+#percentage methylation data
+# Molly's path
+meth <- fread("/Volumes/brothers_seq/Nanopore/201012_Doudna/megalodon_output_00/modified_bases.6mA.bed")
+colnames(meth) <- c("chrom", "start", "end", "name", "score", 
+                    "strand", "startCodon", "stopCodon", "color", 
+                    "coverage", "percentage")
+meth_cols <- c("chrom", "start", "coverage", "percentage")
+filtered_meth <- meth[coverage > 10, ..meth_cols]
+
+#nucleosome occupancy data from Chereji et al 2018
+# Molly's path
+nucs <- fread("/Volumes/brothers_seq/not_my_data/GSE97290_Henikoff_Chereji_2018/Chereji_Occupancy_rep1_singlebp.bedGraph")
+colnames(nucs) <- c("chrom", "start", "end", "occupancy")
+```
+
+# Functions to find avg. methylation in nucleosomes and linkers
+
+```{r avg meth}
+average_methylation_nucs <- function(nucs_data, meth_data){  
+  LtoN <- which(diff(nucs_data$occupancy < 0.4) == -1)
+  NtoL <- which(diff(nucs_data$occupancy < 0.4) == 1)
+  nuc_rows <- data.table(start = c(1,LtoN), end = c(NtoL, nrow(nucs_data)))
+  nuc_rows <- nuc_rows[(nuc_rows$end - nuc_rows$start) >=10,]
+  
+  avg_meth_nucl <- c()
+  for (i in 1:nrow(nuc_rows)) {
+    sub_nucs <- nucs_data[nuc_rows$start[i]:nuc_rows$end[i]]
+    begin <- min(sub_nucs$start)
+    finish <- max(sub_nucs$end)
+    
+    sub_meth <- meth_data[start > begin & start < finish]
+    avg_meth_nucl[i] <- mean(sub_meth$percentage)
+  }
+  return(avg_meth_nucl)
+}
+
+
+average_methylation_linkers <- function(nucs_data, meth_data) {
+  LtoN <- which(diff(nucs_data$occupancy < 0.4) == -1)
+  NtoL <- which(diff(nucs_data$occupancy < 0.4) == 1)
+  linker_rows <- data.table(start = NtoL, end = LtoN)
+  linker_rows <- linker_rows[(linker_rows$end - linker_rows$start) >=10,]
+  
+  avg_meth_linker <- c()
+  for (i in 1:nrow(linker_rows)) {
+    sub_linkers <- nucs_data[linker_rows$start[i]:linker_rows$end[i]]
+    begin <- min(sub_linkers$start)
+    finish <- max(sub_linkers$end)
+    
+    sub_meth <- meth_data[start > begin & start < finish]
+    avg_meth_linker[i] <- mean(sub_meth$percentage)
+  }
+  return(avg_meth_linker)
+}
+```
+
+# Linker vs. Nucleosome Average Methylation
+
+``` {r HMR}
+#HMR
+HMR_nucs <- nucs[chrom == "chrIII" & start > 291e3 & start < 294e3]
+HMR_meth <- filtered_meth[chrom == "III" & start > 291e3 & start < 294e3]
+HMR_nucs_meth <- average_methylation_nucs(HMR_nucs, HMR_meth)
+HMR_linkers_meth <- average_methylation_linkers(HMR_nucs, HMR_meth)
+
+combined <- data.table(region = c(rep("nucleosome",length(HMR_nucs_meth)),
+                                 rep("linker",length(HMR_linkers_meth))),
+                      avg_methylation = c(HMR_nucs_meth, HMR_linkers_meth))
+combined$avg_methylation <- combined$avg_methylation / 100
+m = glm(avg_methylation ~ region, data = combined, family="binomial")
+combined
+```

@@ -146,12 +146,6 @@ HMR_linkers_meth <- average_methylation_linkers(HMR_nucs, HMR_meth)
 #methyl_vs_nucs(HMR_meth, HMR_nucs)
 methyl_boxplot(HMR_nucs_meth, HMR_linkers_meth)
 
-# combined <- data.table(region = c(rep(1,length(HMR_nucs_meth)),
-#                                  rep(0,length(HMR_linkers_meth))),
-#                       avg_methylation = c(HMR_nucs_meth, HMR_linkers_meth))
-# combined$region <- as.logical(combined$region)
-# m = glm(avg_methylation ~ region, data = combined, family="binomial")
-
 #HML
 HML_nucs <- nucs[chrom == "chrIII" & start > 11e3 & start < 14e3]
 HML_meth <- filtered_meth[chrom == "III" & start > 11e3 & start < 14e3]
