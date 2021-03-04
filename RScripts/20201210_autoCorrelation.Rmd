@@ -117,12 +117,126 @@ for(rr in 1:27){
 }
 ```
 
+## Autocorrelation within HMR: single reads
+
+```{r}
+## read read-level data at chr3
+binaryCalls <- fread(file = "/Users/koenvandenberge/data/molly/megalodon_output_06/per_read_modified_base_calls_binary.txt.gz",
+                     nrows = 6e6, skip=11e6)
+colnames(binaryCalls) <- c("readID", "chr", "strand", "pos",
+                           "mod_log_prob", "can_log_prob", "mod_base")
+table(binaryCalls$chr)
+binaryCalls$methylation <- ifelse(binaryCalls$mod_log_prob > -0.2231436, 1, 0)
+binaryCalls3 <- binaryCalls[binaryCalls$chr == "III",]
+
+hmrE <- 292674:292769
+hmrI <- 294805:294864
+
+## subset reads that completely overlap HMR
+readCalls3 <- binaryCalls3 %>% 
+  group_by(readID) %>%
+  summarize(start=min(pos),
+            end=max(pos),
+            avgMeth = mean(methylation),
+            length = n())
+readsHMR <- unique(readCalls3$readID[readCalls3$start <= min(hmrE) & 
+                                readCalls3$end >= max(hmrI)])
+binaryCallsHMR <- binaryCalls3[binaryCalls3$readID %in% readsHMR,]
+
+acfMat <- matrix(NA, nrow=length(readsHMR),
+                 ncol=31)
+for(rr in 1:length(readsHMR)){
+  curRead <- readsHMR[rr]
+  curReadID <- which(readCalls3$readID == curRead)
+  curAvgMeth <- readCalls3$avgMeth[curReadID]
+  if(curAvgMeth > 0 & curAvgMeth < 1){
+    curDf <- binaryCalls3[binaryCalls3$readID == curRead,]
+    curRange <- range(curDf$pos)
+    curChr <- unique(curDf$chr)
+    acFunc <- acf(curDf$methylation, ylim=c(0,1), xlim=c(0,30),
+        main=paste0("chr", curChr,": ", round(curRange[1]/1e3, digits = 2),
+                    " - ", round(curRange[2]/1e3, digits = 2), "kb"))
+    acVals <- acFunc$acf[,1,1]
+    acfMat[rr,1:pmin(31,length(acVals))] <- acVals[1:pmin(31,length(acVals))]
+  } else next
+}
+
+plot(x=0:30, y=colMeans(acfMat, na.rm=TRUE), type='h',
+     xlab="Lag", ylab="Average ACF",
+     main="ACF averaged across all HMR complete reads")
+abline(h=0, lty=2)
+
+```
+
+
+
+
+
 # Autocorrelation at relevant scales: considering linker regions
 
 There is high autocorrelation on the methylation signal on single reads, at the level of single methylated adenine nucleotides. Note that, this could however be expected. Indeed, Molly suggested that the actual biologically relevant resolution might be the resolution of linker regions inbetween nucleosomes.
 In order to identify these linker regions, we could use the nucleosome occupancy data from Chereji *et al.* (2018) and, for example, set a threshold on when a region is 'not occupied by nucleosomes', and then calculating autocorrelation between those regions.
 
 **CHECK**: Does conditioning matter? Does correlation change when looking at (a) a position close to the silencer regions with a position further out in the HMR locus, versus (b) a position in the middle of the HMR locus with a position close to the silencer region? It could be that, for example, if the position close to the silencer region is methylated, there's a reasonable probability that a position in the middle of the locus is also methylated. However, the reverse may be less clear. It's possible that if the position in the middle of the locus is not methylated, the position close to the silencer region will never be methylated, for example.
+
+
+### Defined segments on steady-state
+
+```{r}
+hmrSegments <- readRDS("../data/segmentsHMR.rds")
+
+readsHMR
+binaryCallsHMR
+
+readAvMethList <- list()
+for(rr in 1:length(readsHMR)){
+  curRead <- readsHMR[rr]
+  curData <- binaryCallsHMR[binaryCallsHMR$readID == curRead,]
+  avMethLinkers <- c()
+  for(bb in 1:nrow(hmrSegments)){
+    curStart <- hmrSegments$start[bb]
+    curEnd <- hmrSegments$end[bb]
+    curId <- curData$pos >= curStart & curData$pos <= curEnd
+    if(sum(curId) > 0){
+      curBinData <- curData[curData$pos >= curStart & curData$pos <= curEnd,]
+      avMethLinkers[bb] <- mean(curBinData$methylation)
+      names(avMethLinkers)[bb] <- nrow(curBinData) #coverage
+    } else {
+      avMethLinkers[bb] <- NA
+    }
+  }
+  readAvMethList[[rr]] <- avMethLinkers
+}
+
+avMethMat <- do.call(rbind, readAvMethList)
+colSums(is.na(avMethMat)) # sometimes no data in defined linker regions
+
+# focus on 53 reads with data in all linker regions
+readAvMethListComplete <- readAvMethList[rowSums(is.na(avMethMat)) == 0]
+rafalib::mypar(mfrow=c(2,2))
+for(ll in 1:length(readAvMethListComplete)){
+  y <- readAvMethListComplete[[ll]]
+  if(var(y)>0){
+      acf(y)
+  }
+}
+
+# aggregate acf across all reads
+acfMat <- matrix(NA, nrow=length(readAvMethListComplete),
+                 ncol=14)
+rafalib::mypar(mfrow=c(1,1))
+for(ll in 1:length(readAvMethListComplete)){
+  y <- readAvMethListComplete[[ll]]
+  if(var(y)>0){
+    acfMat[ll,] <- acf(y, plot=FALSE)$acf[1:14,1,1]
+  }
+}
+plot(x=0:13, y=colMeans(acfMat), type='h',
+     xlab="Lag", ylab="Average ACF",
+     main="ACF averaged across all complete reads")
+abline(h=0, lty=2)
+```
+
 
 ## Import aggreated methylation bed file
 
@@ -135,6 +249,7 @@ colnames(meth) <- c("chrom", "start", "end", "name", "score",
 meth_cols <- c("chrom", "start", "coverage", "percentage")
 filtered_meth <- meth[coverage > 10, ..meth_cols]
 ```
+
 
 ## Import hereji et al 2018 nucleosome occupancy data
 
