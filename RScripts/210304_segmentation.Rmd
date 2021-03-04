@@ -1,0 +1,263 @@
+---
+title: "Segmentation analysis on steady-state"
+author: "Koen Van den Berge"
+date: "04/03/2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+## Import aggreated methylation bed files
+
+```{r}
+library(data.table)
+meth6 <- fread("~/data/molly/megalodon_output_06/modified_bases.aggregate06.6mA.bed")
+colnames(meth6) <- c("chrom", "start", "end", "name", "score", 
+                    "strand", "startCodon", "stopCodon", "color", 
+                    "coverage", "percentage")
+meth_cols <- c("chrom", "start", "coverage", "percentage")
+filtered_meth6 <- meth6[, ..meth_cols]
+
+meth7 <- fread("~/data/molly/megalodon_output_07/modified_bases.aggregate07.6mA.bed")
+colnames(meth7) <- c("chrom", "start", "end", "name", "score", 
+                    "strand", "startCodon", "stopCodon", "color", 
+                    "coverage", "percentage")
+filtered_meth7 <- meth7[, ..meth_cols]
+```
+
+## HMR
+
+```{r}
+library(GenomicRanges)
+library(methylKit)
+## only look at HMR region
+## HMR E is at III:292674-292769
+## HMR I is at III:294805-294864
+hmrE <- 292674:292769
+hmrI <- 294805:294864
+```
+
+### Sample 06
+
+```{r}
+meth6_HMR <- filtered_meth6[filtered_meth6$chrom == "III" &
+                            filtered_meth6$start >= min(hmrE) &
+                            filtered_meth6$start <= max(hmrI),]
+meth6_HMR <- meth6_HMR[order(meth6_HMR$start, decreasing=FALSE),]
+gr_HMR <- GRanges(seqnames = "chr3", ranges=IRanges(start = meth6_HMR$start,
+                                          end = meth6_HMR$start),
+        score = meth6_HMR$percentage/100)
+segmentRes <- methSeg(gr_HMR,
+                      diagnostic.plot=TRUE,
+                      maxInt=10,
+                      minSeg=10, G=2)
+
+plot(x=meth6_HMR$start,
+      y=meth6_HMR$percentage,
+      pch=16, cex=1/2,
+      col=scales::alpha("grey", .6))
+abline(v=start(ranges(segmentRes)), col="blue")
+abline(v=end(ranges(segmentRes)), col="red")
+```
+
+```{r}
+# Methylation
+loMethyl6 <- loess(percentage ~ start, data=meth6_HMR, weights=meth6_HMR$coverage, enp.target = 50)
+
+plot(x=meth6_HMR$start,
+      y=meth6_HMR$percentage,
+      pch=16, cex=1/4,
+      col=scales::alpha("grey", .4))
+lines(x=loMethyl6$x[order(loMethyl6$x)], y=loMethyl6$fitted[order(loMethyl6$x)], 
+      col="orange", lwd=4)
+
+plot(x=loMethyl6$x[order(loMethyl6$x)], y=loMethyl6$fitted[order(loMethyl6$x)],
+     type='l')
+abline(h=55, col="red")
+```
+
+
+### Sample 07
+
+```{r}
+meth7_HMR <- filtered_meth7[filtered_meth7$chrom == "III" &
+                            filtered_meth7$start >= min(hmrE) &
+                            filtered_meth7$start <= max(hmrI),]
+meth7_HMR <- meth7_HMR[order(meth7_HMR$start, decreasing=FALSE),]
+gr_HMR <- GRanges(seqnames = "chr3", ranges=IRanges(start = meth7_HMR$start,
+                                          end = meth7_HMR$start),
+        score = meth7_HMR$percentage/100)
+segmentRes <- methSeg(gr_HMR,
+                      diagnostic.plot=TRUE,
+                      maxInt=10,
+                      minSeg=10, G=2)
+
+plot(x=meth7_HMR$start,
+      y=meth7_HMR$percentage,
+      pch=16, cex=1/2,
+      col=scales::alpha("grey", .6))
+abline(v=start(ranges(segmentRes)), col="blue")
+abline(v=end(ranges(segmentRes)), col="red")
+```
+
+```{r}
+# Methylation
+loMethyl7 <- loess(percentage ~ start, data=meth7_HMR, weights=meth7_HMR$coverage, enp.target = 50)
+
+plot(x=meth7_HMR$start,
+      y=meth7_HMR$percentage,
+      pch=16, cex=1/4,
+      col=scales::alpha("grey", .4))
+lines(x=loMethyl7$x[order(loMethyl7$x)], y=loMethyl7$fitted[order(loMethyl7$x)], 
+      col="orange", lwd=4)
+
+plot(x=loMethyl7$x[order(loMethyl7$x)], y=loMethyl7$fitted[order(loMethyl7$x)],
+     type='l')
+abline(h=55, col="red")
+```
+
+
+### Combine both smooths
+
+Very reproducible. Hard threshold seems to be sensible.
+
+```{r}
+plot(x=loMethyl7$x[order(loMethyl7$x)], y=loMethyl7$fitted[order(loMethyl7$x)],
+     type='l',
+     xlab = "Chromosome position", ylab="Smoothed average methylation")
+lines(x=loMethyl6$x[order(loMethyl6$x)], y=loMethyl6$fitted[order(loMethyl6$x)])
+abline(h=55, col="red")
+
+rle <- Rle(loMethyl6$fitted[order(loMethyl6$x)] > 55)
+starts <- c(1, cumsum(rle@lengths)[-length(rle@lengths)]+1)
+ends <- cumsum(rle@lengths)
+segments <- data.frame(start = loMethyl6$x[order(loMethyl6$x)][starts], 
+                       end = loMethyl6$x[order(loMethyl6$x)][ends])
+
+plot(x=loMethyl6$x[order(loMethyl6$x)], y=loMethyl6$fitted[order(loMethyl6$x)],
+     type='l',
+     xlab = "Chromosome position", ylab="Smoothed average methylation")
+abline(h=55, col="red")
+abline(v=segments$start, lty=2, col="orange")
+
+saveRDS(segments, file="../data/segmentsHMR.rds")
+```
+
+
+## HML
+
+```{r}
+# HML E is at III:11237-11268
+# HML I is at III:14600-14711
+hmlE <- 11237:11268
+hmlI <- 14600:14711
+```
+
+
+### Sample 06
+
+```{r}
+meth6_HML <- filtered_meth6[filtered_meth6$chrom == "III" &
+                            filtered_meth6$start >= min(hmlE) &
+                            filtered_meth6$start <= max(hmlI),]
+meth6_HML <- meth6_HML[order(meth6_HML$start, decreasing=FALSE),]
+gr_HML <- GRanges(seqnames = "chr3", ranges=IRanges(start = meth6_HML$start,
+                                          end = meth6_HML$start),
+        score = meth6_HML$percentage/100)
+segmentRes <- methSeg(gr_HML,
+                      diagnostic.plot=TRUE,
+                      maxInt=10,
+                      minSeg=10, G=2)
+
+plot(x=meth6_HML$start,
+      y=meth6_HML$percentage,
+      pch=16, cex=1/2,
+      col=scales::alpha("grey", .6))
+abline(v=start(ranges(segmentRes)), col="blue")
+abline(v=end(ranges(segmentRes)), col="red")
+```
+
+```{r}
+# Methylation
+loMethyl6 <- loess(percentage ~ start, data=meth6_HML, weights=meth6_HML$coverage, enp.target = 50)
+
+plot(x=meth6_HML$start,
+      y=meth6_HML$percentage,
+      pch=16, cex=1/4,
+      col=scales::alpha("grey", .4))
+lines(x=loMethyl6$x[order(loMethyl6$x)], y=loMethyl6$fitted[order(loMethyl6$x)], 
+      col="orange", lwd=4)
+
+plot(x=loMethyl6$x[order(loMethyl6$x)], y=loMethyl6$fitted[order(loMethyl6$x)],
+     type='l')
+abline(h=55, col="red")
+```
+
+
+### Sample 07
+
+```{r}
+meth7_HML <- filtered_meth7[filtered_meth7$chrom == "III" &
+                            filtered_meth7$start >= min(hmlE) &
+                            filtered_meth7$start <= max(hmlI),]
+meth7_HML <- meth7_HML[order(meth7_HML$start, decreasing=FALSE),]
+gr_HMR <- GRanges(seqnames = "chr3", ranges=IRanges(start = meth7_HML$start,
+                                          end = meth7_HML$start),
+        score = meth7_HML$percentage/100)
+segmentRes <- methSeg(gr_HMR,
+                      diagnostic.plot=TRUE,
+                      maxInt=10,
+                      minSeg=10, G=2)
+
+plot(x=meth7_HML$start,
+      y=meth7_HML$percentage,
+      pch=16, cex=1/2,
+      col=scales::alpha("grey", .6))
+abline(v=start(ranges(segmentRes)), col="blue")
+abline(v=end(ranges(segmentRes)), col="red")
+```
+
+```{r}
+# Methylation
+loMethyl7 <- loess(percentage ~ start, data=meth7_HML, weights=meth7_HML$coverage, enp.target = 50)
+
+plot(x=meth7_HML$start,
+      y=meth7_HML$percentage,
+      pch=16, cex=1/4,
+      col=scales::alpha("grey", .4))
+lines(x=loMethyl7$x[order(loMethyl7$x)], y=loMethyl7$fitted[order(loMethyl7$x)], 
+      col="orange", lwd=4)
+
+plot(x=loMethyl7$x[order(loMethyl7$x)], y=loMethyl7$fitted[order(loMethyl7$x)],
+     type='l')
+abline(h=55, col="red")
+```
+
+
+### Combine both smooths
+
+Very reproducible. Hard threshold seems to be sensible.
+
+```{r}
+plot(x=loMethyl7$x[order(loMethyl7$x)], y=loMethyl7$fitted[order(loMethyl7$x)],
+     type='l',
+     xlab = "Chromosome position", ylab="Smoothed average methylation")
+lines(x=loMethyl6$x[order(loMethyl6$x)], y=loMethyl6$fitted[order(loMethyl6$x)],
+      col="steelblue")
+abline(h=55, col="red")
+
+rle <- Rle(loMethyl6$fitted[order(loMethyl6$x)] > 55)
+starts <- c(1, cumsum(rle@lengths)[-length(rle@lengths)]+1)
+ends <- cumsum(rle@lengths)
+segments <- data.frame(start = loMethyl6$x[order(loMethyl6$x)][starts], 
+                       end = loMethyl6$x[order(loMethyl6$x)][ends])
+
+plot(x=loMethyl6$x[order(loMethyl6$x)], y=loMethyl6$fitted[order(loMethyl6$x)],
+     type='l',
+     xlab = "Chromosome position", ylab="Smoothed average methylation")
+abline(h=55, col="red")
+abline(v=segments$start, lty=2, col="orange")
+
+saveRDS(segments, file="../data/segmentsHML.rds")
+```
