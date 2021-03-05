@@ -107,3 +107,14 @@ Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 7.5kb / Yield: 15.7Gb
 + JRY13114 (_sir3-8-EcoGII_) - 150min: barcode06
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 10.6kb / Yield: 16Gb
+
+## 210304_Amanita (megalodon v2.2.10)
+### Strains:
++ JRY13134 (_sir3-8-EcoGII_) - 0min: barcode07
++ JRY13134 (_sir3-8-EcoGII_) - 15min: barcode08
++ JRY13134 (_sir3-8-EcoGII_) - 30min: barcode09
++ JRY13134 (_sir3-8-EcoGII_) - 45min: barcode10
++ JRY13134 (_sir3-8-EcoGII_) - 60min: barcode11
++ JRY13134 (_sir3-8-EcoGII_) - 90min: barcode12
+
+Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50:  / Yield: 
