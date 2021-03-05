@@ -77,7 +77,7 @@ plot_prob(HMR_avg, "HMR")
 
 #plot function
 plot_binary <- function(data) {
-  ggplot(data, aes(x = pos, y = read_id, color = binary)) +
+  ggplot(data, aes(x = pos, y = read_id, color = methylation)) +
     geom_point(shape = 15) +
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank(),
@@ -112,6 +112,7 @@ HML <- probs[start_pos <= HML_region[1]][end_pos >= HML_region[2]][
   pos %between% HML_region]
 hmlp <- plot_binary(HML)
 hmlp
+#hmlp + geom_vline(xintercept = c(segments[,1]), color = "red")
 hmlp + geom_vline(xintercept = HML_silencers) #+
 #geom_vline(xintercept = HML_linkers, size = 0.3, color = "black")
 
@@ -122,12 +123,15 @@ HMR_linkers = c(291100, 291312, 291644, 291863, 292129, 292322,
                 292498, 292921, 293078, 293227, 293440, 293633, 293841, 294155,
                 294515, 294699, 295239, 295555, 295743, 295906)
 
+HMR_all <- probs[start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
+  pos %between% HMR_region]
 HMR_plus <- probs[strand == "+"][start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
   pos %between% HMR_region]
 HMR_minus <- probs[strand == "-"][start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
   pos %between% HMR_region]
-hmrp <- plot_binary(HMR_plus)
+hmrp <- plot_binary(HMR_all)
 hmrp
+#HMR_segments <- read_delim("~/sequencing/sir_spreading/data/segmentsHMR.tsv", delim = '\t')
 hmrp + geom_vline(xintercept = HMR_silencers)
 
 #plot tel3L
