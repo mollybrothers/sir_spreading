@@ -3,7 +3,7 @@
 #########################
 # Author: Molly Brothers
 # Github: mollybrothers
-# Date: 2021-02-28
+# Date: 2021-03-04
 #########################
 
 #######################################################################################
@@ -107,12 +107,13 @@ HML_linkers = c(#9407, 9587.5, 9067, 9747, 9923, 10166, 10331,
   13017, 13396, 13558, 13829, 14011, 14221, 14883, 15229, 15406
   #15573, 15984, 16244
 )
+HML_segments <- readRDS("~/sequencing/sir_spreading/data/segmentsHML.rds")
 
 HML <- probs[start_pos <= HML_region[1]][end_pos >= HML_region[2]][
   pos %between% HML_region]
 hmlp <- plot_binary(HML)
 hmlp
-#hmlp + geom_vline(xintercept = c(segments[,1]), color = "red")
+hmlp + geom_vline(xintercept = c(HML_segments[,1]), color = "red")
 hmlp + geom_vline(xintercept = HML_silencers) #+
 #geom_vline(xintercept = HML_linkers, size = 0.3, color = "black")
 
@@ -122,6 +123,7 @@ HMR_silencers = c(292388, 295034)
 HMR_linkers = c(291100, 291312, 291644, 291863, 292129, 292322,
                 292498, 292921, 293078, 293227, 293440, 293633, 293841, 294155,
                 294515, 294699, 295239, 295555, 295743, 295906)
+HMR_segments <- readRDS("~/sequencing/sir_spreading/data/segmentsHMR.rds")
 
 HMR_all <- probs[start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
   pos %between% HMR_region]
@@ -130,8 +132,7 @@ HMR_plus <- probs[strand == "+"][start_pos <= HMR_region[1]][end_pos >= HMR_regi
 HMR_minus <- probs[strand == "-"][start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
   pos %between% HMR_region]
 hmrp <- plot_binary(HMR_all)
-hmrp
-#HMR_segments <- read_delim("~/sequencing/sir_spreading/data/segmentsHMR.tsv", delim = '\t')
+hmrp + geom_vline(xintercept = c(HMR_segments[,1]), color = "red")
 hmrp + geom_vline(xintercept = HMR_silencers)
 
 #plot tel3L
