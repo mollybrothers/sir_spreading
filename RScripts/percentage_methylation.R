@@ -3,7 +3,7 @@
 #########################
 # Author: Molly Brothers
 # Github: mollybrothers
-# Date: 2021-03-08
+# Date: 2021-02-11
 #########################
 
 # With an input bedMethyl file:
