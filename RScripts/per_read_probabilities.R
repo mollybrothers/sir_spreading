@@ -3,7 +3,7 @@
 #########################
 # Author: Molly Brothers
 # Github: mollybrothers
-# Date: 2021-03-08
+# Date: 2021-03-09
 #########################
 
 #######################################################################################
@@ -19,11 +19,11 @@ library(data.table)
 library(tidyverse)
 library(wesanderson)
 
-mega_directory <- "/Volumes/brothers_seq/Nanopore/201125_Turkey/megalodon_output_07/"
+mega_directory <- "/Volumes/brothers_seq/210304_Amanita/megalodon_output_11/"
 chr <- "III" #which chromosome?
+barcode <- "11"
 
-
-probs <- fread(sprintf("%schr%s.txt", mega_directory, chr),
+probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
                     select = c(1, 2, 3, 4, 5),
                     col.names = c("read_id", "chrm", "strand", "pos", "mod_log_prob"))
 
@@ -134,6 +134,7 @@ HMR_plus <- probs[strand == "+"][start_pos <= HMR_region[1]][end_pos >= HMR_regi
 HMR_minus <- probs[strand == "-"][start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
   pos %between% HMR_region]
 hmrp <- plot_binary(HMR_all)
+hmrp
 hmrp + geom_vline(xintercept = c(HMR_segments[,1]), color = "red")
 hmrp + geom_vline(xintercept = HMR_silencers)
 
