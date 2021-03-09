@@ -3,12 +3,14 @@
 #########################
 # Author: Molly Brothers
 # Github: mollybrothers
-# Date: 2021-03-04
+# Date: 2021-03-08
 #########################
 
 #######################################################################################
 # the per_read_base_calls.txt file itself is too large for RStudio's memory,
 # so you'll need to use mawk on the command line to pick out the lines you want first
+# An SBATCH jobscript and bash script have been written to do this on the computing cluster:
+# extract_chr-js.sh and extract_chr.sh
 # EXAMPLE:
 # cat per_read_modified_base_calls.txt | mawk '$2 ~ /^III$/ {print $0}' > chrIII.txt
 #######################################################################################

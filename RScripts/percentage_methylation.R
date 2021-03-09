@@ -19,22 +19,22 @@ columns <- c("chrom", "start", "end", "name", "score",
              "strand", "startCodon", "stopCodon", "color", 
              "coverage", "percentage")
 
-dt_1 <- fread("/Volumes/brothers_seq/Nanopore/210208_Rescue/megalodon_output_01/modified_bases.aggregate01.6mA.bed")
+dt_1 <- fread("/Volumes/brothers_seq/210304_Amanita/megalodon_output_07/modified_bases.aggregate07.6mA.bed")
 colnames(dt_1) <- columns
 
-dt_2 <- fread("/Volumes/brothers_seq/Nanopore/210208_Rescue/megalodon_output_02/modified_bases.aggregate02.6mA.bed")
+dt_2 <- fread("/Volumes/brothers_seq/210304_Amanita/megalodon_output_08/modified_bases.aggregate08.6mA.bed")
 colnames(dt_2) <- columns
 
-dt_3 <- fread("/Volumes/brothers_seq/Nanopore/210208_Rescue/megalodon_output_03/modified_bases.aggregate03.6mA.bed")
+dt_3 <- fread("/Volumes/brothers_seq/210304_Amanita/megalodon_output_09/modified_bases.aggregate09.6mA.bed")
 colnames(dt_3) <- columns
 
-dt_4 <- fread("/Volumes/brothers_seq/Nanopore/210208_Rescue/megalodon_output_04/modified_bases.aggregate04.6mA.bed")
+dt_4 <- fread("/Volumes/brothers_seq/210304_Amanita/megalodon_output_10/modified_bases.aggregate10.6mA.bed")
 colnames(dt_4) <- columns
 
-dt_5 <- fread("/Volumes/brothers_seq/Nanopore/210208_Rescue/megalodon_output_05/modified_bases.aggregate05.6mA.bed")
+dt_5 <- fread("/Volumes/brothers_seq/210304_Amanita/megalodon_output_11/modified_bases.aggregate11.6mA.bed")
 colnames(dt_5) <- columns
 
-dt_6 <- fread("/Volumes/brothers_seq/Nanopore/210208_Rescue/megalodon_output_06/modified_bases.aggregate06.6mA.bed")
+dt_6 <- fread("/Volumes/brothers_seq/210304_Amanita/megalodon_output_12/modified_bases.aggregate12.6mA.bed")
 colnames(dt_6) <- columns
 
 #get a new data.table only containing chrom, start, coverage, and percentage
@@ -96,6 +96,7 @@ plot_methylation_bars <- function(data, data2, chr) {
   
   #plot the bins and the points that are at 100%
   ggplot(mapping = aes(x = interval, y = mean)) +
+    ylim(c(-10,100)) +
     geom_point(data = data_stats, color = "mediumpurple4") +
     geom_point(data = data2_stats, color = "cyan3") +
     geom_point(data = data_full, mapping = aes(x = start, y = percentage), color = "mediumpurple4", inherit.aes = FALSE) +
@@ -130,6 +131,7 @@ plot_methylation_bars_alone <- function(data, chr) {
   
   #plot the bins and the points that are at 100%
   ggplot(mapping = aes(x = interval, y = mean)) +
+    ylim(c(-10,100)) +
     geom_point(data = data_stats, color = "mediumpurple4") +
     geom_point(data = data_full, mapping = aes(x = start, y = percentage), color = "mediumpurple4", inherit.aes = FALSE) +
     geom_errorbar(data = data_stats, mapping = aes(ymin = lower, ymax = upper), color = "mediumpurple4", inherit.aes = TRUE) + 
@@ -157,8 +159,8 @@ HML_3 <- relevant_3[chrom == "III" & start > 0 & start < 25e3]
 HML_4 <- relevant_4[chrom == "III" & start > 0 & start < 25e3]
 HML_5 <- relevant_5[chrom == "III" & start > 0 & start < 25e3]
 HML_6 <- relevant_6[chrom == "III" & start > 0 & start < 25e3]
-plot_methylation_bars_alone(HML_6, "III") + geom_vline(xintercept = c(11146, 14849))
-plot_methylation_bars(HML_1, HML_2, "III")
+plot_methylation_bars_alone(HML_2, "III") + geom_vline(xintercept = c(11146, 14849))
+plot_methylation_bars(HML_6, HML_1, "III")
 plot_methylation_dot(HML, "III")
 
 #plot HMR
@@ -169,7 +171,7 @@ HMR_4 <- relevant_4[chrom == "III" & start > 280e3 & start < 305e3]
 HMR_5 <- relevant_5[chrom == "III" & start > 280e3 & start < 305e3]
 HMR_6 <- relevant_6[chrom == "III" & start > 280e3 & start < 305e3]
 plot_methylation_bars_alone(HMR_6, "III") + geom_vline(xintercept = c(292388, 295034))
-plot_methylation_bars(HMR_25C, HMR_37C, "III")
+plot_methylation_bars(HMR_6, HMR_1, "III")
 plot_methylation_dot(HMR_37C, "III")
 
 #plot telomere
