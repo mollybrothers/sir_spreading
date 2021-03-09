@@ -130,4 +130,4 @@ Accidentally did the experiment with JRY13140 (_sir3-8, hmr-i∆_) instead of JR
 + JRY13140 (_sir3-8, hmr-i∆_) - 60min: barcode05
 + JRY13140 (_sir3-8, hmr-i∆_) - 90min: barcode06
 
-Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50:  / Yield: 
+Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 11kb / Yield: 24Gb
