@@ -109,6 +109,7 @@ Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 7.5kb / Yield: 15.7Gb
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 10.6kb / Yield: 16Gb
 
 ## 210304_Amanita (megalodon v2.2.10)
+Definitely see methylation here, but appears much more slowly (barely anything by time 90min) than with 210208_Rescue. Perhaps because I'm using a different strain...perhaps because of variability. Might stick with JRY13114 for time course experiments with EcoGII.
 ### Strains:
 + JRY13134 (_sir3-8-EcoGII_) - 0min: barcode07
 + JRY13134 (_sir3-8-EcoGII_) - 15min: barcode08
@@ -120,7 +121,7 @@ Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 10.6kb / Yield: 16Gb
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 11.3kb / Yield: 15.9Gb
 
 ## 210306_Ecology (have not called with megalodon yet)
-Accidentally did the experiment with JRY13140 (sir3-8 hmr-i∆) instead of JRY13141 (sir3-8-EcoGII hmr-i∆). So I am not analyzing it yet but could potentially use it as a (way overkill) negative control in the future.
+Accidentally did the experiment with JRY13140 (_sir3-8, hmr-i∆_) instead of JRY13141 (_sir3-8-EcoGII, hmr-i∆_). So I am not analyzing it yet but could potentially use it as a (way overkill) negative control in the future.
 ### Strains:
 + JRY13140 (_sir3-8, hmr-i∆_) - 0min: barcode01
 + JRY13140 (_sir3-8, hmr-i∆_) - 15min: barcode02
