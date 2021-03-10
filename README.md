@@ -131,3 +131,14 @@ Accidentally did the experiment with JRY13140 (_sir3-8, hmr-i∆_) instead of JR
 + JRY13140 (_sir3-8, hmr-i∆_) - 90min: barcode06
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 11kb / Yield: 24Gb
+
+## 210310_Russula (megalodon v2.2.10)
+### Strains:
++ JRY13114 (_sir3-8-EcoGII_) - 0min: barcode01
++ JRY13114 (_sir3-8-EcoGII_) - 15min: barcode02
++ JRY13114 (_sir3-8-EcoGII_) - 30min: barcode03
++ JRY13114 (_sir3-8-EcoGII_) - 45min: barcode04
++ JRY13114 (_sir3-8-EcoGII_) - 60min: barcode05
++ JRY13114 (_sir3-8-EcoGII_) - 90min: barcode06
+
+Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50:  / Yield: 
