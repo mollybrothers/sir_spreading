@@ -19,9 +19,9 @@ library(data.table)
 library(tidyverse)
 library(wesanderson)
 
-mega_directory <- "/Volumes/brothers_seq/210304_Amanita/megalodon_output_11/"
+mega_directory <- "/Volumes/brothers_seq/Nanopore/201125_Turkey/megalodon_output_06/"
 chr <- "III" #which chromosome?
-barcode <- "11"
+barcode <- "06"
 
 probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
                     select = c(1, 2, 3, 4, 5),
@@ -34,7 +34,8 @@ probs <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE, FALSE)][
   , list(read_id, pos, methylation, strand)][
     , start_pos := min(pos), by = read_id][
       , end_pos := max(pos), by = read_id][
-        order(pos)]
+        , avg_methyl := mean(methylation == TRUE), by = read_id][
+          order(-avg_methyl, read_id)]
 
 #extract each unique read_id to set the order (in same order as in the data table to start with) for single read plots
 read_names <- unique(probs$read_id)
@@ -94,13 +95,19 @@ plot_binary <- function(data) {
     scale_color_manual(values = c("grey90", "mediumpurple4"))
 }
 
-#plot unmethylated region
+#############################
+#### unmethylated region ####
+#############################
+
 control_region <- c(95e3, 100e3)
 control <- probs[start_pos <= control_region[1]][end_pos >= control_region[2]][
   pos %between% control_region]
 plot_binary(control)
 
-#plot HML
+#############
+#### HML ####
+#############
+
 HML_region <- c(10.5e3, 15.5e3)
 HML_silencers <- c(11146, 14849)
 HML_linkers = c(#9407, 9587.5, 9067, 9747, 9923, 10166, 10331, 
@@ -109,35 +116,71 @@ HML_linkers = c(#9407, 9587.5, 9067, 9747, 9923, 10166, 10331,
   13017, 13396, 13558, 13829, 14011, 14221, 14883, 15229, 15406
   #15573, 15984, 16244
 )
-HML_segments <- readRDS("~/sequencing/sir_spreading/data/segmentsHML.rds")
 
-HML <- probs[start_pos <= HML_region[1]][end_pos >= HML_region[2]][
+#read in segments with high and low methylation from steady state data
+HML_segments <- readRDS("~/sequencing/sir_spreading/data/segmentsHML.rds")
+HML_highmeth <- HML_segments[!c(TRUE,FALSE),]
+HML_lowmeth <- HML_segments[c(TRUE,FALSE),]
+
+#plus or minus strands only
+HML_plus <- probs[strand == "+"][start_pos <= HML_region[1]][end_pos >= HML_region[2]][
   pos %between% HML_region]
-hmlp <- plot_binary(HML)
+HML_plus <- droplevels(HML_plus)
+HML_minus <- probs[strand == "-"][start_pos <= HML_region[1]][end_pos >= HML_region[2]][
+  pos %between% HML_region]
+HML_minus <- droplevels(HML_minus)
+
+#all reads
+HML_all <- probs[start_pos <= HML_region[1]][end_pos >= HML_region[2]][
+  pos %between% HML_region]
+HML_all <- droplevels(HML_all)
+
+hmlp <- plot_binary(HML_all)
 hmlp
 hmlp + geom_vline(xintercept = c(HML_segments[,1]), color = "red")
-hmlp + geom_vline(xintercept = HML_silencers) #+
-#geom_vline(xintercept = HML_linkers, size = 0.3, color = "black")
+hmlp + annotate("rect", xmin = c(HML_highmeth$start), xmax = c(HML_highmeth$end),
+                ymin = 0, ymax = nlevels(HML_all$read_id), alpha = 0.1, fill = "red")
+hmlp + geom_vline(xintercept = HML_silencers)
 
-#plot HMR
+#############
+#### HMR ####
+#############
+
 HMR_region <- c(291e3, 296e3)
 HMR_silencers = c(292388, 295034)
 HMR_linkers = c(291100, 291312, 291644, 291863, 292129, 292322,
                 292498, 292921, 293078, 293227, 293440, 293633, 293841, 294155,
                 294515, 294699, 295239, 295555, 295743, 295906)
-HMR_segments <- readRDS("~/sequencing/sir_spreading/data/segmentsHMR.rds")
 
-HMR_all <- probs[start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
-  pos %between% HMR_region]
+#read in segments with high and low methylation from steady state data
+HMR_segments <- readRDS("~/sequencing/sir_spreading/data/segmentsHMR.rds")
+HMR_highmeth <- HMR_segments[!c(TRUE,FALSE),]
+HMR_lowmeth <- HMR_segments[c(TRUE,FALSE),]
+
+#plus or minus only reads
 HMR_plus <- probs[strand == "+"][start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
   pos %between% HMR_region]
+HMR_plus <- droplevels(HMR_plus)
 HMR_minus <- probs[strand == "-"][start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
   pos %between% HMR_region]
+HMR_minus <- droplevels(HMR_minus)
+
+#all reads
+HMR_all <- probs[start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
+  pos %between% HMR_region]
+HMR_all <- droplevels(HMR_all)
+
+#plot
 hmrp <- plot_binary(HMR_all)
 hmrp
 hmrp + geom_vline(xintercept = c(HMR_segments[,1]), color = "red")
+hmrp + annotate("rect", xmin = c(HMR_highmeth$start), xmax = c(HMR_highmeth$end),
+                ymin = 0, ymax = nlevels(HMR_all$read_id), alpha = 0.1, fill = "red")
 hmrp + geom_vline(xintercept = HMR_silencers)
 
+###################
+#### telomeres ####
+###################
 #plot tel3L
 tel3L_region <- c(300, 5e3)
 tel3L <- probs[start_pos <= tel3L_region[1]][end_pos >= tel3L_region[2]][
