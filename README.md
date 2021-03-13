@@ -109,7 +109,7 @@ Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 7.5kb / Yield: 15.7Gb
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 10.6kb / Yield: 16Gb
 
 ## 210304_Amanita (megalodon v2.2.10)
-Definitely see methylation here, but appears much more slowly (barely anything by time 90min) than with 210208_Rescue. Perhaps because I'm using a different strain...perhaps because of variability. Might stick with JRY13114 for time course experiments with EcoGII.
+Definitely see methylation here, but appears much more slowly (barely anything by time 90min) than with 210208_Rescue. Perhaps because I'm using a different strain...perhaps because of variability, perhaps because of culture density (these were at a higher OD when I started the experiment than 210208_Rescue). 210310_Russula, which uses JRY13114 like 210208_Rescue, was also taken at a higher culture density than 210208_Rescue and also seems to have slower kinetics.
 ### Strains:
 + JRY13134 (_sir3-8-EcoGII_) - 0min: barcode07
 + JRY13134 (_sir3-8-EcoGII_) - 15min: barcode08
@@ -133,6 +133,7 @@ Accidentally did the experiment with JRY13140 (_sir3-8, hmr-i∆_) instead of JR
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 11kb / Yield: 24Gb
 
 ## 210310_Russula (megalodon v2.2.10)
+Same strain as 210208_Rescue, but taken at a higher culture density and seems to have slower kinetics (similar to 210304_Amanita).
 ### Strains:
 + JRY13114 (_sir3-8-EcoGII_) - 0min: barcode01
 + JRY13114 (_sir3-8-EcoGII_) - 15min: barcode02
