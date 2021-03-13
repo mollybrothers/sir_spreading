@@ -123,12 +123,12 @@ Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 11.3kb / Yield: 15.9G
 ## 210306_Ecology (have not called with megalodon yet)
 Accidentally did the experiment with JRY13140 (_sir3-8, hmr-i∆_) instead of JRY13141 (_sir3-8-EcoGII, hmr-i∆_). So I am not analyzing it yet but could potentially use it as a (way overkill) negative control in the future.
 ### Strains:
-+ JRY13140 (_sir3-8, hmr-i∆_) - 0min: barcode01
-+ JRY13140 (_sir3-8, hmr-i∆_) - 15min: barcode02
-+ JRY13140 (_sir3-8, hmr-i∆_) - 30min: barcode03
-+ JRY13140 (_sir3-8, hmr-i∆_) - 45min: barcode04
-+ JRY13140 (_sir3-8, hmr-i∆_) - 60min: barcode05
-+ JRY13140 (_sir3-8, hmr-i∆_) - 90min: barcode06
++ JRY13140 (_sir3-8, HMR-i∆_) - 0min: barcode01
++ JRY13140 (_sir3-8, HMR-i∆_) - 15min: barcode02
++ JRY13140 (_sir3-8, HMR-i∆_) - 30min: barcode03
++ JRY13140 (_sir3-8, HMR-i∆_) - 45min: barcode04
++ JRY13140 (_sir3-8, HMR-i∆_) - 60min: barcode05
++ JRY13140 (_sir3-8, HMR-i∆_) - 90min: barcode06
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 11kb / Yield: 24Gb
 
