@@ -3,7 +3,7 @@
 #########################
 # Author: Molly Brothers
 # Github: mollybrothers
-# Date: 2021-03-09
+# Date: 2021-03-11
 #########################
 
 #######################################################################################
@@ -29,13 +29,23 @@ probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
 
 #1. create a binary column; if 10^mod_log_prob is >0.8, set as methylated (m6A). if < 0.8, set as unmethylated (A)
 #2. add start and end positions for each read_id
-#3. order by position
+#3. find the average methylation of each read (for ordering on plot)
+#4. order by avg methyl and read_id
 probs <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE, FALSE)][
   , list(read_id, pos, methylation, strand)][
     , start_pos := min(pos), by = read_id][
       , end_pos := max(pos), by = read_id][
         , avg_methyl := mean(methylation == TRUE), by = read_id][
           order(-avg_methyl, read_id)]
+
+# INCLUDE NA's (methylation = NA if prob is between 0.2 and 0.8)
+# probs <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE,
+#                                        ifelse(10^mod_log_prob < 0.2, FALSE, NA))][
+#   , list(read_id, pos, methylation, strand)][
+#     , start_pos := min(pos), by = read_id][
+#       , end_pos := max(pos), by = read_id][
+#         , avg_methyl := mean(methylation == TRUE, na.rm = TRUE), by = read_id][
+#           order(-avg_methyl, read_id)]
 
 #extract each unique read_id to set the order (in same order as in the data table to start with) for single read plots
 read_names <- unique(probs$read_id)
@@ -92,7 +102,7 @@ plot_binary <- function(data) {
           legend.position = "top",
           legend.title = element_blank(),
           legend.key = element_blank()) +
-    scale_color_manual(values = c("grey90", "mediumpurple4"))
+    scale_color_manual(values = c("gray90", "mediumpurple4"), na.value = "white")
 }
 
 #############################
@@ -109,7 +119,8 @@ plot_binary(control)
 #############
 
 HML_region <- c(10.5e3, 15.5e3)
-HML_silencers <- c(11146, 14849)
+HML_E <- c(11237, 11268)
+HML_I <- c(14600, 14711)
 HML_linkers = c(#9407, 9587.5, 9067, 9747, 9923, 10166, 10331, 
   10585, 10748,
   10944, 11118, 11418, 11645, 12021, 12251, 12436, 12649, 12842,
@@ -135,11 +146,14 @@ HML_all <- probs[start_pos <= HML_region[1]][end_pos >= HML_region[2]][
   pos %between% HML_region]
 HML_all <- droplevels(HML_all)
 
+#plot
 hmlp <- plot_binary(HML_all)
 hmlp
-hmlp + geom_vline(xintercept = c(HML_segments[,1]), color = "red")
+#annotate silencers (black) and high-meth regions (purple)
 hmlp + annotate("rect", xmin = c(HML_highmeth$start), xmax = c(HML_highmeth$end),
-                ymin = 0, ymax = nlevels(HML_all$read_id), alpha = 0.1, fill = "red")
+                ymin = 0.5, ymax = nlevels(HML_all$read_id)+0.5, alpha = 0.3, fill = "mediumpurple4") +
+  annotate("rect", xmin = c(HML_E[1], HML_I[1]), xmax = c(HML_E[2], HML_I[2]),
+           ymin = 0.5, ymax = nlevels(HML_all$read_id)+0.5, alpha = 0.3, fill = "black")
 hmlp + geom_vline(xintercept = HML_silencers)
 
 #############
@@ -147,10 +161,11 @@ hmlp + geom_vline(xintercept = HML_silencers)
 #############
 
 HMR_region <- c(291e3, 296e3)
-HMR_silencers = c(292388, 295034)
-HMR_linkers = c(291100, 291312, 291644, 291863, 292129, 292322,
-                292498, 292921, 293078, 293227, 293440, 293633, 293841, 294155,
-                294515, 294699, 295239, 295555, 295743, 295906)
+HMR_E = c(292674, 292769)
+HMR_I = c(294805, 294864)
+# HMR_linkers = c(291100, 291312, 291644, 291863, 292129, 292322,
+#                 292498, 292921, 293078, 293227, 293440, 293633, 293841, 294155,
+#                 294515, 294699, 295239, 295555, 295743, 295906)
 
 #read in segments with high and low methylation from steady state data
 HMR_segments <- readRDS("~/sequencing/sir_spreading/data/segmentsHMR.rds")
@@ -173,9 +188,11 @@ HMR_all <- droplevels(HMR_all)
 #plot
 hmrp <- plot_binary(HMR_all)
 hmrp
-hmrp + geom_vline(xintercept = c(HMR_segments[,1]), color = "red")
+#annotate silencers (black) and high-meth regions (purple)
 hmrp + annotate("rect", xmin = c(HMR_highmeth$start), xmax = c(HMR_highmeth$end),
-                ymin = 0, ymax = nlevels(HMR_all$read_id), alpha = 0.1, fill = "red")
+                ymin = 0.5, ymax = nlevels(HMR_all$read_id)+0.5, alpha = 0.2, fill = "mediumpurple4") +
+  annotate("rect", xmin = c(HMR_E[1], HMR_I[1]), xmax = c(HMR_E[2], HMR_I[2]),
+           ymin = 0.5, ymax = nlevels(HMR_all$read_id)+0.5, alpha = 0.3, fill = "black")
 hmrp + geom_vline(xintercept = HMR_silencers)
 
 ###################
