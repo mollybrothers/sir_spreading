@@ -3,7 +3,7 @@
 #########################
 # Author: Molly Brothers
 # Github: mollybrothers
-# Date: 2021-03-11
+# Date: 2021-03-14
 #########################
 
 #######################################################################################
@@ -19,7 +19,7 @@ library(data.table)
 library(tidyverse)
 library(wesanderson)
 
-mega_directory <- "/Volumes/brothers_seq/Nanopore/201125_Turkey/megalodon_output_06/"
+mega_directory <- "/Volumes/brothers_seq/210310_Russula/megalodon_output_06/"
 chr <- "III" #which chromosome?
 barcode <- "06"
 
@@ -30,13 +30,13 @@ probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
 #1. create a binary column; if 10^mod_log_prob is >0.8, set as methylated (m6A). if < 0.8, set as unmethylated (A)
 #2. add start and end positions for each read_id
 #3. find the average methylation of each read (for ordering on plot)
-#4. order by avg methyl and read_id
+#4. order by strand, avg methyl and read_id
 probs <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE, FALSE)][
   , list(read_id, pos, methylation, strand)][
     , start_pos := min(pos), by = read_id][
       , end_pos := max(pos), by = read_id][
         , avg_methyl := mean(methylation == TRUE), by = read_id][
-          order(-avg_methyl, read_id)]
+          order(strand, -avg_methyl, read_id)]
 
 # INCLUDE NA's (methylation = NA if prob is between 0.2 and 0.8)
 # probs <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE,
@@ -45,7 +45,7 @@ probs <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE, FALSE)][
 #     , start_pos := min(pos), by = read_id][
 #       , end_pos := max(pos), by = read_id][
 #         , avg_methyl := mean(methylation == TRUE, na.rm = TRUE), by = read_id][
-#           order(-avg_methyl, read_id)]
+#           order(strand, -avg_methyl, read_id)]
 
 #extract each unique read_id to set the order (in same order as in the data table to start with) for single read plots
 read_names <- unique(probs$read_id)
@@ -193,6 +193,7 @@ hmrp + annotate("rect", xmin = c(HMR_highmeth$start), xmax = c(HMR_highmeth$end)
                 ymin = 0.5, ymax = nlevels(HMR_all$read_id)+0.5, alpha = 0.2, fill = "mediumpurple4") +
   annotate("rect", xmin = c(HMR_E[1], HMR_I[1]), xmax = c(HMR_E[2], HMR_I[2]),
            ymin = 0.5, ymax = nlevels(HMR_all$read_id)+0.5, alpha = 0.3, fill = "black")
+
 hmrp + geom_vline(xintercept = HMR_silencers)
 
 ###################
