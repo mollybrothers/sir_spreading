@@ -3,7 +3,7 @@
 #########################
 # Author: Molly Brothers
 # Github: mollybrothers
-# Date: 2021-03-13
+# Date: 2021-03-15
 #########################
 
 # With an input bedMethyl file:
@@ -96,11 +96,11 @@ plot_methylation_bars <- function(data, data2, chr) {
   
   #plot the bins and the points that are at 100%
   ggplot(mapping = aes(x = interval, y = mean)) +
-    ylim(c(-10,100)) +
+    ylim(c(-20,100)) +
     geom_point(data = data_stats, color = "mediumpurple4") +
     geom_point(data = data2_stats, color = "cyan3") +
-    geom_point(data = data_full, mapping = aes(x = start, y = percentage), color = "mediumpurple4", inherit.aes = FALSE) +
-    geom_point(data = data2_full, mapping = aes(x = start, y = percentage), color = "cyan3", inherit.aes = FALSE) +
+    geom_point(data = data_full, mapping = aes(x = start, y = percentage), color = "mediumpurple4", alpha = 0.3, inherit.aes = FALSE) +
+    geom_point(data = data2_full, mapping = aes(x = start, y = percentage), color = "cyan3", alpha = 0.3, inherit.aes = FALSE) +
     geom_errorbar(data = data_stats, mapping = aes(ymin = lower, ymax = upper), color = "mediumpurple4", inherit.aes = TRUE) + 
     geom_errorbar(data = data2_stats, mapping = aes(ymin = lower, ymax = upper), color = "cyan3", inherit.aes = TRUE) +
     theme(panel.background = element_blank(),
@@ -131,9 +131,9 @@ plot_methylation_bars_alone <- function(data, chr) {
   
   #plot the bins and the points that are at 100%
   ggplot(mapping = aes(x = interval, y = mean)) +
-    ylim(c(-10,100)) +
+    ylim(c(-15,100)) +
     geom_point(data = data_stats, color = "mediumpurple4") +
-    geom_point(data = data_full, mapping = aes(x = start, y = percentage), color = "mediumpurple4", inherit.aes = FALSE) +
+    geom_point(data = data_full, mapping = aes(x = start, y = percentage), color = "mediumpurple4", alpha = 0.3, inherit.aes = FALSE) +
     geom_errorbar(data = data_stats, mapping = aes(ymin = lower, ymax = upper), color = "mediumpurple4", inherit.aes = TRUE) + 
     theme(panel.background = element_blank(),
           panel.grid.minor = element_blank(),
@@ -146,10 +146,10 @@ plot_methylation_bars_alone <- function(data, chr) {
 }
 
 #plot a negative control region
-control_25C <- relevant_25C[chrom == "III" & start > 80e3 & start < 105e3]
-control_37C <- relevant_37C[chrom == "III" & start > 80e3 & start < 105e3]
+control_1 <- relevant_1[chrom == "III" & start > 80e3 & start < 105e3]
+control_2 <- relevant_2[chrom == "III" & start > 80e3 & start < 105e3]
 plot_methylation_bars_alone(control_37C, "III")
-plot_methylation_bars(control_25C, control_37C, "III")
+plot_methylation_bars(control_2, control_1, "III")
 plot_methylation_dot(control, "III")
 
 #plot HML
@@ -160,7 +160,7 @@ HML_4 <- relevant_4[chrom == "III" & start > 0 & start < 25e3]
 HML_5 <- relevant_5[chrom == "III" & start > 0 & start < 25e3]
 HML_6 <- relevant_6[chrom == "III" & start > 0 & start < 25e3]
 plot_methylation_bars_alone(HML_6, "III") + geom_vline(xintercept = c(11146, 14849))
-plot_methylation_bars(HML_1, HML_1, "III")
+plot_methylation_bars(HML_4, HML_1, "III")
 plot_methylation_dot(HML, "III")
 
 #plot HMR
@@ -171,7 +171,7 @@ HMR_4 <- relevant_4[chrom == "III" & start > 280e3 & start < 305e3]
 HMR_5 <- relevant_5[chrom == "III" & start > 280e3 & start < 305e3]
 HMR_6 <- relevant_6[chrom == "III" & start > 280e3 & start < 305e3]
 plot_methylation_bars_alone(HMR_6, "III") + geom_vline(xintercept = c(292388, 295034))
-plot_methylation_bars(HMR_6, HMR_1, "III")
+plot_methylation_bars(HMR_3, HMR_1, "III") + geom_vline(xintercept = c(292388, 295034))
 plot_methylation_dot(HMR_37C, "III")
 
 #plot telomere
