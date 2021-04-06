@@ -3,7 +3,7 @@
 #########################
 # Author: Molly Brothers
 # Github: mollybrothers
-# Date: 2021-03-15
+# Date: 2021-04-06
 #########################
 
 #######################################################################################
@@ -19,9 +19,9 @@ library(data.table)
 library(tidyverse)
 library(wesanderson)
 
-mega_directory <- "/Volumes/brothers_seq/210304_Amanita/megalodon_output_12/"
+mega_directory <- "/Volumes/brothers_seq/210403_Hello/megalodon_output_03/"
 chr <- "III" #which chromosome?
-barcode <- "12"
+barcode <- "03"
 
 probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
                     select = c(1, 2, 3, 4, 5),
