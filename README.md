@@ -154,3 +154,11 @@ Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 9.3kb / Yield: 16.5Gb
 + JRY13141 (_sir3-8-EcoGII, HMR-i∆_) - 90min: barcode12
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 11.5kb / Yield: 16Gb
+
+## 210403_Hello (megalodon v2.2.10)
+### Strains:
++ JRY9316 (no EcoGII) - 25C: barcode01
++ JRY13114 (_sir3-8-EcoGII_) - 25C: barcode02
++ JRY13220 (_sir3-8-Hia5_) - 25C: barcode03
+
+Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 11kb / Yield: 12.5Gb
