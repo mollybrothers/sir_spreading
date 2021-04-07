@@ -185,8 +185,6 @@ In order to identify these linker regions, we could use the nucleosome occupancy
 ```{r}
 hmrSegments <- readRDS("../data/segmentsHMR.rds")
 
-readsHMR
-binaryCallsHMR
 
 readAvMethList <- list()
 for(rr in 1:length(readsHMR)){

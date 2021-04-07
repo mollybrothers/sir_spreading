@@ -1,0 +1,350 @@
+---
+title: "Conditional methylation probability tables"
+author: "Koen Van den Berge"
+date: "3/10/2021"
+output: html_document
+---
+
+```{r}
+library(data.table)
+library(tidyverse)
+```
+
+
+# Probability relatively to max methylation
+
+## HMR
+
+```{r}
+hmrE <- 292674:292769
+hmrI <- 294805:294864
+  
+chr3Files <- list.files("/Users/koenvandenberge/data/molly/Rescue",
+                        pattern = "^chrIII", full.names = TRUE)
+
+for(ff in 1:length(chr3Files)){
+  binaryCalls <- fread(file = chr3Files[ff])
+  colnames(binaryCalls) <- c("readID", "chr", "strand", "pos",
+                             "mod_log_prob", "can_log_prob", "mod_base")
+  binaryCalls$methylation <- ifelse(binaryCalls$mod_log_prob > -0.2231436, 1, 0)
+  binaryCalls <- binaryCalls[,c("readID", "chr", "strand", 
+                                "pos", "methylation")]
+
+  
+  ## subset reads that completely overlap HMR
+  readCalls <- binaryCalls %>% 
+    group_by(readID) %>%
+    summarize(start=min(pos),
+              end=max(pos),
+              avgMeth = mean(methylation),
+              length = n())
+  readsHMR <- unique(readCalls$readID[readCalls$start <= min(hmrE) & 
+                                  readCalls$end >= max(hmrI)])
+  assign(paste0("binaryCalls",ff), binaryCalls[binaryCalls$readID %in% readsHMR,])
+}
+```
+
+
+```{r}
+# make probability matrix: relative to max avg methylation in each bin.
+### HMR segments
+hmrSegments <- readRDS("../data/segmentsHMR.rds")
+readAvMethListHMR <- list()
+for(ff in 1:length(chr3Files)){ # loop timepoints
+  curData <- get(paste0("binaryCalls",ff))
+  curReads <- unique(curData$readID)
+  for(rr in 1:length(curReads)){ # loop reads
+    curRead <- curReads[rr]
+    curReadData <- curData[curData$readID == curRead,]
+    avMethLinkers <- c()
+    for(bb in 1:nrow(hmrSegments)){ # loop bins
+      curStart <- hmrSegments$start[bb]
+      curEnd <- hmrSegments$end[bb]
+      curId <- curReadData$pos >= curStart & curReadData$pos <= curEnd
+      if(sum(curId) > 0){
+        curBinData <- curReadData[curReadData$pos >= curStart & curReadData$pos <= curEnd,]
+        avMethLinkers[bb] <- mean(curBinData$methylation)
+        names(avMethLinkers)[bb] <- nrow(curBinData) #coverage
+      } else {
+        avMethLinkers[bb] <- NA
+      }
+    }
+    readAvMethListHMR[[rr]] <- avMethLinkers
+  }
+  avMethMatHMR <- do.call(rbind, readAvMethListHMR)
+  # normalize by maximum average methylation in each bin
+  avMethMatHMRNormalized <- sweep(avMethMatHMR, 2, STATS=apply(avMethMatHMR, 2, max), FUN="/")
+  assign(paste0("avMethMatHMRNormalized", ff), avMethMatHMRNormalized)
+}
+
+# for some reason, there are 4 bins that do not have any data in the 4th timepoint:
+# TODO: check this
+rowSums(is.na(avMethMatHMRNormalized4))
+
+# for(ff in 1:length(chr3Files)){
+#   curMeth <- get(paste0("avMethMatHMRNormalized", ff))
+#   jointProbability <- crossprod(curMeth) / nrow(curMeth)
+#   # P(A)
+#   marginalProbability <- colMeans(curMeth)
+#   # P(A=1 | B=1) = P(A=1, B=1) / P(B=1)
+#   # P(B=1 | A=1) = P(A=1, B=1) / P(A=1)
+#   conditionalProbability <- jointProbability / marginalProbability
+#   
+#   library(pheatmap)
+#   pheatmap(conditionalProbability,
+#            cluster_rows = FALSE,
+#            cluster_cols=FALSE,
+#            main=paste0("Conditional probability Table ", ff))
+#   assign(paste0("conditionalProbabilityTable", ff), conditionalProbability)
+# }
+
+for(ff in 1:length(chr3Files)){
+  #if(ff == 4) next
+  curMeth <- get(paste0("avMethMatHMRNormalized", ff))
+  conditionalProbability <- matrix(NA, nrow=nrow(hmrSegments), ncol=nrow(hmrSegments))
+  for(bb in 1:nrow(hmrSegments)){
+    jointProbability <- colMeans(curMeth[,bb] * curMeth) # P(bin A, bin B)
+    # P(bin A | bin B) = P(bin A, bin B) / P(bin B)
+    conditionalProbability[,bb] <- jointProbability / colMeans(curMeth) 
+    #avConditionalProbability <- colMeans(conditionalProbability)
+  }
+  # jointProbability <- crossprod(curMeth) / nrow(curMeth)
+  # # P(A)
+  # marginalProbability <- colMeans(curMeth)
+  # # P(A=1 | B=1) = P(A=1, B=1) / P(B=1)
+  # # P(B=1 | A=1) = P(A=1, B=1) / P(A=1)
+  # conditionalProbability <- jointProbability / marginalProbability
+  
+  library(pheatmap)
+  rownames(conditionalProbability) <- paste0("P(. | bin", 1:nrow(hmrSegments),")")
+  colnames(conditionalProbability) <- paste0("P(bin", 1:nrow(hmrSegments)," | .)")
+  pheatmap(conditionalProbability,
+           cluster_rows = FALSE,
+           cluster_cols=FALSE,
+           main=paste0("Conditional probability Table ", ff))
+  assign(paste0("conditionalProbabilityTable", ff), conditionalProbability)
+}
+
+# should this be correlated?
+plot(x=colMeans(avMethMatHMRNormalized1), y=diag(conditionalProbabilityTable1))
+
+
+
+```
+
+
+## HML
+
+```{r}
+hmlE <- 11237:11268
+hmlI <- 14600:14711
+  
+chr3Files <- list.files("/Users/koenvandenberge/data/molly/Rescue",
+                        pattern = "^chrIII", full.names = TRUE)
+
+for(ff in 1:length(chr3Files)){
+  binaryCalls <- fread(file = chr3Files[ff])
+  colnames(binaryCalls) <- c("readID", "chr", "strand", "pos",
+                             "mod_log_prob", "can_log_prob", "mod_base")
+  binaryCalls$methylation <- ifelse(binaryCalls$mod_log_prob > -0.2231436, 1, 0)
+  binaryCalls <- binaryCalls[,c("readID", "chr", "strand", 
+                                "pos", "methylation")]
+
+  
+  ## subset reads that completely overlap HMR
+  readCalls <- binaryCalls %>% 
+    group_by(readID) %>%
+    summarize(start=min(pos),
+              end=max(pos),
+              avgMeth = mean(methylation),
+              length = n())
+  readsHMR <- unique(readCalls$readID[readCalls$start <= min(hmlE) & 
+                                  readCalls$end >= max(hmlI)])
+  assign(paste0("binaryCalls",ff), binaryCalls[binaryCalls$readID %in% readsHMR,])
+}
+```
+
+```{r}
+# make probability matrix: relative to max avg methylation in each bin.
+### HML segments
+HMLSegments <- readRDS("../data/segmentsHML.rds")
+readAvMethListHML <- list()
+for(ff in 1:length(chr3Files)){ # loop timepoints
+  curData <- get(paste0("binaryCalls",ff))
+  curReads <- unique(curData$readID)
+  for(rr in 1:length(curReads)){ # loop reads
+    curRead <- curReads[rr]
+    curReadData <- curData[curData$readID == curRead,]
+    avMethLinkers <- c()
+    for(bb in 1:nrow(HMLSegments)){ # loop bins
+      curStart <- HMLSegments$start[bb]
+      curEnd <- HMLSegments$end[bb]
+      curId <- curReadData$pos >= curStart & curReadData$pos <= curEnd
+      if(sum(curId) > 0){
+        curBinData <- curReadData[curReadData$pos >= curStart & curReadData$pos <= curEnd,]
+        avMethLinkers[bb] <- mean(curBinData$methylation)
+        names(avMethLinkers)[bb] <- nrow(curBinData) #coverage
+      } else {
+        avMethLinkers[bb] <- NA
+      }
+    }
+    readAvMethListHML[[rr]] <- avMethLinkers
+  }
+  avMethMatHML <- do.call(rbind, readAvMethListHML)
+  # normalize by maximum average methylation in each bin
+  avMethMatHMLNormalized <- sweep(avMethMatHML, 2, STATS=apply(avMethMatHML, 2, max), FUN="/")
+  assign(paste0("avMethMatHMLNormalized", ff), avMethMatHMLNormalized)
+}
+
+# for some reason, there are 4 bins that do not have any data in the 4th timepoint:
+# TODO: check this
+rowSums(is.na(avMethMatHMLNormalized4))
+
+# for(ff in 1:length(chr3Files)){
+#   curMeth <- get(paste0("avMethMatHMLNormalized", ff))
+#   jointProbability <- crossprod(curMeth) / nrow(curMeth)
+#   # P(A)
+#   marginalProbability <- colMeans(curMeth)
+#   # P(A=1 | B=1) = P(A=1, B=1) / P(B=1)
+#   # P(B=1 | A=1) = P(A=1, B=1) / P(A=1)
+#   conditionalProbability <- jointProbability / marginalProbability
+#   
+#   library(pheatmap)
+#   pheatmap(conditionalProbability,
+#            cluster_rows = FALSE,
+#            cluster_cols=FALSE,
+#            main=paste0("Conditional probability Table ", ff))
+#   assign(paste0("conditionalProbabilityTable", ff), conditionalProbability)
+# }
+
+for(ff in 1:length(chr3Files)){
+  #if(ff == 4) next
+  curMeth <- get(paste0("avMethMatHMLNormalized", ff))
+  conditionalProbability <- matrix(NA, nrow=nrow(HMLSegments), ncol=nrow(HMLSegments))
+  for(bb in 1:nrow(HMLSegments)){
+    jointProbability <- colMeans(curMeth[,bb] * curMeth) # P(bin A, bin B)
+    # P(bin A | bin B) = P(bin A, bin B) / P(bin B)
+    conditionalProbability[,bb] <- jointProbability / colMeans(curMeth) 
+    #avConditionalProbability <- colMeans(conditionalProbability)
+  }
+  # jointProbability <- crossprod(curMeth) / nrow(curMeth)
+  # # P(A)
+  # marginalProbability <- colMeans(curMeth)
+  # # P(A=1 | B=1) = P(A=1, B=1) / P(B=1)
+  # # P(B=1 | A=1) = P(A=1, B=1) / P(A=1)
+  # conditionalProbability <- jointProbability / marginalProbability
+  
+  library(pheatmap)
+  rownames(conditionalProbability) <- paste0("P(. | bin", 1:nrow(HMLSegments),")")
+  colnames(conditionalProbability) <- paste0("P(bin", 1:nrow(HMLSegments)," | .)")
+  pheatmap(conditionalProbability,
+           cluster_rows = FALSE,
+           cluster_cols=FALSE,
+           main=paste0("Conditional probability Table ", ff))
+  assign(paste0("conditionalProbabilityTable", ff), conditionalProbability)
+}
+
+# should this be correlated?
+plot(x=colMeans(avMethMatHMLNormalized1), y=diag(conditionalProbabilityTable1))
+```
+
+
+
+# OLD: Turkey run
+
+# Import data from Turkey run
+
+```{r, eval=FALSE}
+library(data.table)
+library(tidyverse)
+
+## read read-level data at chr3
+binaryCalls <- fread(file = "/Users/koenvandenberge/data/molly/megalodon_output_06/per_read_modified_base_calls_binary.txt.gz",
+                     nrows = 6e6, skip=11e6)
+colnames(binaryCalls) <- c("readID", "chr", "strand", "pos",
+                           "mod_log_prob", "can_log_prob", "mod_base")
+table(binaryCalls$chr)
+binaryCalls$methylation <- ifelse(binaryCalls$mod_log_prob > -0.2231436, 1, 0)
+binaryCalls3 <- binaryCalls[binaryCalls$chr == "III",]
+
+hmrE <- 292674:292769
+hmrI <- 294805:294864
+
+## subset reads that completely overlap HMR
+readCalls3 <- binaryCalls3 %>% 
+  group_by(readID) %>%
+  summarize(start=min(pos),
+            end=max(pos),
+            avgMeth = mean(methylation),
+            length = n())
+readsHMR <- unique(readCalls3$readID[readCalls3$start <= min(hmrE) & 
+                                readCalls3$end >= max(hmrI)])
+binaryCallsHMR <- binaryCalls3[binaryCalls3$readID %in% readsHMR,]
+
+```
+
+# Conditional probability table
+
+Constructing a conditional probability table in order to understand the most likely path a locus would follow to go from a completely unmethylated to a methylated state, we should probably want to limit ourselves to bins where we find methylation in the steady-state.
+
+```{r, eval=FALSE}
+hmrSegments <- readRDS("../data/segmentsHMR.rds")
+# add bin type (high means high methylation)
+hmrSegments$type <- rep(c("high", "low"), length=nrow(hmrSegments))
+hmrSegmentsHigh <- hmrSegments[hmrSegments$type == "high",]
+```
+
+## Probability of SOME methylation (at least one called base)
+
+Unfortunately, the pattern seems to reflect mainly bin width.
+
+```{r, eval=FALSE}
+anyMethList <- list()
+meanMethList <- list()
+for(rr in 1:length(readsHMR)){
+  curRead <- readsHMR[rr]
+  curData <- binaryCallsHMR[binaryCallsHMR$readID == curRead,]
+  anyMethylationSegments <- c()
+  meanMethylationSegments <- c()
+  for(bb in 1:nrow(hmrSegmentsHigh)){
+    curStart <- hmrSegmentsHigh$start[bb]
+    curEnd <- hmrSegmentsHigh$end[bb]
+    curId <- curData$pos >= curStart & curData$pos <= curEnd
+    if(sum(curId) > 0){
+      curBinData <- curData[curData$pos >= curStart & curData$pos <= curEnd,]
+      anyMethylationSegments[bb] <- as.numeric(any(as.logical(curBinData$methylation)))
+      meanMethylationSegments[bb] <- mean(curBinData$methylation)
+    } else {
+      anyMethylationSegments[bb] <- NA
+      meanMethylationSegments[bb] <- NA
+    }
+  }
+  anyMethList[[rr]] <- anyMethylationSegments
+  meanMethList[[rr]] <- meanMethylationSegments
+}
+anyMethDf <- do.call(rbind, anyMethList)
+meanMethDf <- do.call(rbind, meanMethList)
+# for now, replace NA with 0
+anyMethDf[is.na(anyMethDf)] <- 0
+meanMethDf[is.na(meanMethDf)] <- 0
+
+pheatmap(anyMethDf[order(rowMeans(anyMethDf)),], cluster_cols=FALSE, cluster_rows=FALSE)
+pheatmap(meanMethDf[order(rowMeans(meanMethDf)),], cluster_cols=FALSE, cluster_rows=FALSE)
+
+## normalize for bin width!
+
+# P(A=1, B=1)
+jointProbability <- crossprod(anyMethDf) / nrow(anyMethDf)
+# P(A=1)
+marginalProbability <- colMeans(anyMethDf)
+# P(A=1 | B=1) = P(A=1, B=1) / P(B=1)
+# P(B=1 | A=1) = P(A=1, B=1) / P(A=1)
+conditionalProbability <- jointProbability / marginalProbability
+
+library(pheatmap)
+pheatmap(conditionalProbability,
+         cluster_rows = FALSE,
+         cluster_cols=FALSE)
+```
+
+
