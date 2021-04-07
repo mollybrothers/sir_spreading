@@ -145,7 +145,7 @@ saveRDS(segments, file="../data/segmentsHMR_extended.rds")
 ```
 
 
-## HML
+## HML +/- 500bp
 
 ```{r}
 # HML E is at III:11237-11268
