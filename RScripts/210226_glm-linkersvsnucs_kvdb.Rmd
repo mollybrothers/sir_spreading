@@ -1,0 +1,94 @@
+---
+title: "210226_glm-linkersvsnucs_kvdb"
+author: "Koen Van den Berge"
+date: "4/7/2021"
+output: html_document
+---
+
+```{r}
+data <- read.table("../data/combined.txt", header = TRUE)
+```
+
+# EDA
+
+```{r}
+boxplot(avg_methylation ~ region, data = data)
+```
+
+
+# Fit a Binomial model
+
+Below we're fitting a Binomial GLM.
+Note that, while the Binomial GLM does not find a significant difference in average methylation between the nucleosome and linker regions, the visualization above clearly shows there actually is quite a large difference.
+This is because the data does not conform to the Binomial distribuition. In particular, the variability in the data is lower than what is assumed by a Binomial distribution. This causes standard errors to be larger than they should be, hence inflating p-values.
+
+
+```{r}
+m <- glm(avg_methylation ~ region,
+         data = data,
+         family = "binomial")
+summary(m)
+plot(m)
+```
+
+# Checking for overdispersion by estimating a dispersion parameter.
+
+Let $Y_i$ be the average methylation in bin $i$, and $x_i$ the binary covariate defining whether bin $i$ is a linker or nucleosome region.
+The Binomial GLM can then be defined as
+
+\[
+            \left\{
+            \begin{array}{ccc}
+            Y_i & \sim & B(\pi_i)\\
+            \log \left( \frac{\pi_i}{1-\pi_i} \right) & = & \eta_i\\
+            \eta_i & = & \beta_0 + \beta_1 x_{1i}
+            \end{array}\right.
+\]
+
+Let $\hat{\beta}_0$ and $\hat{\beta}_1$ be the estimates for $\beta_0$ and $\beta_1$, respectively, after fitting the Binomial GLM.
+Then, we can define Pearson residuals as
+
+\[ e_i = \frac{Y_i - \hat{\mu}_i}{Var(\hat{\mu}_i)}. \]
+
+Theory tells us that, if the Binomial GLM holds, we can expect
+
+\[ e_i \sim N(0, 1), \]
+
+i.e. the Pearson residuals follow a standard normal distribution.
+Note that, assuming the standard normal distribution, their variance would be
+
+\[ Var(e_i) = \frac{1}{n-p} \sum_i \left\{ (e_i - \bar{e}_i)^2\right\} = \frac{1}{n-p} \sum_i e_i^2. \]
+
+The right hand side holds because, the mean residual $\bar{e}_i$ equals zero by definition. Note that we divide by $n-p$ and not by $n$ because this is an unbiased estimate of the variance (i.e., we need to account for the $p$ parameters estimated in the GLM). This is analogous to dividing by $n-1$, rather than by $n$, in the usual variance estimate of a random variable to account for estimating its mean.
+
+If the model assumptions hold, therefore, we would expect that
+
+\[ \frac{1}{n-p} \sum_i e_i^2 = 1.  \]
+
+Let's set set $\phi = \frac{1}{n-p} \sum_i e_i^2$. Then, $\phi$ is something we're calling an dispersion parameter; or in some cases a scale parameter. 
+Below we estimate such an dispersion parameter.
+The dispersion parameter should be around 1 (roughly in [0.8, 1.2]) if the data reasonably well conforms to the Binomial. Here, it is **much** lower than 1, hence we're dealing with data that is underdispersed with respect to the Binomial distribution.
+
+```{r}
+epsilon <- resid(m, type="pearson")
+n  <- nrow(data) # number of data points
+p  <- length(coef(m))  # number of coefficients
+disp <- sum(epsilon^2) / (n - p) # dispersion estimate
+disp # if the variance would conform a Binomial this should be around 1. underdispersion
+```
+
+# Fit a quasibinomial GLM
+
+Note how the dispersion parameter estimated by the GLM function is practically the same as the one we've derived above.
+The p-value now is much lower, because we're fitting a quasibinomial model, which allows the assumed variance to adept based on the data at hand.
+
+```{r}
+m <- glm(avg_methylation ~ region,
+         data = data,
+         family = "quasibinomial")
+summary(m)
+plot(m)
+```
+
+
+
