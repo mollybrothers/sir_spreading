@@ -4,7 +4,7 @@
 
 # Running Megalodon
 https://github.com/nanoporetech/megalodon
-our current running version: 2.2.8
+our current running version: 2.2.10
 
 ## necessary configurations
 Megalodon is run from a conda environment specified in the `guppy_conda.yml` file
