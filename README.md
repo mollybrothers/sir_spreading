@@ -145,6 +145,7 @@ Same strain as 210208_Rescue, but taken at a higher culture density and seems to
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 9.3kb / Yield: 16.5Gb
 
 ## 210311_Hygrocybe (megalodon v2.2.10)
+Kinetics are slower than Rescue, just like Amanita and Russula runs.
 ### Strains:
 + JRY13141 (_sir3-8-EcoGII, HMR-i∆_) - 0min: barcode07
 + JRY13141 (_sir3-8-EcoGII, HMR-i∆_) - 15min: barcode08
