@@ -3,7 +3,7 @@
 #################################################
 # Author: Molly Brothers and Koen Van den Berge
 # Github: mollybrothers
-# Date: 2021-02-18
+# Date: 2021-04-10
 #################################################
 
 # goal of this script is to compare directly in the same plot nucleosome occupancy data and % methylation
@@ -18,7 +18,7 @@ library(tidyverse)
 
 #percentage methylation data
 # Molly's path
-meth <- fread("/Volumes/brothers_seq/Nanopore/201012_Doudna/megalodon_output_00/modified_bases.6mA.bed")
+meth <- fread("/Volumes/brothers_seq/201125_Turkey/megalodon_output_07/modified_bases.aggregate07.6mA.bed")
 # Savio path
 # meth <- fread("/global/scratch/molly_brothers/201012_Doudna/megalodon_output_00/modified_bases.6mA.bed")
 # Koen's path
@@ -145,6 +145,16 @@ HMR_nucs_meth <- average_methylation_nucs(HMR_nucs, HMR_meth)
 HMR_linkers_meth <- average_methylation_linkers(HMR_nucs, HMR_meth)
 #methyl_vs_nucs(HMR_meth, HMR_nucs)
 methyl_boxplot(HMR_nucs_meth, HMR_linkers_meth)
+
+#scatterplot: weak correlation
+combined_HMR <- inner_join(HMR_nucs, HMR_meth, by = "start")
+
+ggplot(combined_HMR, aes(x = combined_HMR$occupancy, y = combined_HMR$percentage)) +
+  geom_point() +
+  geom_smooth(method='lm', formula= y~x) +
+  #geom_smooth(method = 'loess')
+
+cor(combined$percentage, combined$occupancy)
 
 #HML
 HML_nucs <- nucs[chrom == "chrIII" & start > 11e3 & start < 14e3]
