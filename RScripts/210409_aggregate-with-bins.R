@@ -2,28 +2,28 @@
 
 library(data.table)
 library(tidyverse)
-library(wesanderson)
+library(viridis)
 
 columns <- c("chrom", "start", "end", "name", "score", 
              "strand", "startCodon", "stopCodon", "color", 
              "coverage", "percentage")
 
-dt_1 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate01.6mA.bed")
+dt_1 <- fread("/Volumes/brothersseq/210304_Amanita/modified_bases.aggregate07.6mA.bed")
 colnames(dt_1) <- columns
 
-dt_2 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate02.6mA.bed")
+dt_2 <- fread("/Volumes/brothersseq/210304_Amanita/modified_bases.aggregate08.6mA.bed")
 colnames(dt_2) <- columns
 
-dt_3 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate03.6mA.bed")
+dt_3 <- fread("/Volumes/brothersseq/210304_Amanita/modified_bases.aggregate09.6mA.bed")
 colnames(dt_3) <- columns
 
-dt_4 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate04.6mA.bed")
+dt_4 <- fread("/Volumes/brothersseq/210304_Amanita/modified_bases.aggregate10.6mA.bed")
 colnames(dt_4) <- columns
 
-dt_5 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate05.6mA.bed")
+dt_5 <- fread("/Volumes/brothersseq/210304_Amanita/modified_bases.aggregate11.6mA.bed")
 colnames(dt_5) <- columns
 
-dt_6 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate06.6mA.bed")
+dt_6 <- fread("/Volumes/brothersseq/210304_Amanita/modified_bases.aggregate12.6mA.bed")
 colnames(dt_6) <- columns
 
 dt_ss <- fread("/Volumes/brothersseq/210403_Hello/modified_bases.aggregate02.6mA.bed")
@@ -101,23 +101,29 @@ final_HMR$mean3 = final_HMR$mean3 - final_HMR$mean1
 final_HMR$mean2 = final_HMR$mean2 - final_HMR$mean1
 final_HMR$mean1 = final_HMR$mean1 - final_HMR$mean1
 
-
+colors <- viridis(6)
 ggplot(final_HMR, aes(x = start)) +
-  geom_point(mapping = aes(y = mean1), color = "red") +
-  geom_point(mapping = aes(y = mean2), color = "orange") +
-  geom_point(mapping = aes(y = mean3), color = "yellow") +
-  geom_point(mapping = aes(y = mean4), color = "green") +
-  geom_point(mapping = aes(y = mean5), color = "blue") +
-  geom_point(mapping = aes(y = mean6), color = "purple") +
+  geom_point(mapping = aes(y = mean1), color = colors[6]) +
+  geom_point(mapping = aes(y = mean2), color = colors[5]) +
+  geom_point(mapping = aes(y = mean3), color = colors[4]) +
+  geom_point(mapping = aes(y = mean4), color = colors[3]) +
+  geom_point(mapping = aes(y = mean5), color = colors[2]) +
+  geom_point(mapping = aes(y = mean6), color = colors[1]) +
   geom_point(mapping = aes(y = meanss), color = "black") +
-  geom_line(mapping = aes(y = mean1), color = "red") +
-  geom_line(mapping = aes(y = mean2), color = "orange") +
-  geom_line(mapping = aes(y = mean3), color = "yellow") +
-  geom_line(mapping = aes(y = mean4), color = "green") +
-  geom_line(mapping = aes(y = mean5), color = "blue") +
-  geom_line(mapping = aes(y = mean6), color = "purple") +
+  geom_line(mapping = aes(y = mean1), color = colors[6]) +
+  geom_line(mapping = aes(y = mean2), color = colors[5]) +
+  geom_line(mapping = aes(y = mean3), color = colors[4]) +
+  geom_line(mapping = aes(y = mean4), color = colors[3]) +
+  geom_line(mapping = aes(y = mean5), color = colors[2]) +
+  geom_line(mapping = aes(y = mean6), color = colors[1]) +
   geom_line(mapping = aes(y = meanss), color = "black") +
-
+  theme(panel.background = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.line = element_line(color = "black"),
+        text = element_text(size = 15, color = "black", family = "Arial")) +
+  labs(x = "position on chr III",
+       y = "average % methylated reads")+
   annotate("rect", xmin = c(HMR_E[1], HMR_I[1]), xmax = c(HMR_E[2], HMR_I[2]),
            fill = "black", ymin = 0, ymax = 70, alpha = 0.3)
 
@@ -169,20 +175,28 @@ final_HML$mean3 = final_HML$mean3 - final_HML$mean1
 final_HML$mean2 = final_HML$mean2 - final_HML$mean1
 final_HML$mean1 = final_HML$mean1 - final_HML$mean1
 
+colors <- viridis(6)
 ggplot(final_HML, aes(x = start)) +
-  geom_point(mapping = aes(y = mean1), color = "red") +
-  geom_point(mapping = aes(y = mean2), color = "orange") +
-  geom_point(mapping = aes(y = mean3), color = "yellow") +
-  geom_point(mapping = aes(y = mean4), color = "green") +
-  geom_point(mapping = aes(y = mean5), color = "blue") +
-  geom_point(mapping = aes(y = mean6), color = "purple") +
+  geom_point(mapping = aes(y = mean1), color = colors[6]) +
+  geom_point(mapping = aes(y = mean2), color = colors[5]) +
+  geom_point(mapping = aes(y = mean3), color = colors[4]) +
+  geom_point(mapping = aes(y = mean4), color = colors[3]) +
+  geom_point(mapping = aes(y = mean5), color = colors[2]) +
+  geom_point(mapping = aes(y = mean6), color = colors[1]) +
   geom_point(mapping = aes(y = meanss), color = "black") +
-  geom_line(mapping = aes(y = mean1), color = "red") +
-  geom_line(mapping = aes(y = mean2), color = "orange") +
-  geom_line(mapping = aes(y = mean3), color = "yellow") +
-  geom_line(mapping = aes(y = mean4), color = "green") +
-  geom_line(mapping = aes(y = mean5), color = "blue") +
-  geom_line(mapping = aes(y = mean6), color = "purple") +
-  geom_line(mapping = aes(y = meanss), color = "black")
+  geom_line(mapping = aes(y = mean1), color = colors[6]) +
+  geom_line(mapping = aes(y = mean2), color = colors[5]) +
+  geom_line(mapping = aes(y = mean3), color = colors[4]) +
+  geom_line(mapping = aes(y = mean4), color = colors[3]) +
+  geom_line(mapping = aes(y = mean5), color = colors[2]) +
+  geom_line(mapping = aes(y = mean6), color = colors[1]) +
+  geom_line(mapping = aes(y = meanss), color = "black") +
+  theme(panel.background = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.line = element_line(color = "black"),
+        text = element_text(size = 15, color = "black", family = "Arial")) +
+  labs(x = "position on chr III",
+       y = "average % methylated reads")+
   annotate("rect", xmin = c(HML_E[1], HML_I[1]), xmax = c(HML_E[2], HML_I[2]),
            fill = "black", ymin = 0, ymax = 40, alpha = 0.3)
