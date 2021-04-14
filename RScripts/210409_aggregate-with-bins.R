@@ -8,22 +8,22 @@ columns <- c("chrom", "start", "end", "name", "score",
              "strand", "startCodon", "stopCodon", "color", 
              "coverage", "percentage")
 
-dt_1 <- fread("/Volumes/brothersseq/210304_Amanita/modified_bases.aggregate07.6mA.bed")
+dt_1 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate01.6mA.bed")
 colnames(dt_1) <- columns
 
-dt_2 <- fread("/Volumes/brothersseq/210304_Amanita/modified_bases.aggregate08.6mA.bed")
+dt_2 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate02.6mA.bed")
 colnames(dt_2) <- columns
 
-dt_3 <- fread("/Volumes/brothersseq/210304_Amanita/modified_bases.aggregate09.6mA.bed")
+dt_3 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate03.6mA.bed")
 colnames(dt_3) <- columns
 
-dt_4 <- fread("/Volumes/brothersseq/210304_Amanita/modified_bases.aggregate10.6mA.bed")
+dt_4 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate04.6mA.bed")
 colnames(dt_4) <- columns
 
-dt_5 <- fread("/Volumes/brothersseq/210304_Amanita/modified_bases.aggregate11.6mA.bed")
+dt_5 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate05.6mA.bed")
 colnames(dt_5) <- columns
 
-dt_6 <- fread("/Volumes/brothersseq/210304_Amanita/modified_bases.aggregate12.6mA.bed")
+dt_6 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate06.6mA.bed")
 colnames(dt_6) <- columns
 
 dt_ss <- fread("/Volumes/brothersseq/210403_Hello/modified_bases.aggregate02.6mA.bed")
@@ -82,7 +82,7 @@ combined_HMR <- HMR_1 %>% full_join(HMR_2, by = "start", suffix = c("1", "2")) %
   full_join(HMR_ss, by = "start", suffix = c("6", "ss"))
 
 
-combined_HMR <- bin(combined_HMR, HMR_segments_high)
+combined_HMR <- bin(combined_HMR, HMR_segments_low)
 combined_HMR <- combined_HMR[!is.na(bin)][order(bin)]
 final_HMR <- combined_HMR %>% group_by(bin) %>% summarize(
   mean1 = mean(percentage1, na.rm = TRUE),
@@ -132,11 +132,11 @@ ggplot(final_HMR, aes(x = start)) +
 HML_segments <- data.table(readRDS("~/sequencing/sir_spreading/data/segmentsHML_extended.rds"))
 
 #add variables for methylation status and bin number to HMR_segments
-meth_status_HML <- rep_len(c("high", "low"), nrow(HML_segments))
+meth_status_HML <- rep_len(c("low", "high"), nrow(HML_segments))
 HML_segments$meth_status <- meth_status_HML
 HML_segments$bin <- seq(1, nrow(HML_segments), 1)
-HML_segments_high <- HML_segments[(bin %% 2) != 0]
-HML_segments_low <- HML_segments[(bin %% 2) == 0]
+HML_segments_high <- HML_segments[(bin %% 2) == 0]
+HML_segments_low <- HML_segments[(bin %% 2) != 0]
 
 #HML data
 HML_E <- c(11237, 11268)
@@ -176,7 +176,7 @@ final_HML$mean2 = final_HML$mean2 - final_HML$mean1
 final_HML$mean1 = final_HML$mean1 - final_HML$mean1
 
 colors <- viridis(6)
-ggplot(final_HML, aes(x = start)) +
+ggplot(final_HML, aes(x = start), xlim = c(0,65)) +
   geom_point(mapping = aes(y = mean1), color = colors[6]) +
   geom_point(mapping = aes(y = mean2), color = colors[5]) +
   geom_point(mapping = aes(y = mean3), color = colors[4]) +
@@ -199,4 +199,4 @@ ggplot(final_HML, aes(x = start)) +
   labs(x = "position on chr III",
        y = "average % methylated reads")+
   annotate("rect", xmin = c(HML_E[1], HML_I[1]), xmax = c(HML_E[2], HML_I[2]),
-           fill = "black", ymin = 0, ymax = 40, alpha = 0.3)
+           fill = "black", ymin = 0, ymax = 65, alpha = 0.3)
