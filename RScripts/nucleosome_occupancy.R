@@ -18,7 +18,7 @@ library(tidyverse)
 
 #percentage methylation data
 # Molly's path
-meth <- fread("/Volumes/brothers_seq/201125_Turkey/megalodon_output_07/modified_bases.aggregate07.6mA.bed")
+meth <- fread("/Volumes/brothers_seq/210205_Ocular/megalodon_output_11/modified_bases.aggregate11.6mA.bed")
 # Savio path
 # meth <- fread("/global/scratch/molly_brothers/201012_Doudna/megalodon_output_00/modified_bases.6mA.bed")
 # Koen's path
@@ -63,7 +63,7 @@ methyl_vs_nucs <- function (methyl_data, nuc_data) {
   loOccup <- loess(occupancy/max(occupancy) ~ start, 
                    data=nuc_data, 
                    enp.target = 50)
-  lines(x=loOccup$x, y=scale(loOccup$fitted), col="grey70", lwd=3)
+  lines(x=loOccup$x, y=scale(loOccup$fitted), col="grey60", lwd=3)
 }
 
 #############################################################
@@ -143,30 +143,41 @@ HMR_nucs <- nucs[chrom == "chrIII" & start > 291e3 & start < 294e3]
 HMR_meth <- filtered_meth[chrom == "III" & start > 291e3 & start < 294e3]
 HMR_nucs_meth <- average_methylation_nucs(HMR_nucs, HMR_meth)
 HMR_linkers_meth <- average_methylation_linkers(HMR_nucs, HMR_meth)
-#methyl_vs_nucs(HMR_meth, HMR_nucs)
+methyl_vs_nucs(HMR_meth, HMR_nucs)
 methyl_boxplot(HMR_nucs_meth, HMR_linkers_meth)
 
 #scatterplot: weak correlation
-combined_HMR <- inner_join(HMR_nucs, HMR_meth, by = "start")
-
-ggplot(combined_HMR, aes(x = combined_HMR$occupancy, y = combined_HMR$percentage)) +
-  geom_point() +
-  geom_smooth(method='lm', formula= y~x) +
-  #geom_smooth(method = 'loess')
-
-cor(combined$percentage, combined$occupancy)
+# combined_HMR <- inner_join(HMR_nucs, HMR_meth, by = "start")
+# 
+# ggplot(combined_HMR, aes(x = combined_HMR$occupancy, y = combined_HMR$percentage)) +
+#   geom_point() +
+#   geom_smooth(method='lm', formula= y~x)
+#   #geom_smooth(method = 'loess')
+# 
+# cor(combined_HMR$percentage, combined_HMR$occupancy)
 
 #HML
 HML_nucs <- nucs[chrom == "chrIII" & start > 11e3 & start < 14e3]
 HML_meth <- filtered_meth[chrom == "III" & start > 11e3 & start < 14e3]
 HML_nucs_meth <- average_methylation_nucs(HML_nucs, HML_meth)
 HML_linkers_meth <- average_methylation_linkers(HML_nucs, HML_meth)
-#methyl_vs_nucs(HML_meth, HML_nucs)
+methyl_vs_nucs(HML_meth, HML_nucs)
 methyl_boxplot(HML_nucs_meth, HML_linkers_meth)
 
+
+#HML and HMR together: quasibinomial glm
 all_linkers <- c(HMR_linkers_meth, HML_linkers_meth)
 all_nucs <- c(HMR_nucs_meth, HML_nucs_meth)
 methyl_boxplot(all_nucs, all_linkers)
+all_together <- data.table(region = c(rep("nucleosome",length(all_nucs)),
+                                      rep("linker",length(all_linkers))),
+                                      avg_methylation = c(all_nucs, all_linkers))
+all_together$avg_methylation <- all_together$avg_methylation / 100
+m <- glm(avg_methylation ~ region,
+         data = all_together,
+         family = "quasibinomial")
+summary(m)
+#plot(m)
 
 #tel6R
 tel6R_nucs <- nucs[chrom == "chrVI" & start > 265e3 & start < 268e3]
