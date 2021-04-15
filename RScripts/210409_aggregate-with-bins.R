@@ -93,13 +93,13 @@ final_HMR <- combined_HMR %>% group_by(bin) %>% summarize(
   mean6 = mean(percentage6, na.rm = TRUE),
   meanss = mean(percentage, na.rm = TRUE),
   start = start)
-final_HMR$meanss = final_HMR$meanss - final_HMR$mean1
-final_HMR$mean6 = final_HMR$mean6 - final_HMR$mean1
-final_HMR$mean5 = final_HMR$mean5 - final_HMR$mean1
-final_HMR$mean4 = final_HMR$mean4 - final_HMR$mean1
-final_HMR$mean3 = final_HMR$mean3 - final_HMR$mean1
-final_HMR$mean2 = final_HMR$mean2 - final_HMR$mean1
-final_HMR$mean1 = final_HMR$mean1 - final_HMR$mean1
+final_HMR$mean6 = (final_HMR$mean6 - final_HMR$mean1) / (final_HMR$meanss - final_HMR$mean1)
+final_HMR$mean5 = (final_HMR$mean5 - final_HMR$mean1) / (final_HMR$meanss - final_HMR$mean1)
+final_HMR$mean4 = (final_HMR$mean4 - final_HMR$mean1) / (final_HMR$meanss - final_HMR$mean1)
+final_HMR$mean3 = (final_HMR$mean3 - final_HMR$mean1) / (final_HMR$meanss - final_HMR$mean1)
+final_HMR$mean2 = (final_HMR$mean2 - final_HMR$mean1) / (final_HMR$meanss - final_HMR$mean1)
+final_HMR$mean1 = 0
+final_HMR$meanss = 1
 
 colors <- viridis(6)
 ggplot(final_HMR, aes(x = start)) +
@@ -125,7 +125,7 @@ ggplot(final_HMR, aes(x = start)) +
   labs(x = "position on chr III",
        y = "average % methylated reads")+
   annotate("rect", xmin = c(HMR_E[1], HMR_I[1]), xmax = c(HMR_E[2], HMR_I[2]),
-           fill = "black", ymin = 0, ymax = 70, alpha = 0.3)
+           fill = "black", ymin = 0, ymax = 1, alpha = 0.3)
 
 #### HML ####
 #read in the segments partitioned by methylation level from loess fitting to aggregate data
@@ -156,7 +156,7 @@ combined_HML <- HML_1 %>% full_join(HML_2, by = "start", suffix = c("1", "2")) %
   full_join(HML_ss, by = "start", suffix = c("6", "ss"))
 
 
-combined_HML <- bin(combined_HML, HML_segments_high)
+combined_HML <- bin(combined_HML, HML_segments_low)
 combined_HML <- combined_HML[!is.na(bin)][order(bin)]
 final_HML <- combined_HML %>% group_by(bin) %>% summarize(
   mean1 = mean(percentage1, na.rm = TRUE),
@@ -167,13 +167,13 @@ final_HML <- combined_HML %>% group_by(bin) %>% summarize(
   mean6 = mean(percentage6, na.rm = TRUE),
   meanss = mean(percentage, na.rm = TRUE),
   start = start)
-final_HML$meanss = final_HML$meanss - final_HML$mean1
-final_HML$mean6 = final_HML$mean6 - final_HML$mean1
-final_HML$mean5 = final_HML$mean5 - final_HML$mean1
-final_HML$mean4 = final_HML$mean4 - final_HML$mean1
-final_HML$mean3 = final_HML$mean3 - final_HML$mean1
-final_HML$mean2 = final_HML$mean2 - final_HML$mean1
-final_HML$mean1 = final_HML$mean1 - final_HML$mean1
+final_HML$mean6 = (final_HML$mean6 - final_HML$mean1) / (final_HML$meanss - final_HML$mean1)
+final_HML$mean5 = (final_HML$mean5 - final_HML$mean1) / (final_HML$meanss - final_HML$mean1)
+final_HML$mean4 = (final_HML$mean4 - final_HML$mean1) / (final_HML$meanss - final_HML$mean1)
+final_HML$mean3 = (final_HML$mean3 - final_HML$mean1) / (final_HML$meanss - final_HML$mean1)
+final_HML$mean2 = (final_HML$mean2 - final_HML$mean1) / (final_HML$meanss - final_HML$mean1)
+final_HML$mean1 = 0
+final_HML$meanss = 1
 
 colors <- viridis(6)
 ggplot(final_HML, aes(x = start), xlim = c(0,65)) +
@@ -199,4 +199,4 @@ ggplot(final_HML, aes(x = start), xlim = c(0,65)) +
   labs(x = "position on chr III",
        y = "average % methylated reads")+
   annotate("rect", xmin = c(HML_E[1], HML_I[1]), xmax = c(HML_E[2], HML_I[2]),
-           fill = "black", ymin = 0, ymax = 65, alpha = 0.3)
+           fill = "black", ymin = 0, ymax = 1, alpha = 0.3)
