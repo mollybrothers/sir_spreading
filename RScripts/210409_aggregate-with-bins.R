@@ -82,9 +82,9 @@ combined_HMR <- HMR_1 %>% full_join(HMR_2, by = "start", suffix = c("1", "2")) %
   full_join(HMR_ss, by = "start", suffix = c("6", "ss"))
 
 
-combined_HMR <- bin(combined_HMR, HMR_segments_low)
-combined_HMR <- combined_HMR[!is.na(bin)][order(bin)]
-final_HMR <- combined_HMR %>% group_by(bin) %>% summarize(
+binned_HMR <- bin(combined_HMR, HMR_segments_low)
+binned_HMR <- binned_HMR[!is.na(bin)][order(bin)]
+final_HMR <- binned_HMR %>% group_by(bin) %>% summarize(
   mean1 = mean(percentage1, na.rm = TRUE),
   mean2 = mean(percentage2, na.rm = TRUE),
   mean3 = mean(percentage3, na.rm = TRUE),
@@ -93,13 +93,15 @@ final_HMR <- combined_HMR %>% group_by(bin) %>% summarize(
   mean6 = mean(percentage6, na.rm = TRUE),
   meanss = mean(percentage, na.rm = TRUE),
   start = start)
-final_HMR$mean6 = (final_HMR$mean6 - final_HMR$mean1) / (final_HMR$meanss - final_HMR$mean1)
-final_HMR$mean5 = (final_HMR$mean5 - final_HMR$mean1) / (final_HMR$meanss - final_HMR$mean1)
-final_HMR$mean4 = (final_HMR$mean4 - final_HMR$mean1) / (final_HMR$meanss - final_HMR$mean1)
-final_HMR$mean3 = (final_HMR$mean3 - final_HMR$mean1) / (final_HMR$meanss - final_HMR$mean1)
-final_HMR$mean2 = (final_HMR$mean2 - final_HMR$mean1) / (final_HMR$meanss - final_HMR$mean1)
-final_HMR$mean1 = 0
-final_HMR$meanss = 1
+HMR_min <- final_HMR$mean1
+HMR_max <- final_HMR$meanss
+final_HMR$mean6 = (final_HMR$mean6 - min) / (max - min)
+final_HMR$mean5 = (final_HMR$mean5 - min) / (max - min)
+final_HMR$mean4 = (final_HMR$mean4 - min) / (max - min)
+final_HMR$mean3 = (final_HMR$mean3 - min) / (max - min)
+final_HMR$mean2 = (final_HMR$mean2 - min) / (max - min)
+final_HMR$mean1 = (final_HMR$mean1 - min) / (max - min)
+final_HMR$meanss = (final_HMR$meanss - min) / (max - min)
 
 colors <- viridis(6)
 ggplot(final_HMR, aes(x = start)) +
@@ -156,9 +158,9 @@ combined_HML <- HML_1 %>% full_join(HML_2, by = "start", suffix = c("1", "2")) %
   full_join(HML_ss, by = "start", suffix = c("6", "ss"))
 
 
-combined_HML <- bin(combined_HML, HML_segments_low)
-combined_HML <- combined_HML[!is.na(bin)][order(bin)]
-final_HML <- combined_HML %>% group_by(bin) %>% summarize(
+binned_HML <- bin(combined_HML, HML_segments_low)
+binned_HML <- binned_HML[!is.na(bin)][order(bin)]
+final_HML <- binned_HML %>% group_by(bin) %>% summarize(
   mean1 = mean(percentage1, na.rm = TRUE),
   mean2 = mean(percentage2, na.rm = TRUE),
   mean3 = mean(percentage3, na.rm = TRUE),
@@ -167,13 +169,15 @@ final_HML <- combined_HML %>% group_by(bin) %>% summarize(
   mean6 = mean(percentage6, na.rm = TRUE),
   meanss = mean(percentage, na.rm = TRUE),
   start = start)
-final_HML$mean6 = (final_HML$mean6 - final_HML$mean1) / (final_HML$meanss - final_HML$mean1)
-final_HML$mean5 = (final_HML$mean5 - final_HML$mean1) / (final_HML$meanss - final_HML$mean1)
-final_HML$mean4 = (final_HML$mean4 - final_HML$mean1) / (final_HML$meanss - final_HML$mean1)
-final_HML$mean3 = (final_HML$mean3 - final_HML$mean1) / (final_HML$meanss - final_HML$mean1)
-final_HML$mean2 = (final_HML$mean2 - final_HML$mean1) / (final_HML$meanss - final_HML$mean1)
-final_HML$mean1 = 0
-final_HML$meanss = 1
+HML_min <- final_HML$mean1
+HML_max <- final_HML$meanss
+final_HMR$mean6 = (final_HML$mean6 - min) / (max - min)
+final_HMR$mean5 = (final_HML$mean5 - min) / (max - min)
+final_HMR$mean4 = (final_HML$mean4 - min) / (max - min)
+final_HMR$mean3 = (final_HML$mean3 - min) / (max - min)
+final_HMR$mean2 = (final_HML$mean2 - min) / (max - min)
+final_HMR$mean1 = (final_HML$mean1 - min) / (max - min)
+final_HMR$meanss = (final_HML$meanss - min) / (max - min)
 
 colors <- viridis(6)
 ggplot(final_HML, aes(x = start), xlim = c(0,65)) +
