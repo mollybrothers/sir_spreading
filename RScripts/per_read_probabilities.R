@@ -19,7 +19,7 @@ library(data.table)
 library(tidyverse)
 library(wesanderson)
 
-mega_directory <- "/Volumes/brothers_seq/210403_Hello/megalodon_output_03/"
+mega_directory <- "/Volumes/brothersseq/210403_Hello/"
 chr <- "III" #which chromosome?
 barcode <- "03"
 
@@ -31,12 +31,12 @@ probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
 #2. add start and end positions for each read_id
 #3. find the average methylation of each read (for ordering on plot)
 #4. order by strand, avg methyl and read_id
-probs <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE, FALSE)][
+probs_filtered <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE, FALSE)][
   , list(read_id, pos, methylation, strand)][
     , start_pos := min(pos), by = read_id][
       , end_pos := max(pos), by = read_id][
         , avg_methyl := mean(methylation == TRUE), by = read_id][
-          order(strand, -avg_methyl, read_id)]
+          order(-avg_methyl, read_id)]
 
 # INCLUDE NA's (methylation = NA if prob is between 0.2 and 0.8)
 # probs <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE,
@@ -48,8 +48,8 @@ probs <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE, FALSE)][
 #           order(strand, -avg_methyl, read_id)]
 
 #extract each unique read_id to set the order (in same order as in the data table to start with) for single read plots
-read_names <- unique(probs$read_id)
-probs$read_id = factor(probs$read_id, levels = read_names)
+read_names <- unique(probs_filtered$read_id)
+probs_filtered$read_id = factor(probs_filtered$read_id, levels = read_names)
 
 ##################################
 ####PLOT AVERAGE PROBABILITIES####
@@ -110,7 +110,7 @@ plot_binary <- function(data) {
 #############################
 
 control_region <- c(95e3, 100e3)
-control <- probs[start_pos <= control_region[1]][end_pos >= control_region[2]][
+control <- probs_filtered[start_pos <= control_region[1]][end_pos >= control_region[2]][
   pos %between% control_region]
 plot_binary(control)
 
@@ -129,20 +129,20 @@ HML_linkers = c(#9407, 9587.5, 9067, 9747, 9923, 10166, 10331,
 )
 
 #read in segments with high and low methylation from steady state data
-HML_segments <- readRDS("~/sequencing/sir_spreading/data/segmentsHML.rds")
+HML_segments <- readRDS("~/sequencing/sir_spreading/data/segmentsHML_extended.rds")
 HML_highmeth <- HML_segments[!c(TRUE,FALSE),]
 HML_lowmeth <- HML_segments[c(TRUE,FALSE),]
 
 #plus or minus strands only
-HML_plus <- probs[strand == "+"][start_pos <= HML_region[1]][end_pos >= HML_region[2]][
+HML_plus <- probs_filtered[strand == "+"][start_pos <= HML_region[1]][end_pos >= HML_region[2]][
   pos %between% HML_region]
 HML_plus <- droplevels(HML_plus)
-HML_minus <- probs[strand == "-"][start_pos <= HML_region[1]][end_pos >= HML_region[2]][
+HML_minus <- probs_filtered[strand == "-"][start_pos <= HML_region[1]][end_pos >= HML_region[2]][
   pos %between% HML_region]
 HML_minus <- droplevels(HML_minus)
 
 #all reads
-HML_all <- probs[start_pos <= HML_region[1]][end_pos >= HML_region[2]][
+HML_all <- probs_filtered[start_pos <= HML_region[1]][end_pos >= HML_region[2]][
   pos %between% HML_region]
 HML_all <- droplevels(HML_all)
 
@@ -155,6 +155,7 @@ hmlp + annotate("rect", xmin = c(HML_highmeth$start), xmax = c(HML_highmeth$end)
   annotate("rect", xmin = c(HML_E[1], HML_I[1]), xmax = c(HML_E[2], HML_I[2]),
            ymin = 0.5, ymax = nlevels(HML_all$read_id)+0.5, alpha = 0.3, fill = "black")
 hmlp + geom_vline(xintercept = HML_silencers)
+hmlp + geom_vline(xintercept = HML_linkers)
 
 #############
 #### HMR ####
@@ -173,15 +174,15 @@ HMR_highmeth <- HMR_segments[!c(TRUE,FALSE),]
 HMR_lowmeth <- HMR_segments[c(TRUE,FALSE),]
 
 #plus or minus only reads
-HMR_plus <- probs[strand == "+"][start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
+HMR_plus <- probs_filtered[strand == "+"][start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
   pos %between% HMR_region]
 HMR_plus <- droplevels(HMR_plus)
-HMR_minus <- probs[strand == "-"][start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
+HMR_minus <- probs_filtered[strand == "-"][start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
   pos %between% HMR_region]
 HMR_minus <- droplevels(HMR_minus)
 
 #all reads
-HMR_all <- probs[start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
+HMR_all <- probs_filtered[start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
   pos %between% HMR_region]
 HMR_all <- droplevels(HMR_all)
 
@@ -201,13 +202,13 @@ hmrp + geom_vline(xintercept = HMR_silencers)
 ###################
 #plot tel3L
 tel3L_region <- c(300, 5e3)
-tel3L <- probs[start_pos <= tel3L_region[1]][end_pos >= tel3L_region[2]][
+tel3L <- probs_filtered[start_pos <= tel3L_region[1]][end_pos >= tel3L_region[2]][
   pos %between% tel3L_region]
 plot_binary(tel3L)
 
 #plot tel6R
 tel6R_region <- c(265e3, 270e3)
-tel6R <- probs[start_pos <= tel6R_region[1]][end_pos >= tel6R_region[2]][pos %between% tel6R_region]
+tel6R <- probs_filtered[start_pos <= tel6R_region[1]][end_pos >= tel6R_region[2]][pos %between% tel6R_region]
 plot_binary(tel6R)
 
 ###############################
