@@ -26,32 +26,32 @@ methyl_filtered <- methyl[coverage > 10, ..select_cols]
 
 # uncomment for region of interest
 
-#for HMR
+# # for HMR
 # save <- "HMR"
-# chrom <- "III"
+# chromo <- "III"
 # beg <- 292674 - 500
 # end <- 294864 + 500
-# threshold <- 40
-# odd_bins <- "high"
-# even_bins <- "low"
-
-#for HML
-# save <- "HML"
-# chrom <- "III"
-# beg <- 11237 - 500
-# end <- 14711 + 500
 # threshold <- 40
 # odd_bins <- "low"
 # even_bins <- "high"
 
-#tel13L
-save <- "tel13L"
-chromo <- "XIII"
-beg <- 0
-end <- 20000
+#for HML
+save <- "HML"
+chromo <- "III"
+beg <- 11237 - 500
+end <- 14711 + 500
 threshold <- 40
-odd_bins <- "high"
-even_bins <- "low"
+odd_bins <- "low"
+even_bins <- "high"
+
+# #tel13L
+# save <- "tel13L"
+# chromo <- "XIII"
+# beg <- 0
+# end <- 20000
+# threshold <- 40
+# odd_bins <- "high"
+# even_bins <- "low"
 
 #tel14L
 # save <- "tel14L"
