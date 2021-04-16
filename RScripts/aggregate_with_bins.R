@@ -1,4 +1,14 @@
-# IN PROGRESS
+#!/bin/R
+
+###############################################
+# Author: Molly Brothers
+# Github: mollybrothers
+# Date: 2021-04-15
+###############################################
+
+# The purpose of this script is to plot the aggregate nanopore methylation data
+# into the bins made with methylation_binning.R
+# This is not as efficient as it could be, but rolling with it for now.
 
 library(data.table)
 library(tidyverse)
@@ -55,14 +65,9 @@ bin <- function(data, segments){
 
 #### HMR ####
 #read in the segments partitioned by methylation level from loess fitting to aggregate data
-HMR_segments <- data.table(readRDS("~/sequencing/sir_spreading/data/segmentsHMR_extended.rds"))
-
-#add variables for methylation status and bin number to HMR_segments
-meth_status_HMR <- rep_len(c("high", "low"), nrow(HMR_segments))
-HMR_segments$meth_status <- meth_status_HMR
-HMR_segments$bin <- seq(1, nrow(HMR_segments), 1)
-HMR_segments_high <- HMR_segments[(bin %% 2) != 0]
-HMR_segments_low <- HMR_segments[(bin %% 2) == 0]
+HMR_segments <- data.table(readRDS("~/sequencing/sir_spreading/data/HMR_bins.rds"))
+HMR_segments_high <- HMR_segments[meth_status == "high"]
+HMR_segments_low <- HMR_segments[meth_status == "low"]
 
 #HMR data
 HMR_E = c(292674, 292769)
@@ -131,14 +136,9 @@ ggplot(final_HMR, aes(x = start)) +
 
 #### HML ####
 #read in the segments partitioned by methylation level from loess fitting to aggregate data
-HML_segments <- data.table(readRDS("~/sequencing/sir_spreading/data/segmentsHML_extended.rds"))
-
-#add variables for methylation status and bin number to HMR_segments
-meth_status_HML <- rep_len(c("low", "high"), nrow(HML_segments))
-HML_segments$meth_status <- meth_status_HML
-HML_segments$bin <- seq(1, nrow(HML_segments), 1)
-HML_segments_high <- HML_segments[(bin %% 2) == 0]
-HML_segments_low <- HML_segments[(bin %% 2) != 0]
+HML_segments <- data.table(readRDS("~/sequencing/sir_spreading/data/HML_bins.rds"))
+HML_segments_high <- HML_segments[meth_status == "high"]
+HML_segments_low <- HML_segments[meth_status == "low"]
 
 #HML data
 HML_E <- c(11237, 11268)
