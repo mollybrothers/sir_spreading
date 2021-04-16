@@ -72,6 +72,7 @@ HMR_segments_low <- HMR_segments[meth_status == "low"]
 #HMR data
 HMR_E = c(292674, 292769)
 HMR_I = c(294805, 294864)
+HMR_promoter = c(293538, 293835)
 
 HMR_1 <- relevant_1[chrom == "III" & start > min(HMR_segments$start) & start < max(HMR_segments$end), list(start, percentage)]
 HMR_2 <- relevant_2[chrom == "III" & start > min(HMR_segments$start) & start < max(HMR_segments$end), list(start, percentage)]
@@ -131,7 +132,7 @@ ggplot(final_HMR, aes(x = start)) +
         text = element_text(size = 15, color = "black", family = "Arial")) +
   labs(x = "position on chr III",
        y = "average % methylated reads")+
-  annotate("rect", xmin = c(HMR_E[1], HMR_I[1]), xmax = c(HMR_E[2], HMR_I[2]),
+  annotate("rect", xmin = c(HMR_E[1], HMR_I[1], HMR_promoter[1]), xmax = c(HMR_E[2], HMR_I[2], HMR_promoter[2]),
            fill = "black", ymin = 0, ymax = 1, alpha = 0.3)
 
 #### HML ####
@@ -143,6 +144,7 @@ HML_segments_low <- HML_segments[meth_status == "low"]
 #HML data
 HML_E <- c(11237, 11268)
 HML_I <- c(14600, 14711)
+HML_promoter <- c(13018, 13282)
 
 HML_1 <- relevant_1[chrom == "III" & start > 10738 & start < 15211, list(start, percentage)]
 HML_2 <- relevant_2[chrom == "III" & start > 10738 & start < 15211, list(start, percentage)]
@@ -158,7 +160,7 @@ combined_HML <- HML_1 %>% full_join(HML_2, by = "start", suffix = c("1", "2")) %
   full_join(HML_ss, by = "start", suffix = c("6", "ss"))
 
 
-binned_HML <- bin(combined_HML, HML_segments_low)
+binned_HML <- bin(combined_HML, HML_segments_high)
 binned_HML <- binned_HML[!is.na(bin)][order(bin)]
 final_HML <- binned_HML %>% group_by(bin) %>% summarize(
   mean1 = mean(percentage1, na.rm = TRUE),
@@ -171,13 +173,13 @@ final_HML <- binned_HML %>% group_by(bin) %>% summarize(
   start = start)
 HML_min <- final_HML$mean1
 HML_max <- final_HML$meanss
-final_HMR$mean6 = (final_HML$mean6 - HML_min) / (HML_max - HML_min)
-final_HMR$mean5 = (final_HML$mean5 - HML_min) / (HML_max - HML_min)
-final_HMR$mean4 = (final_HML$mean4 - HML_min) / (HML_max - HML_min)
-final_HMR$mean3 = (final_HML$mean3 - HML_min) / (HML_max - HML_min)
-final_HMR$mean2 = (final_HML$mean2 - HML_min) / (HML_max - HML_min)
-final_HMR$mean1 = (final_HML$mean1 - HML_min) / (HML_max - HML_min)
-final_HMR$meanss = (final_HML$meanss - HML_min) / (HML_max - HML_min)
+final_HML$mean6 = (final_HML$mean6 - HML_min) / (HML_max - HML_min)
+final_HML$mean5 = (final_HML$mean5 - HML_min) / (HML_max - HML_min)
+final_HML$mean4 = (final_HML$mean4 - HML_min) / (HML_max - HML_min)
+final_HML$mean3 = (final_HML$mean3 - HML_min) / (HML_max - HML_min)
+final_HML$mean2 = (final_HML$mean2 - HML_min) / (HML_max - HML_min)
+final_HML$mean1 = (final_HML$mean1 - HML_min) / (HML_max - HML_min)
+final_HML$meanss = (final_HML$meanss - HML_min) / (HML_max - HML_min)
 
 colors <- viridis(6)
 ggplot(final_HML, aes(x = start), xlim = c(0,65)) +
@@ -202,5 +204,76 @@ ggplot(final_HML, aes(x = start), xlim = c(0,65)) +
         text = element_text(size = 15, color = "black", family = "Arial")) +
   labs(x = "position on chr III",
        y = "average % methylated reads")+
-  annotate("rect", xmin = c(HML_E[1], HML_I[1]), xmax = c(HML_E[2], HML_I[2]),
+  annotate("rect", xmin = c(HML_E[1], HML_I[1], HML_promoter[1]), xmax = c(HML_E[2], HML_I[2], HML_promoter[2]),
            fill = "black", ymin = 0, ymax = 1, alpha = 0.3)
+
+# tel13L
+tel13L_segments <- data.table(readRDS("~/sequencing/sir_spreading/data/tel13L_bins.rds"))
+tel13L_segments_high <- tel13L_segments[meth_status == "high"]
+tel13L_segments_low <- tel13L_segments[meth_status == "low"]
+
+repeats <- c(1, 51, 5538, 5585)
+Yprime <- c(52, 5537)
+Xelement <- c(5586, 6344)
+
+tel13L_1 <- relevant_1[chrom == "XIII" & start > 0 & start < 7000, list(start, percentage)]
+tel13L_2 <- relevant_2[chrom == "XIII" & start > 0 & start < 7000, list(start, percentage)]
+tel13L_3 <- relevant_3[chrom == "XIII" & start > 0 & start < 7000, list(start, percentage)]
+tel13L_4 <- relevant_4[chrom == "XIII" & start > 0 & start < 7000, list(start, percentage)]
+tel13L_5 <- relevant_5[chrom == "XIII" & start > 0 & start < 7000, list(start, percentage)]
+tel13L_6 <- relevant_6[chrom == "XIII" & start > 0 & start < 7000, list(start, percentage)]
+tel13L_ss <- relevant_ss[chrom == "XIII" & start > 0 & start < 7000, list(start, percentage)]
+
+combined_tel13L <- tel13L_1 %>% full_join(tel13L_2, by = "start", suffix = c("1", "2")) %>%
+  full_join(tel13L_3, by = "start", suffix = c("2", "3")) %>% full_join(tel13L_4, by = "start", suffix = c("3", "4")) %>%
+  full_join(tel13L_5, by = "start", suffix = c("4", "5")) %>% full_join(tel13L_6, by = "start", suffix = c("5", "6")) %>%
+  full_join(tel13L_ss, by = "start", suffix = c("6", "ss"))
+
+binned_tel13L <- bin(combined_tel13L, tel13L_segments_high)
+binned_tel13L <- binned_tel13L[!is.na(bin)][order(bin)]
+final_tel13L <- binned_tel13L %>% group_by(bin) %>% summarize(
+  mean1 = mean(percentage1, na.rm = TRUE),
+  mean2 = mean(percentage2, na.rm = TRUE),
+  mean3 = mean(percentage3, na.rm = TRUE),
+  mean4 = mean(percentage4, na.rm = TRUE),
+  mean5 = mean(percentage5, na.rm = TRUE),
+  mean6 = mean(percentage6, na.rm = TRUE),
+  meanss = mean(percentage, na.rm = TRUE),
+  start = start)
+tel13L_min <- final_tel13L$mean1
+tel13L_max <- final_tel13L$meanss
+final_tel13L$mean6 = (final_tel13L$mean6 - tel13L_min) / (tel13L_max - tel13L_min)
+final_tel13L$mean5 = (final_tel13L$mean5 - tel13L_min) / (tel13L_max - tel13L_min)
+final_tel13L$mean4 = (final_tel13L$mean4 - tel13L_min) / (tel13L_max - tel13L_min)
+final_tel13L$mean3 = (final_tel13L$mean3 - tel13L_min) / (tel13L_max - tel13L_min)
+final_tel13L$mean2 = (final_tel13L$mean2 - tel13L_min) / (tel13L_max - tel13L_min)
+final_tel13L$mean1 = (final_tel13L$mean1 - tel13L_min) / (tel13L_max - tel13L_min)
+final_tel13L$meanss = (final_tel13L$meanss - tel13L_min) / (tel13L_max - tel13L_min)
+
+colors <- viridis(6)
+ggplot(final_tel13L, aes(x = start), xlim = c(0,65)) +
+  geom_point(mapping = aes(y = mean1), color = colors[6]) +
+  geom_point(mapping = aes(y = mean2), color = colors[5]) +
+  geom_point(mapping = aes(y = mean3), color = colors[4]) +
+  geom_point(mapping = aes(y = mean4), color = colors[3]) +
+  geom_point(mapping = aes(y = mean5), color = colors[2]) +
+  geom_point(mapping = aes(y = mean6), color = colors[1]) +
+  geom_point(mapping = aes(y = meanss), color = "black") +
+  geom_line(mapping = aes(y = mean1), color = colors[6]) +
+  geom_line(mapping = aes(y = mean2), color = colors[5]) +
+  geom_line(mapping = aes(y = mean3), color = colors[4]) +
+  geom_line(mapping = aes(y = mean4), color = colors[3]) +
+  geom_line(mapping = aes(y = mean5), color = colors[2]) +
+  geom_line(mapping = aes(y = mean6), color = colors[1]) +
+  geom_line(mapping = aes(y = meanss), color = "black") +
+  theme(panel.background = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.line = element_line(color = "black"),
+        text = element_text(size = 15, color = "black", family = "Arial")) +
+  labs(x = "position on chr XIII",
+       y = "average % methylated reads") +
+  annotate("rect", xmin = c(repeats[1], repeats[3]), xmax = c(repeats[2], repeats[4]),
+           fill = "black", ymin = 0, ymax = 1, alpha = 0.3) +
+  # annotate("rect", xmin = Yprime[1], xmax = Yprime[2], fill = "green", ymin = 0, ymax = 1, alpha = 0.3) +
+  annotate("rect", xmin = Xelement[1], xmax = Xelement[2], fill = "gray", ymin = 0, ymax = 1, alpha = 0.3)
