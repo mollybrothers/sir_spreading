@@ -21,7 +21,7 @@ library(wesanderson)
 
 mega_directory <- "/Volumes/brothersseq/210403_Hello/"
 chr <- "III" #which chromosome?
-barcode <- "03"
+barcode <- "02"
 
 probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
                     select = c(1, 2, 3, 4, 5),
@@ -129,9 +129,9 @@ HML_linkers = c(#9407, 9587.5, 9067, 9747, 9923, 10166, 10331,
 )
 
 #read in segments with high and low methylation from steady state data
-HML_segments <- readRDS("~/sequencing/sir_spreading/data/segmentsHML_extended.rds")
-HML_highmeth <- HML_segments[!c(TRUE,FALSE),]
-HML_lowmeth <- HML_segments[c(TRUE,FALSE),]
+HML_segments <- data.table(readRDS("~/sequencing/sir_spreading/data/HML_bins.rds"))
+HML_highmeth <- HML_segments[meth_status == "high"]
+HML_lowmeth <- HML_segments[meth_status == "high"]
 
 #plus or minus strands only
 HML_plus <- probs_filtered[strand == "+"][start_pos <= HML_region[1]][end_pos >= HML_region[2]][
@@ -153,8 +153,8 @@ hmlp
 hmlp + annotate("rect", xmin = c(HML_highmeth$start), xmax = c(HML_highmeth$end),
                 ymin = 0.5, ymax = nlevels(HML_all$read_id)+0.5, alpha = 0.3, fill = "mediumpurple4") +
   annotate("rect", xmin = c(HML_E[1], HML_I[1]), xmax = c(HML_E[2], HML_I[2]),
-           ymin = 0.5, ymax = nlevels(HML_all$read_id)+0.5, alpha = 0.3, fill = "black")
-hmlp + geom_vline(xintercept = HML_silencers)
+           ymin = 0.5, ymax = nlevels(HML_all$read_id)+0.5, alpha = 0.2, fill = "black")
+hmlp + geom_vline(xintercept = c(mean(HML_E), mean(HML_I)))
 hmlp + geom_vline(xintercept = HML_linkers)
 
 #############
@@ -169,9 +169,9 @@ HMR_I = c(294805, 294864)
 #                 294515, 294699, 295239, 295555, 295743, 295906)
 
 #read in segments with high and low methylation from steady state data
-HMR_segments <- readRDS("~/sequencing/sir_spreading/data/segmentsHMR.rds")
-HMR_highmeth <- HMR_segments[!c(TRUE,FALSE),]
-HMR_lowmeth <- HMR_segments[c(TRUE,FALSE),]
+HMR_segments <- data.table(readRDS("~/sequencing/sir_spreading/data/HMR_bins.rds"))
+HMR_highmeth <- HMR_segments[meth_status == "high"]
+HMR_lowmeth <- HMR_segments[meth_status == "low"]
 
 #plus or minus only reads
 HMR_plus <- probs_filtered[strand == "+"][start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
@@ -195,7 +195,7 @@ hmrp + annotate("rect", xmin = c(HMR_highmeth$start), xmax = c(HMR_highmeth$end)
   annotate("rect", xmin = c(HMR_E[1], HMR_I[1]), xmax = c(HMR_E[2], HMR_I[2]),
            ymin = 0.5, ymax = nlevels(HMR_all$read_id)+0.5, alpha = 0.3, fill = "black")
 
-hmrp + geom_vline(xintercept = HMR_silencers)
+hmrp + geom_vline(xintercept = c(mean(HMR_E), mean(HMR_I)))
 
 ###################
 #### telomeres ####
