@@ -157,6 +157,7 @@ hmlp + annotate("rect", xmin = c(HML_highmeth$start), xmax = c(HML_highmeth$end)
 hmlp + geom_vline(xintercept = c(mean(HML_E), mean(HML_I)))
 hmlp + geom_vline(xintercept = HML_linkers)
 
+hmlp + geom_vline(xintercept = c(mean(HML_E), mean(HML_I), 13282, 13809, 12386, 13018))
 #############
 #### HMR ####
 #############
@@ -195,7 +196,7 @@ hmrp + annotate("rect", xmin = c(HMR_highmeth$start), xmax = c(HMR_highmeth$end)
   annotate("rect", xmin = c(HMR_E[1], HMR_I[1]), xmax = c(HMR_E[2], HMR_I[2]),
            ymin = 0.5, ymax = nlevels(HMR_all$read_id)+0.5, alpha = 0.3, fill = "black")
 
-hmrp + geom_vline(xintercept = c(mean(HMR_E), mean(HMR_I)))
+hmrp + geom_vline(xintercept = c(mean(HMR_E), mean(HMR_I), 293835, 294321, 293179, 293538))
 
 ###################
 #### telomeres ####
