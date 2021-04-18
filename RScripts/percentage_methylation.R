@@ -69,12 +69,12 @@ plot_methylation_dot <- function(data, chr) {
 
 plot_methylation_bars <- function(data, data2, chr) {
   #break data into 200bp bins, find the mean and sd of % methylated reads in each bin
-  numbreaks <- as.integer((max(data$start) - min(data$start)) / 200)
+  numbreaks <- as.integer((max(data$start) - min(data$start)) / 100)
   data$window <- cut(data$start, breaks = numbreaks)
   data_mean <- aggregate(data$percentage, by = list(data$window), function(x){ mean(x)})
   data_sd <- aggregate(data$percentage, by = list(data$window), function(x){ sd(x)})
   
-  numbreaks2 <- as.integer((max(data2$start) - min(data2$start)) / 200)
+  numbreaks2 <- as.integer((max(data2$start) - min(data2$start)) / 100)
   data2$window <- cut(data2$start, breaks = numbreaks2)
   data2_mean <- aggregate(data2$percentage, by = list(data2$window), function(x){ mean(x)})
   data2_sd <- aggregate(data2$percentage, by = list(data2$window), function(x){ sd(x)})
@@ -115,7 +115,7 @@ plot_methylation_bars <- function(data, data2, chr) {
 
 plot_methylation_bars_alone <- function(data, chr) {
   #break data into 200bp bins, find the mean and sd of % methylated reads in each bin
-  numbreaks <- as.integer((max(data$start) - min(data$start)) / 200)
+  numbreaks <- as.integer((max(data$start) - min(data$start)) / 100)
   data$window <- cut(data$start, breaks = numbreaks)
   data_mean <- aggregate(data$percentage, by = list(data$window), function(x){ mean(x)})
   data_sd <- aggregate(data$percentage, by = list(data$window), function(x){ sd(x)})
@@ -183,9 +183,10 @@ plot_methylation_bars_alone(tel6R_2, "VI")
 plot_methylation_bars(tel6R_2, tel6R_3, "VI")
 plot_methylation_dot(tel6R, "VI")
 
-tel9L_25C <- relevant_25C[chrom == "IX" & start > 0 & start < 25e3]
-tel9L_37C <- relevant_37C[chrom == "IX" & start > 0 & start < 25e3]
-plot_methylation_bars(tel9L_25C, tel9L_37C, "IX")
+#plot rDNA
+rdna_1 <- relevant_1[chrom == "XII" & start > 445e3 & start < 475e3]
+rdna_2 <- relevant_2[chrom == "XII" & start > 445e3 & start < 475e3]
+plot_methylation_bars(rdna_1, rdna_2, "XII")
 
 #plot chromosome
 chrXV <- relevant[chrom == "XV"]
