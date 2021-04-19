@@ -20,8 +20,8 @@ library(tidyverse)
 library(wesanderson)
 
 mega_directory <- "/Volumes/brothersseq/210403_Hello/"
-chr <- "III" #which chromosome?
-barcode <- "02"
+chr <- "XI" #which chromosome?
+barcode <- "01"
 
 probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
                     select = c(1, 2, 3, 4, 5),
@@ -201,16 +201,17 @@ hmrp + geom_vline(xintercept = c(mean(HMR_E), mean(HMR_I), 293835, 294321, 29317
 ###################
 #### telomeres ####
 ###################
-#plot tel3L
-tel3L_region <- c(300, 5e3)
-tel3L <- probs_filtered[start_pos <= tel3L_region[1]][end_pos >= tel3L_region[2]][
-  pos %between% tel3L_region]
-plot_binary(tel3L)
+#plot tel14L
+tel14L_region <- c(0, 10e3)
+tel14L <- probs_filtered[start_pos <= tel14L_region[1]+500][end_pos >= tel14L_region[2]][
+  pos %between% tel14L_region]
+plot_binary(tel14L)
 
-#plot tel6R
-tel6R_region <- c(265e3, 270e3)
-tel6R <- probs_filtered[start_pos <= tel6R_region[1]][end_pos >= tel6R_region[2]][pos %between% tel6R_region]
-plot_binary(tel6R)
+#plot tel11R
+tel11R_region <- c(662e3, 666500)
+tel11R <- probs_filtered[start_pos <= tel11R_region[1]][end_pos >= tel11R_region[2]][
+  pos %between% tel11R_region]
+plot_binary(tel11R)
 
 ###############################
 ####HIERARCHICAL CLUSTERING####
