@@ -1,0 +1,152 @@
+---
+title: 'Cracking the SIR spreading code: preliminary ideas'
+author: "Koen Van den Berge"
+date: "3/13/2021"
+output: html_document
+---
+
+# Data simulation: 4 segments
+
+Here we will simulate data where there are four bins, and a pre-defined logic. The true logic is the following:
+
+ - **No methylation**: Bin 1 is methylated with 85% probability. Alternatively, other bins are methylated with a 5% probability each.
+ - **One bin methylated**: Given bin 1 is methylated, bin 4 is methylated with 70% probability, and 10% probability for each other bin. If another bin is methylated, one of the other three bins is selected randomly (hence with a 33% probability).
+ - **Two bins methylated**: If bin 1 and bin 4 are methylated, bin 2 is methylated with 80% probability, and therefore bin 3 is methylated with 20% probability. If not, another bin will be methylated randomly.
+ - **Three bins methylated**: There is only one option, which is methylation of the remaining bin.
+ 
+```{r}
+simulateOneRead <- function(){
+  data <- rep(0, 4)
+  ## first bin
+  bin1Sample <- rbinom(n = 1, size = 1, prob = 0.85)
+  if(bin1Sample){
+    data[1] <- 1
+  } else {
+    data[sample(x=2:4, size=1)] <- 1
+  }
+  data1 <- data
+  
+  ## second bin
+  bin2Sample <- rbinom(n = 1, size = 1, prob = 0.70)
+  if(bin1Sample & bin2Sample){
+    data[4] <- 1
+  } else {
+    data[sample(x=which(data==0), size=1)] <- 1
+  }
+  data2 <- data
+  
+  ## third bin
+  bin3Sample <- rbinom(n = 1, size = 1, prob = 0.80)
+  if(bin1Sample & bin2Sample & bin3Sample){
+    data[2] <- 1
+  } else {
+    data[sample(x=which(data==0), size=1)] <- 1
+  }
+  data3 <- data
+  
+  ## fourth bin
+  data[sample(x=which(data==0), size=1)] <- 1
+  data4 <- data
+  
+  return(rbind(data1, data2, data3, data4))
+}
+
+for(kk in 1:100){
+  if(kk == 1){
+    reads <- simulateOneRead()
+  } else {
+    reads <- rbind(reads, simulateOneRead())
+  }
+}
+
+
+```
+ 
+ 
+
+# Analysis ideas
+
+## EDA
+
+```{r}
+
+### Too few data points for LSI
+# library(Seurat)
+# lsi <- Seurat::RunLSI(t(reads), n=2)
+# dr <- Seurat::Embeddings(lsi)
+
+
+library(pheatmap)
+pheatmap(reads, cluster_cols = FALSE)
+pheatmap(reads[order(rowSums(reads)),], cluster_rows=FALSE, cluster_cols = FALSE)
+
+for(kk in 1:3){
+  curReads <- reads[rowSums(reads) == kk,]
+  pheatmap(curReads, cluster_cols = FALSE)
+}
+```
+ 
+## Conditional probability table
+ 
+ 
+```{r}
+curMeth <- curReads
+conditionalProbability <- matrix(NA, nrow=4, ncol=4)
+for(bb in 1:4){
+  conditionalProbability[,bb] <- colSums(curMeth[,bb] * curMeth) / colSums(curMeth)
+}
+# jointProbability <- crossprod(curMeth) / nrow(curMeth)
+# # P(A)
+# marginalProbability <- colMeans(curMeth)
+# # P(A=1 | B=1) = P(A=1, B=1) / P(B=1)
+# # P(B=1 | A=1) = P(A=1, B=1) / P(A=1)
+# conditionalProbability <- jointProbability / marginalProbability
+
+library(pheatmap)
+rownames(conditionalProbability) <- paste0("P(. | bin", 1:4,")")
+colnames(conditionalProbability) <- paste0("P(bin", 1:4," | .)")
+pheatmap(conditionalProbability,
+         cluster_rows = FALSE,
+         cluster_cols=FALSE,
+         main="Conditional probability Table")
+
+## a rough estimate for the most likely sequence are the column means
+colMeans(conditionalProbability)
+
+### interpretation of below: probability that that particular bin is methylated
+### = P(methylation | bin x)
+colMeans(reads)
+### interpretation of below: if a bin is methylated, what's the probability it
+### is bin x? = P(bin x | methylation)
+colMeans(reads) / sum(colMeans(reads))
+
+## one could view the conditional probabilities as an adjacency matrix
+## of a directed graph
+library(igraph)
+A <- conditionalProbability
+diag(A) <- 0
+rownames(A) <- colnames(A) <- paste0("Bin",1:4)
+g <- graph_from_adjacency_matrix(A, mode="directed", weighted=TRUE)
+E(g)$width = E(g)$weight
+E(g)$arrow.size = .2
+V(g)$size = colMeans(reads) * 20
+plot(g, edge.color="grey", edge.width=E(g)$width*2, edge.curved = .3)
+
+## Interpretation:
+## an edge from bin A to bin B signifies P(bin A | bin B).
+## for example, every node has a bold arrow to bin 1, since P(bin 1 | bin x) is high for all bins.
+```
+ 
+ 
+ 
+ 
+ 
+## HMM
+
+If we think about a Hidden Markov Model, then we would have $2^4 = 16$ different states. However the number of states scale exponentially with the number of bins. If we'd have 20 bins there would be $2^{20} = 1048576$ different states. This quickly makes a standard HMM approach infeasible.
+
+## Latent semantic indexing and clustering
+
+Here we consider each read as a data point, and the different bins as binary variables. The data then can be considered as NLP data. We can visualize the reads in reduced dimensional space using LSI, coloring reads by how many bins are methylated, and possibly interpret these plots.
+
+

@@ -73,13 +73,9 @@ for(ff in 1:length(chr3Files)){ # loop timepoints
   }
   avMethMatHMR <- do.call(rbind, readAvMethListHMR)
   # normalize by maximum average methylation in each bin
-  avMethMatHMRNormalized <- sweep(avMethMatHMR, 2, STATS=apply(avMethMatHMR, 2, max), FUN="/")
+  avMethMatHMRNormalized <- sweep(avMethMatHMR, 2, STATS=apply(avMethMatHMR, 2, max, na.rm=TRUE), FUN="/")
   assign(paste0("avMethMatHMRNormalized", ff), avMethMatHMRNormalized)
 }
-
-# for some reason, there are 4 bins that do not have any data in the 4th timepoint:
-# TODO: check this
-rowSums(is.na(avMethMatHMRNormalized4))
 
 # for(ff in 1:length(chr3Files)){
 #   curMeth <- get(paste0("avMethMatHMRNormalized", ff))
@@ -103,9 +99,9 @@ for(ff in 1:length(chr3Files)){
   curMeth <- get(paste0("avMethMatHMRNormalized", ff))
   conditionalProbability <- matrix(NA, nrow=nrow(hmrSegments), ncol=nrow(hmrSegments))
   for(bb in 1:nrow(hmrSegments)){
-    jointProbability <- colMeans(curMeth[,bb] * curMeth) # P(bin A, bin B)
+    jointProbability <- colMeans(curMeth[,bb] * curMeth, na.rm=TRUE) # P(bin A, bin B)
     # P(bin A | bin B) = P(bin A, bin B) / P(bin B)
-    conditionalProbability[,bb] <- jointProbability / colMeans(curMeth) 
+    conditionalProbability[,bb] <- jointProbability / colMeans(curMeth, na.rm=TRUE) 
     #avConditionalProbability <- colMeans(conditionalProbability)
   }
   # jointProbability <- crossprod(curMeth) / nrow(curMeth)
@@ -114,7 +110,6 @@ for(ff in 1:length(chr3Files)){
   # # P(A=1 | B=1) = P(A=1, B=1) / P(B=1)
   # # P(B=1 | A=1) = P(A=1, B=1) / P(A=1)
   # conditionalProbability <- jointProbability / marginalProbability
-  
   library(pheatmap)
   rownames(conditionalProbability) <- paste0("P(. | bin", 1:nrow(hmrSegments),")")
   colnames(conditionalProbability) <- paste0("P(bin", 1:nrow(hmrSegments)," | .)")
@@ -123,13 +118,28 @@ for(ff in 1:length(chr3Files)){
            cluster_cols=FALSE,
            main=paste0("Conditional probability Table ", ff))
   assign(paste0("conditionalProbabilityTable", ff), conditionalProbability)
+
 }
 
-# should this be correlated?
-plot(x=colMeans(avMethMatHMRNormalized1), y=diag(conditionalProbabilityTable1))
+for(ff in 1:length(chr3Files)){
+  conditionalProbability <- get(paste0("conditionalProbabilityTable", ff))
+  library(igraph)
+  A <- conditionalProbability / max(conditionalProbability)
+  diag(A) <- colMeans(curMeth, na.rm=TRUE)
+  rownames(A) <- colnames(A) <- paste0("Bin",1:nrow(A))
+  g <- graph_from_adjacency_matrix(A, mode="directed", weighted=TRUE)
+  E(g)$width = E(g)$weight
+  E(g)$arrow.size = .2
+  V(g)$size = colMeans(curMeth, na.rm=TRUE) * 20
+  plot(g, edge.color="grey", edge.width=E(g)$width*2, edge.curved = .3)
+}
 
+# TODO: should this be correlated?
+plot(x=colMeans(avMethMatHMRNormalized1^2), y=diag(conditionalProbabilityTable1))
 
-
+## one can use a path of least resistance to define a most likely logic.
+## by starting at most methylated site, following the most likely edges
+## to nodes that have not been crossed yet.
 ```
 
 
@@ -192,13 +202,10 @@ for(ff in 1:length(chr3Files)){ # loop timepoints
   }
   avMethMatHML <- do.call(rbind, readAvMethListHML)
   # normalize by maximum average methylation in each bin
-  avMethMatHMLNormalized <- sweep(avMethMatHML, 2, STATS=apply(avMethMatHML, 2, max), FUN="/")
+  avMethMatHMLNormalized <- sweep(avMethMatHML, 2, STATS=apply(avMethMatHML, 2, max, na.rm=TRUE), FUN="/")
   assign(paste0("avMethMatHMLNormalized", ff), avMethMatHMLNormalized)
 }
 
-# for some reason, there are 4 bins that do not have any data in the 4th timepoint:
-# TODO: check this
-rowSums(is.na(avMethMatHMLNormalized4))
 
 # for(ff in 1:length(chr3Files)){
 #   curMeth <- get(paste0("avMethMatHMLNormalized", ff))
@@ -222,9 +229,9 @@ for(ff in 1:length(chr3Files)){
   curMeth <- get(paste0("avMethMatHMLNormalized", ff))
   conditionalProbability <- matrix(NA, nrow=nrow(HMLSegments), ncol=nrow(HMLSegments))
   for(bb in 1:nrow(HMLSegments)){
-    jointProbability <- colMeans(curMeth[,bb] * curMeth) # P(bin A, bin B)
+    jointProbability <- colMeans(curMeth[,bb] * curMeth, na.rm=TRUE) # P(bin A, bin B)
     # P(bin A | bin B) = P(bin A, bin B) / P(bin B)
-    conditionalProbability[,bb] <- jointProbability / colMeans(curMeth) 
+    conditionalProbability[,bb] <- jointProbability / colMeans(curMeth, na.rm=TRUE) 
     #avConditionalProbability <- colMeans(conditionalProbability)
   }
   # jointProbability <- crossprod(curMeth) / nrow(curMeth)
