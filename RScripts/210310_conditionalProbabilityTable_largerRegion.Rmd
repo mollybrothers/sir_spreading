@@ -73,13 +73,9 @@ for(ff in 1:length(chr3Files)){ # loop timepoints
   }
   avMethMatHMR <- do.call(rbind, readAvMethListHMR)
   # normalize by maximum average methylation in each bin
-  avMethMatHMRNormalized <- sweep(avMethMatHMR, 2, STATS=apply(avMethMatHMR, 2, max), FUN="/")
+  avMethMatHMRNormalized <- sweep(avMethMatHMR, 2, STATS=apply(avMethMatHMR, 2, max, na.rm=TRUE), FUN="/")
   assign(paste0("avMethMatHMRNormalized", ff), avMethMatHMRNormalized)
 }
-
-# for some reason, there are 4 bins that do not have any data in the 4th timepoint:
-# TODO: check this
-rowSums(is.na(avMethMatHMRNormalized4))
 
 # for(ff in 1:length(chr3Files)){
 #   curMeth <- get(paste0("avMethMatHMRNormalized", ff))
@@ -103,9 +99,9 @@ for(ff in 1:length(chr3Files)){
   curMeth <- get(paste0("avMethMatHMRNormalized", ff))
   conditionalProbability <- matrix(NA, nrow=nrow(hmrSegments), ncol=nrow(hmrSegments))
   for(bb in 1:nrow(hmrSegments)){
-    jointProbability <- colMeans(curMeth[,bb] * curMeth) # P(bin A, bin B)
+    jointProbability <- colMeans(curMeth[,bb] * curMeth, na.rm=TRUE) # P(bin A, bin B)
     # P(bin A | bin B) = P(bin A, bin B) / P(bin B)
-    conditionalProbability[,bb] <- jointProbability / colMeans(curMeth) 
+    conditionalProbability[,bb] <- jointProbability / colMeans(curMeth, na.rm=TRUE) 
     #avConditionalProbability <- colMeans(conditionalProbability)
   }
   # jointProbability <- crossprod(curMeth) / nrow(curMeth)
@@ -192,13 +188,9 @@ for(ff in 1:length(chr3Files)){ # loop timepoints
   }
   avMethMatHML <- do.call(rbind, readAvMethListHML)
   # normalize by maximum average methylation in each bin
-  avMethMatHMLNormalized <- sweep(avMethMatHML, 2, STATS=apply(avMethMatHML, 2, max), FUN="/")
+  avMethMatHMLNormalized <- sweep(avMethMatHML, 2, STATS=apply(avMethMatHML, 2, max, na.rm=TRUE), FUN="/")
   assign(paste0("avMethMatHMLNormalized", ff), avMethMatHMLNormalized)
 }
-
-# for some reason, there are 4 bins that do not have any data in the 4th timepoint:
-# TODO: check this
-rowSums(is.na(avMethMatHMLNormalized4))
 
 # for(ff in 1:length(chr3Files)){
 #   curMeth <- get(paste0("avMethMatHMLNormalized", ff))
@@ -222,9 +214,9 @@ for(ff in 1:length(chr3Files)){
   curMeth <- get(paste0("avMethMatHMLNormalized", ff))
   conditionalProbability <- matrix(NA, nrow=nrow(HMLSegments), ncol=nrow(HMLSegments))
   for(bb in 1:nrow(HMLSegments)){
-    jointProbability <- colMeans(curMeth[,bb] * curMeth) # P(bin A, bin B)
+    jointProbability <- colMeans(curMeth[,bb] * curMeth, na.rm=TRUE) # P(bin A, bin B)
     # P(bin A | bin B) = P(bin A, bin B) / P(bin B)
-    conditionalProbability[,bb] <- jointProbability / colMeans(curMeth) 
+    conditionalProbability[,bb] <- jointProbability / colMeans(curMeth, na.rm=TRUE) 
     #avConditionalProbability <- colMeans(conditionalProbability)
   }
   # jointProbability <- crossprod(curMeth) / nrow(curMeth)
