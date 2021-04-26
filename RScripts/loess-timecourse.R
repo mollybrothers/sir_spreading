@@ -35,41 +35,26 @@ methyl_filtered_90 <- methyl_90[coverage > 10, ..select_cols]
 
 # uncomment for region of interest
 
-# # for HMR
-# save <- "HMR"
+# for HMR
 # chromo <- "III"
 # beg <- 292674 - 500
 # end <- 294864 + 500
-# threshold <- 40
-# odd_bins <- "low"
-# even_bins <- "high"
 
-#for HML
-# save <- "HML"
+# for HML
 # chromo <- "III"
 # beg <- 11237 - 500
 # end <- 14711 + 500
-# threshold <- 40
-# odd_bins <- "low"
-# even_bins <- "high"
 
-# #tel13L
-save <- "tel13L"
+# left telomeres
 chromo <- "XIII"
 beg <- 0
-end <- 20000
-threshold <- 40
-odd_bins <- "high"
-even_bins <- "low"
+end <- 15000
 
-#tel14L
-# save <- "tel14L"
+# right telomeres
 # chromo <- "XIV"
-# beg <- 0
-# end <- 20000
-# threshold <- 28
-# odd_bins <- "low"
-# even_bins <- "high"
+# end <- 15000
+# beg <- end - 15000
+
 
 # filter to region of interest
 region_methyl_0 <- methyl_filtered_0[chrom == chromo & start > beg & start < end]
