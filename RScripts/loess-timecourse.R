@@ -1,0 +1,95 @@
+#!/bin/R
+
+###############################################
+# Author: Molly Brothers / Koen Van den Berge
+# Github: mollybrothers
+# Date: 2021-04-24
+###############################################
+
+# Takes in aggregate bedMethyl file and plots loess-smoothed curve for different samples / time points
+
+library(data.table)
+
+columns <- c("chrom", "start", "end", "name", "score", 
+             "strand", "startCodon", "stopCodon", "color", 
+             "coverage", "percentage")
+select_cols <- c("chrom", "start", "coverage", "percentage")
+my_pal <- c("gray50", "forestgreen", "darkturquoise", "mediumpurple3")
+
+# change for different samples
+methyl_0 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate01.6mA.bed",
+                col.names = columns)
+methyl_filtered_0 <- methyl_0[coverage > 10, ..select_cols]
+
+methyl_30 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate03.6mA.bed",
+                  col.names = columns)
+methyl_filtered_30 <- methyl_30[coverage > 10, ..select_cols]
+
+methyl_60 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate05.6mA.bed",
+                  col.names = columns)
+methyl_filtered_60 <- methyl_60[coverage > 10, ..select_cols]
+
+methyl_90 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate06.6mA.bed",
+                  col.names = columns)
+methyl_filtered_90 <- methyl_90[coverage > 10, ..select_cols]
+
+# uncomment for region of interest
+
+# # for HMR
+# save <- "HMR"
+# chromo <- "III"
+# beg <- 292674 - 500
+# end <- 294864 + 500
+# threshold <- 40
+# odd_bins <- "low"
+# even_bins <- "high"
+
+#for HML
+# save <- "HML"
+# chromo <- "III"
+# beg <- 11237 - 500
+# end <- 14711 + 500
+# threshold <- 40
+# odd_bins <- "low"
+# even_bins <- "high"
+
+# #tel13L
+save <- "tel13L"
+chromo <- "XIII"
+beg <- 0
+end <- 20000
+threshold <- 40
+odd_bins <- "high"
+even_bins <- "low"
+
+#tel14L
+# save <- "tel14L"
+# chromo <- "XIV"
+# beg <- 0
+# end <- 20000
+# threshold <- 28
+# odd_bins <- "low"
+# even_bins <- "high"
+
+# filter to region of interest
+region_methyl_0 <- methyl_filtered_0[chrom == chromo & start > beg & start < end]
+region_methyl_30 <- methyl_filtered_30[chrom == chromo & start > beg & start < end]
+region_methyl_60 <- methyl_filtered_60[chrom == chromo & start > beg & start < end]
+region_methyl_90 <- methyl_filtered_90[chrom == chromo & start > beg & start < end]
+
+#loess
+lo_methyl_0 <- loess(percentage ~ start, data=region_methyl_0, weights=region_methyl_0$coverage, enp.target = 100)
+lo_methyl_30 <- loess(percentage ~ start, data=region_methyl_30, weights=region_methyl_30$coverage, enp.target = 100)
+lo_methyl_60 <- loess(percentage ~ start, data=region_methyl_60, weights=region_methyl_60$coverage, enp.target = 100)
+lo_methyl_90 <- loess(percentage ~ start, data=region_methyl_90, weights=region_methyl_90$coverage, enp.target = 100)
+
+#plot loess
+plot(x=lo_methyl_0$x[order(lo_methyl_0$x)], y=lo_methyl_0$fitted[order(lo_methyl_0$x)], 
+     type = 'l', lwd=2, ylim = c(0,90), col = my_pal[1])
+legend("topleft", legend = c("0min", "30min", "60min", "90min"), fill = my_pal)
+lines(x=lo_methyl_30$x[order(lo_methyl_30$x)], y=lo_methyl_30$fitted[order(lo_methyl_30$x)], 
+      type = 'l', lwd=2, ylim = c(0,90), col = my_pal[2])
+lines(x=lo_methyl_60$x[order(lo_methyl_60$x)], y=lo_methyl_60$fitted[order(lo_methyl_60$x)], 
+      type = 'l', lwd=2, ylim = c(0,90), col = my_pal[3])
+lines(x=lo_methyl_90$x[order(lo_methyl_90$x)], y=lo_methyl_90$fitted[order(lo_methyl_90$x)], 
+      type = 'l', lwd=2, ylim = c(0,90), col = my_pal[4])
