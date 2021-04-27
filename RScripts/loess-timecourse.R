@@ -37,23 +37,23 @@ methyl_filtered_90 <- methyl_90[coverage > 10, ..select_cols]
 
 # for HMR
 # chromo <- "III"
-# beg <- 292674 - 500
-# end <- 294864 + 500
+# beg <- 292674 - 500 #285e3 #
+# end <- 294864 + 500 #305e3 #
 
 # for HML
 # chromo <- "III"
-# beg <- 11237 - 500
-# end <- 14711 + 500
+# beg <- 11237 - 500 #0  #
+# end <- 14711 + 500 #20e3 #
 
 # left telomeres
-chromo <- "XIII"
+chromo <- "XIV"
 beg <- 0
 end <- 15000
 
 # right telomeres
-# chromo <- "XIV"
-# end <- 15000
-# beg <- end - 15000
+chromo <- "XI"
+end <- 670000
+beg <- end - 15000
 
 
 # filter to region of interest
@@ -70,10 +70,11 @@ lo_methyl_90 <- loess(percentage ~ start, data=region_methyl_90, weights=region_
 
 #plot loess
 plot(x=lo_methyl_0$x[order(lo_methyl_0$x)], y=lo_methyl_0$fitted[order(lo_methyl_0$x)], 
-     type = 'l', lwd=2, ylim = c(0,90), col = my_pal[1])
+     type = 'l', lwd=2, ylim = c(0,100), col = my_pal[1], frame.plot = FALSE)
 legend("topleft", legend = c("0min", "30min", "60min", "90min"), fill = my_pal)
 lines(x=lo_methyl_30$x[order(lo_methyl_30$x)], y=lo_methyl_30$fitted[order(lo_methyl_30$x)], 
-      type = 'l', lwd=2, ylim = c(0,90), col = my_pal[2])
+      type = 'l', lwd=2, ylim = c(0,100), col = my_pal[2])
+# abline(v = c(13282, 13809, 12386, 13018, 11237, 11267, 14600, 14711))
 lines(x=lo_methyl_60$x[order(lo_methyl_60$x)], y=lo_methyl_60$fitted[order(lo_methyl_60$x)], 
       type = 'l', lwd=2, ylim = c(0,90), col = my_pal[3])
 lines(x=lo_methyl_90$x[order(lo_methyl_90$x)], y=lo_methyl_90$fitted[order(lo_methyl_90$x)], 
