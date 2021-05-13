@@ -33,6 +33,10 @@ methyl_90 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate
                   col.names = columns)
 methyl_filtered_90 <- methyl_90[coverage > 10, ..select_cols]
 
+methyl_ss <- fread("/Volumes/brothersseq/210403_Hello/modified_bases.aggregate02.6mA.bed",
+                   col.names = columns)
+methyl_filtered_ss <- methyl_ss[coverage > 10, ..select_cols]
+
 # uncomment for region of interest
 
 # for HMR
@@ -46,13 +50,13 @@ methyl_filtered_90 <- methyl_90[coverage > 10, ..select_cols]
 # end <- 14711 + 500 #20e3 #
 
 # left telomeres
-chromo <- "XIV"
-beg <- 0
-end <- 15000
+# chromo <- "XV"
+# beg <- 0
+# end <- 15000
 
 # right telomeres
-chromo <- "XI"
-end <- 670000
+chromo <- "VI"
+end <- 270161
 beg <- end - 15000
 
 
@@ -61,21 +65,25 @@ region_methyl_0 <- methyl_filtered_0[chrom == chromo & start > beg & start < end
 region_methyl_30 <- methyl_filtered_30[chrom == chromo & start > beg & start < end]
 region_methyl_60 <- methyl_filtered_60[chrom == chromo & start > beg & start < end]
 region_methyl_90 <- methyl_filtered_90[chrom == chromo & start > beg & start < end]
+region_methyl_ss <- methyl_filtered_ss[chrom == chromo & start > beg & start < end]
 
 #loess
 lo_methyl_0 <- loess(percentage ~ start, data=region_methyl_0, weights=region_methyl_0$coverage, enp.target = 100)
 lo_methyl_30 <- loess(percentage ~ start, data=region_methyl_30, weights=region_methyl_30$coverage, enp.target = 100)
 lo_methyl_60 <- loess(percentage ~ start, data=region_methyl_60, weights=region_methyl_60$coverage, enp.target = 100)
 lo_methyl_90 <- loess(percentage ~ start, data=region_methyl_90, weights=region_methyl_90$coverage, enp.target = 100)
+lo_methyl_ss <- loess(percentage ~ start, data=region_methyl_ss, weights=region_methyl_ss$coverage, enp.target = 100)
 
 #plot loess
 plot(x=lo_methyl_0$x[order(lo_methyl_0$x)], y=lo_methyl_0$fitted[order(lo_methyl_0$x)], 
      type = 'l', lwd=2, ylim = c(0,100), col = my_pal[1], frame.plot = FALSE)
-legend("topleft", legend = c("0min", "30min", "60min", "90min"), fill = my_pal)
+#legend("topleft", legend = c("0min", "30min", "60min", "90min"), fill = my_pal)
 lines(x=lo_methyl_30$x[order(lo_methyl_30$x)], y=lo_methyl_30$fitted[order(lo_methyl_30$x)], 
       type = 'l', lwd=2, ylim = c(0,100), col = my_pal[2])
 # abline(v = c(13282, 13809, 12386, 13018, 11237, 11267, 14600, 14711))
 lines(x=lo_methyl_60$x[order(lo_methyl_60$x)], y=lo_methyl_60$fitted[order(lo_methyl_60$x)], 
-      type = 'l', lwd=2, ylim = c(0,90), col = my_pal[3])
+      type = 'l', lwd=2, ylim = c(0,100), col = my_pal[3])
 lines(x=lo_methyl_90$x[order(lo_methyl_90$x)], y=lo_methyl_90$fitted[order(lo_methyl_90$x)], 
-      type = 'l', lwd=2, ylim = c(0,90), col = my_pal[4])
+      type = 'l', lwd=2, ylim = c(0,100), col = my_pal[4])
+lines(x=lo_methyl_ss$x[order(lo_methyl_ss$x)], y=lo_methyl_ss$fitted[order(lo_methyl_ss$x)], 
+      type = 'l', lwd=2, ylim = c(0,100), col = "black")
