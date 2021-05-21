@@ -17,11 +17,11 @@ select_cols <- c("chrom", "start", "coverage", "percentage")
 my_pal <- c("gray50", "forestgreen", "darkturquoise", "mediumpurple3")
 
 # change for different samples
-methyl_0 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate01.6mA.bed",
+methyl_0 <- fread("/Volumes/brothers_seq/201125_Turkey/megalodon_output_06/modified_bases.aggregate06.6mA.bed",
                 col.names = columns)
 methyl_filtered_0 <- methyl_0[coverage > 10, ..select_cols]
 
-methyl_30 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate03.6mA.bed",
+methyl_30 <- fread("/Volumes/brothers_seq/201125_Turkey/megalodon_output_07/modified_bases.aggregate07.6mA.bed",
                   col.names = columns)
 methyl_filtered_30 <- methyl_30[coverage > 10, ..select_cols]
 
@@ -55,9 +55,14 @@ methyl_filtered_ss <- methyl_ss[coverage > 10, ..select_cols]
 # end <- 15000
 
 # right telomeres
-chromo <- "VI"
-end <- 270161
-beg <- end - 15000
+# chromo <- "VI"
+# end <- 270161
+# beg <- end - 15000
+
+# other
+# chromo <- "I"
+# beg <- 124000
+# end <- 125000
 
 
 # filter to region of interest
@@ -80,7 +85,7 @@ plot(x=lo_methyl_0$x[order(lo_methyl_0$x)], y=lo_methyl_0$fitted[order(lo_methyl
 #legend("topleft", legend = c("0min", "30min", "60min", "90min"), fill = my_pal)
 lines(x=lo_methyl_30$x[order(lo_methyl_30$x)], y=lo_methyl_30$fitted[order(lo_methyl_30$x)], 
       type = 'l', lwd=2, ylim = c(0,100), col = my_pal[2])
-# abline(v = c(13282, 13809, 12386, 13018, 11237, 11267, 14600, 14711))
+# abline(v = c(68759, 68861))
 lines(x=lo_methyl_60$x[order(lo_methyl_60$x)], y=lo_methyl_60$fitted[order(lo_methyl_60$x)], 
       type = 'l', lwd=2, ylim = c(0,100), col = my_pal[3])
 lines(x=lo_methyl_90$x[order(lo_methyl_90$x)], y=lo_methyl_90$fitted[order(lo_methyl_90$x)], 
