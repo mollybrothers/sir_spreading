@@ -163,3 +163,21 @@ Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 11.5kb / Yield: 16Gb
 + JRY13220 (_sir3-8-Hia5_) - 25C: barcode03
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 11kb / Yield: 12.5Gb
+
+## 210531_Texas (megalodon ??)
+Grew these strains up to log phase overnight. Unfortunately, 12 samples is too much for the nanopore, so I don't have enough data to be happy with this run.
+### Strains:
++ JRY13134 (_sir3-8-EcoGII_) - 0min: barcode01
++ JRY13134 (_sir3-8-EcoGII_) - 30min: barcode02
++ JRY13134 (_sir3-8-EcoGII_) - 60min: barcode03
++ JRY13134 (_sir3-8-EcoGII_) - 90min: barcode04
++ JRY13134 (_sir3-8-EcoGII_) - 120min: barcode05
++ JRY13134 (_sir3-8-EcoGII_) - 150min: barcode06
++ JRY13213 (_sir3-8-EcoGII, dot1∆_) - 0min: barcode07
++ JRY13213 (_sir3-8-EcoGII, dot1∆_) - 30min: barcode08
++ JRY13213 (_sir3-8-EcoGII, dot1∆_) - 60min: barcode09
++ JRY13213 (_sir3-8-EcoGII, dot1∆_) - 90min: barcode10
++ JRY13213 (_sir3-8-EcoGII, dot1∆_) - 120min: barcode11
++ JRY13213 (_sir3-8-EcoGII, dot1∆_) - 150min: barcode12
+
+Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 9.6kb / Yield: 16.7Gb
