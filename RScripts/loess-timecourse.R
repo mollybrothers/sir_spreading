@@ -17,32 +17,36 @@ select_cols <- c("chrom", "start", "coverage", "percentage")
 my_pal <- c("gray50", "forestgreen", "darkturquoise", "mediumpurple3")
 
 # change for different samples
-methyl_0 <- fread("/Volumes/brothers_seq/201125_Turkey/megalodon_output_06/modified_bases.aggregate06.6mA.bed",
+methyl_0 <- fread("/Volumes/brothers_seq/210531_Texas/modified_bases.aggregate01.6mA.bed",
                 col.names = columns)
 methyl_filtered_0 <- methyl_0[coverage > 10, ..select_cols]
 
-methyl_30 <- fread("/Volumes/brothers_seq/201125_Turkey/megalodon_output_07/modified_bases.aggregate07.6mA.bed",
+methyl_30 <- fread("/Volumes/brothers_seq/210531_Texas/modified_bases.aggregate02.6mA.bed",
                   col.names = columns)
 methyl_filtered_30 <- methyl_30[coverage > 10, ..select_cols]
 
-methyl_60 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate05.6mA.bed",
+methyl_60 <- fread("/Volumes/brothers_seq/210531_Texas/modified_bases.aggregate03.6mA.bed",
                   col.names = columns)
 methyl_filtered_60 <- methyl_60[coverage > 10, ..select_cols]
 
-methyl_90 <- fread("/Volumes/brothersseq/210310_Russula/modified_bases.aggregate06.6mA.bed",
+methyl_90 <- fread("/Volumes/brothers_seq/210531_Texas/modified_bases.aggregate04.6mA.bed",
                   col.names = columns)
 methyl_filtered_90 <- methyl_90[coverage > 10, ..select_cols]
 
-methyl_ss <- fread("/Volumes/brothersseq/210403_Hello/modified_bases.aggregate02.6mA.bed",
+methyl_120 <- fread("/Volumes/brothers_seq/210531_Texas/modified_bases.aggregate05.6mA.bed",
                    col.names = columns)
-methyl_filtered_ss <- methyl_ss[coverage > 10, ..select_cols]
+methyl_filtered_120 <- methyl_120[coverage > 10, ..select_cols]
+
+methyl_150 <- fread("/Volumes/brothers_seq/210531_Texas/modified_bases.aggregate06.6mA.bed",
+                    col.names = columns)
+methyl_filtered_150 <- methyl_150[coverage > 10, ..select_cols]
 
 # uncomment for region of interest
 
 # for HMR
-# chromo <- "III"
-# beg <- 292674 - 500 #285e3 #
-# end <- 294864 + 500 #305e3 #
+chromo <- "III"
+beg <- 292674 - 500 #285e3 #
+end <- 294864 + 500 #305e3 #
 
 # for HML
 # chromo <- "III"
@@ -70,14 +74,16 @@ region_methyl_0 <- methyl_filtered_0[chrom == chromo & start > beg & start < end
 region_methyl_30 <- methyl_filtered_30[chrom == chromo & start > beg & start < end]
 region_methyl_60 <- methyl_filtered_60[chrom == chromo & start > beg & start < end]
 region_methyl_90 <- methyl_filtered_90[chrom == chromo & start > beg & start < end]
-region_methyl_ss <- methyl_filtered_ss[chrom == chromo & start > beg & start < end]
+region_methyl_120 <- methyl_filtered_120[chrom == chromo & start > beg & start < end]
+region_methyl_150 <- methyl_filtered_150[chrom == chromo & start > beg & start < end]
 
 #loess
 lo_methyl_0 <- loess(percentage ~ start, data=region_methyl_0, weights=region_methyl_0$coverage, enp.target = 100)
 lo_methyl_30 <- loess(percentage ~ start, data=region_methyl_30, weights=region_methyl_30$coverage, enp.target = 100)
 lo_methyl_60 <- loess(percentage ~ start, data=region_methyl_60, weights=region_methyl_60$coverage, enp.target = 100)
 lo_methyl_90 <- loess(percentage ~ start, data=region_methyl_90, weights=region_methyl_90$coverage, enp.target = 100)
-lo_methyl_ss <- loess(percentage ~ start, data=region_methyl_ss, weights=region_methyl_ss$coverage, enp.target = 100)
+lo_methyl_120 <- loess(percentage ~ start, data=region_methyl_120, weights=region_methyl_120$coverage, enp.target = 100)
+lo_methyl_150 <- loess(percentage ~ start, data=region_methyl_150, weights=region_methyl_150$coverage, enp.target = 100)
 
 #plot loess
 plot(x=lo_methyl_0$x[order(lo_methyl_0$x)], y=lo_methyl_0$fitted[order(lo_methyl_0$x)], 
@@ -90,5 +96,7 @@ lines(x=lo_methyl_60$x[order(lo_methyl_60$x)], y=lo_methyl_60$fitted[order(lo_me
       type = 'l', lwd=2, ylim = c(0,100), col = my_pal[3])
 lines(x=lo_methyl_90$x[order(lo_methyl_90$x)], y=lo_methyl_90$fitted[order(lo_methyl_90$x)], 
       type = 'l', lwd=2, ylim = c(0,100), col = my_pal[4])
-lines(x=lo_methyl_ss$x[order(lo_methyl_ss$x)], y=lo_methyl_ss$fitted[order(lo_methyl_ss$x)], 
+lines(x=lo_methyl_120$x[order(lo_methyl_120$x)], y=lo_methyl_120$fitted[order(lo_methyl_120$x)], 
       type = 'l', lwd=2, ylim = c(0,100), col = "black")
+lines(x=lo_methyl_150$x[order(lo_methyl_150$x)], y=lo_methyl_150$fitted[order(lo_methyl_150$x)], 
+      type = 'l', lwd=2, ylim = c(0,100), col = "red")
