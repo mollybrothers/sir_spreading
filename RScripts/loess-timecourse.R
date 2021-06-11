@@ -14,7 +14,7 @@ columns <- c("chrom", "start", "end", "name", "score",
              "strand", "startCodon", "stopCodon", "color", 
              "coverage", "percentage")
 select_cols <- c("chrom", "start", "coverage", "percentage")
-my_pal <- c("gray50", "forestgreen", "darkturquoise", "mediumpurple3")
+my_pal <- c("gray50", "forestgreen", "darkturquoise", "mediumpurple3", "deeppink", "black")
 
 # change for different samples
 methyl_0 <- fread("/Volumes/brothers_seq/210531_Texas/modified_bases.aggregate01.6mA.bed",
@@ -88,7 +88,7 @@ lo_methyl_150 <- loess(percentage ~ start, data=region_methyl_150, weights=regio
 #plot loess
 plot(x=lo_methyl_0$x[order(lo_methyl_0$x)], y=lo_methyl_0$fitted[order(lo_methyl_0$x)], 
      type = 'l', lwd=2, ylim = c(0,100), col = my_pal[1], frame.plot = FALSE)
-#legend("topleft", legend = c("0min", "30min", "60min", "90min"), fill = my_pal)
+legend("topleft", legend = c("0min", "30min", "60min", "90min", "120min", "150min"), fill = my_pal)
 lines(x=lo_methyl_30$x[order(lo_methyl_30$x)], y=lo_methyl_30$fitted[order(lo_methyl_30$x)], 
       type = 'l', lwd=2, ylim = c(0,100), col = my_pal[2])
 # abline(v = c(68759, 68861))
@@ -97,6 +97,6 @@ lines(x=lo_methyl_60$x[order(lo_methyl_60$x)], y=lo_methyl_60$fitted[order(lo_me
 lines(x=lo_methyl_90$x[order(lo_methyl_90$x)], y=lo_methyl_90$fitted[order(lo_methyl_90$x)], 
       type = 'l', lwd=2, ylim = c(0,100), col = my_pal[4])
 lines(x=lo_methyl_120$x[order(lo_methyl_120$x)], y=lo_methyl_120$fitted[order(lo_methyl_120$x)], 
-      type = 'l', lwd=2, ylim = c(0,100), col = "black")
+      type = 'l', lwd=2, ylim = c(0,100), col = my_pal[5])
 lines(x=lo_methyl_150$x[order(lo_methyl_150$x)], y=lo_methyl_150$fitted[order(lo_methyl_150$x)], 
-      type = 'l', lwd=2, ylim = c(0,100), col = "red")
+      type = 'l', lwd=2, ylim = c(0,100), col = my_pal[6])
