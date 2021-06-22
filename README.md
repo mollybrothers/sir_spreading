@@ -5,7 +5,7 @@
 # Running Megalodon
 https://github.com/nanoporetech/megalodon
 our current running version: 2.3.3
-guppy running version: 4.2.2
+guppy running version: 5.0.11
 
 ## necessary configurations
 Megalodon is run from a conda environment specified in the `guppy_conda.yml` file
@@ -37,7 +37,7 @@ For now, a workaround is to basecall using guppy_basecaller and guppy_barcoding,
 2. `per_read_probabilities.R`: make single-read plots of methylation probabilities based on data in the `per_read_modified_base_calls.txt` file from `megalodon_per_read_text_js.sh`. This script also filters out the reads with a basecalling qscore < 9 using data from the `sequencing_summary.txt` file output by `megalodon_js.sh`
 
 # Info on experiments
-## 200814_McClintock (megalodon v2.2.5)
+## 200814_McClintock (megalodon v2.2.5, guppy v4.2.2)
 ### Strains:
 + JRY11699 (no EcoGII): barcode01
 + JRY12838 (_sir3∆::EcoGII_): barcode02
@@ -45,13 +45,13 @@ For now, a workaround is to basecall using guppy_basecaller and guppy_barcoding,
 
 Flowcell: FLO-MIN106 / Kit: SQK-RBK004 / N50: 21kb / Yield: 6Gb
 
-## 201012_Doudna (megalodon v2.2.4)
+## 201012_Doudna (megalodon v2.2.4, guppy v4.2.2)
 ### Strains:
 + JRY13027 (_SIR3-EcoGII_)
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 / N50: 3kb / Yield: 13Gb
 
-## 201125_Turkey (megalodon v2.2.8)
+## 201125_Turkey (megalodon v2.2.8, guppy v4.2.2)
 ### Strains:
 + JRY11699 (no EcoGII): barcode04
 + JRY12838 (_sir3∆::EcoGII_): barcode05
@@ -60,7 +60,7 @@ Flowcell: FLO-MIN106 / Kit: SQK-LSK109 / N50: 3kb / Yield: 13Gb
 
 Flowcell: FLO-MIN106 / Kit: SQK-RBK004 / N50: 22kb / Yield: 12Gb
 
-## 201218_Mariah (megalodon v2.2.8)
+## 201218_Mariah (megalodon v2.2.8, guppy v4.2.2)
 Unfortunately bad run. Reads too long (N50 33kb) and pore occupancy started low and quickly depleted. Unfortunately unusable data.
 ### Strains:
 + JRY13110 (_sir3-8_) – 25C: barcode04
@@ -74,7 +74,7 @@ Unfortunately bad run. Reads too long (N50 33kb) and pore occupancy started low 
 
 Flowcell: FLO-MIN106 / Kit: SQK-RBK004 / N50: 33kb / Yield: 6Gb
 
-## 201223_Elf (megalodon v2.2.8)
+## 201223_Elf (megalodon v2.2.8, guppy v4.2.2)
 Data here is still not great in terms of coverage and pore occupancy, but qualitatively you can tell that the sir3-8-EcoGII strains have no methylation at 37C and do have methylation at 25C
 ### Strains:
 + JRY13114 (_sir3-8-EcoGII_) – 25C: barcode01
@@ -86,7 +86,7 @@ Data here is still not great in terms of coverage and pore occupancy, but qualit
 
 Flowcell: FLO-MIN106 / Kit: SQK-RBK004 / N50: 3kb / Yield: 3Gb
 
-## 210205_Ocular (megalodon v2.2.8)
+## 210205_Ocular (megalodon v2.2.8, guppy v4.2.2)
 Fragment size is a little smaller than I would have wanted (15-20kb), due to spinning the Covaris g-TUBE faster than I was supposed to. BUT the nanopore ran great and I got plenty of data.
 ### Strains:
 + JRY9316 (no EcoGII) - 25C: barcode07
@@ -98,7 +98,7 @@ Fragment size is a little smaller than I would have wanted (15-20kb), due to spi
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 7.5kb / Yield: 15.7Gb
 
-## 210208_Rescue (megalodon v2.2.10)
+## 210208_Rescue (megalodon v2.2.10, guppy v4.2.2)
 ### Strains:
 + JRY13114 (_sir3-8-EcoGII_) - 0min: barcode01
 + JRY13114 (_sir3-8-EcoGII_) - 5min: barcode02
@@ -109,7 +109,7 @@ Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 7.5kb / Yield: 15.7Gb
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 10.6kb / Yield: 16Gb
 
-## 210304_Amanita (megalodon v2.2.10)
+## 210304_Amanita (megalodon v2.2.10, guppy v4.2.2)
 Definitely see methylation here, but appears much more slowly (barely anything by time 90min) than with 210208_Rescue. Perhaps because I'm using a different strain...perhaps because of variability, perhaps because of culture density (these were at a higher OD when I started the experiment than 210208_Rescue). 210310_Russula, which uses JRY13114 like 210208_Rescue, was also taken at a higher culture density than 210208_Rescue and also seems to have slower kinetics.
 ### Strains:
 + JRY13134 (_sir3-8-EcoGII_) - 0min: barcode07
@@ -133,7 +133,7 @@ Accidentally did the experiment with JRY13140 (_sir3-8, hmr-i∆_) instead of JR
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 11kb / Yield: 24Gb
 
-## 210310_Russula (megalodon v2.2.10)
+## 210310_Russula (megalodon v2.2.10, guppy v4.2.2)
 Same strain as 210208_Rescue, but taken at a higher culture density and seems to have slower kinetics (similar to 210304_Amanita).
 ### Strains:
 + JRY13114 (_sir3-8-EcoGII_) - 0min: barcode01
@@ -145,7 +145,7 @@ Same strain as 210208_Rescue, but taken at a higher culture density and seems to
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 9.3kb / Yield: 16.5Gb
 
-## 210311_Hygrocybe (megalodon v2.2.10)
+## 210311_Hygrocybe (megalodon v2.2.10, guppy v4.2.2)
 Kinetics are slower than Rescue, just like Amanita and Russula runs.
 ### Strains:
 + JRY13141 (_sir3-8-EcoGII, HMR-i∆_) - 0min: barcode07
@@ -157,7 +157,7 @@ Kinetics are slower than Rescue, just like Amanita and Russula runs.
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 11.5kb / Yield: 16Gb
 
-## 210403_Hello (megalodon v2.2.10)
+## 210403_Hello (megalodon v2.2.10, guppy v4.2.2)
 ### Strains:
 + JRY9316 (no EcoGII) - 25C: barcode01
 + JRY13114 (_sir3-8-EcoGII_) - 25C: barcode02
@@ -165,7 +165,7 @@ Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 11.5kb / Yield: 16Gb
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 11kb / Yield: 12.5Gb
 
-## 210531_Texas (megalodon 2.2.10)
+## 210531_Texas (megalodon 2.2.10, guppy v4.2.2)
 Grew these strains up to log phase overnight. Unfortunately, 12 samples is probably too much for good data (I like to get 3Gb per sample, this is only ~1.4Gb per sample). The aggregate data does look okay, but I haven't looked at the single read data yet.
 ### Strains:
 + JRY13134 (_sir3-8-EcoGII_) - 0min: barcode01
@@ -183,7 +183,7 @@ Grew these strains up to log phase overnight. Unfortunately, 12 samples is proba
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 9.6kb / Yield: 16.7Gb
 
-## 210607_Dotty (megalodon 2.3.3)
+## 210607_Dotty (megalodon 2.3.3, guppy v5.0.11)
 This strain was split into 2 runs: JRY13214 was first (run 1), then JRY13114 (run 2)
 
 NOTE: ran the original guppy basecalling using the FAST config file (it actually didn't seem all that much faster, so probably won't do that in the future)
