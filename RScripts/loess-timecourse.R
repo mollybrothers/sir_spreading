@@ -17,27 +17,27 @@ select_cols <- c("chrom", "start", "coverage", "percentage")
 my_pal <- c("gray50", "forestgreen", "darkturquoise", "mediumpurple3", "deeppink", "black")
 
 # change for different samples
-methyl_0 <- fread("/Volumes/brothers_seq/210531_Texas/modified_bases.aggregate01.6mA.bed",
+methyl_0 <- fread("/home/mbrothers/nanopore/210531_Texas/modified_bases.aggregate01.6mA.bed",
                 col.names = columns)
 methyl_filtered_0 <- methyl_0[coverage > 10, ..select_cols]
 
-methyl_30 <- fread("/Volumes/brothers_seq/210531_Texas/modified_bases.aggregate02.6mA.bed",
+methyl_30 <- fread("/home/mbrothers/nanopore/210531_Texas/modified_bases.aggregate02.6mA.bed",
                   col.names = columns)
 methyl_filtered_30 <- methyl_30[coverage > 10, ..select_cols]
 
-methyl_60 <- fread("/Volumes/brothers_seq/210531_Texas/modified_bases.aggregate03.6mA.bed",
+methyl_60 <- fread("/home/mbrothers/nanopore/210531_Texas/modified_bases.aggregate03.6mA.bed",
                   col.names = columns)
 methyl_filtered_60 <- methyl_60[coverage > 10, ..select_cols]
 
-methyl_90 <- fread("/Volumes/brothers_seq/210531_Texas/modified_bases.aggregate04.6mA.bed",
+methyl_90 <- fread("/home/mbrothers/nanopore/210531_Texas/modified_bases.aggregate04.6mA.bed",
                   col.names = columns)
 methyl_filtered_90 <- methyl_90[coverage > 10, ..select_cols]
 
-methyl_120 <- fread("/Volumes/brothers_seq/210531_Texas/modified_bases.aggregate05.6mA.bed",
+methyl_120 <- fread("/home/mbrothers/nanopore/210531_Texas/modified_bases.aggregate05.6mA.bed",
                    col.names = columns)
 methyl_filtered_120 <- methyl_120[coverage > 10, ..select_cols]
 
-methyl_150 <- fread("/Volumes/brothers_seq/210531_Texas/modified_bases.aggregate06.6mA.bed",
+methyl_150 <- fread("/home/mbrothers/nanopore/210531_Texas/modified_bases.aggregate06.6mA.bed",
                     col.names = columns)
 methyl_filtered_150 <- methyl_150[coverage > 10, ..select_cols]
 

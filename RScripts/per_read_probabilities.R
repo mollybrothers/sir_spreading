@@ -19,8 +19,8 @@ library(data.table)
 library(tidyverse)
 library(wesanderson)
 
-mega_directory <- "/Volumes/brothersseq/210403_Hello/"
-chr <- "XI" #which chromosome?
+mega_directory <- "/home/mbrothers/nanopore/210607_Texas/"
+chr <- "III" #which chromosome?
 barcode <- "01"
 
 probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
