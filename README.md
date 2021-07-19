@@ -206,3 +206,11 @@ RUN 1 / Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 9.1kb / Yield
 
 RUN 2 / Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 8.8kb / Yield: 20Gb
 
+## 210706_Fireworks (megalodon v2.3.3, guppy v5.0.11)
+### Strains:
++ JRY13027 (_SIR3-EcoGII_): barcode09
++ JRY13030 (_sir3∆::EcoGII_): barcode10
++ JRY13438 (_sir3-bah∆-EcoGII_): barcode11
++ JRY13436 (_sir3-wH∆-EcoGII_): barcode12
+
+Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 9.8kb / Yield: 12Gb
