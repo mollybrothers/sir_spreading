@@ -165,7 +165,7 @@ Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 11.5kb / Yield: 16Gb
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 11kb / Yield: 12.5Gb
 
-## 210531_Texas (megalodon 2.2.10, guppy v4.2.2)
+## 210531_Texas (megalodon v2.2.10, guppy v4.2.2)
 Grew these strains up to log phase overnight. Unfortunately, 12 samples is probably too much for good data (I like to get 3Gb per sample, this is only ~1.4Gb per sample). The aggregate data does look okay, but I haven't looked at the single read data yet.
 ### Strains:
 + JRY13134 (_sir3-8-EcoGII_) - 0min: barcode01
@@ -183,10 +183,8 @@ Grew these strains up to log phase overnight. Unfortunately, 12 samples is proba
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 9.6kb / Yield: 16.7Gb
 
-## 210607_Dotty (megalodon 2.3.3, guppy v5.0.11)
+## 210607_Dotty (megalodon v2.3.3, guppy v5.0.11)
 This strain was split into 2 runs: JRY13214 was first (run 1), then JRY13114 (run 2)
-
-NOTE: ran the original guppy basecalling using the FAST config file (it actually didn't seem all that much faster, so probably won't do that in the future)
 
 ### Strains:
 + JRY13114 (_sir3-8-EcoGII_) - 0min: barcode01
