@@ -212,3 +212,12 @@ RUN 2 / Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 8.8kb / Yield
 + JRY13436 (_sir3-wH∆-EcoGII_): barcode12
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 9.8kb / Yield: 12Gb
+
+## 210730_Ashby (megalodon v2.3.3, guppy v5.0.11)
+### Strains:
++ JRY12840 (_SIR3-EcoGII_): barcode01
++ JRY13029 (_sir3∆::EcoGII_): barcode02
++ JRY13437 (_sir3-wH∆-EcoGII_): barcode03
++ JRY13439 (_sir3-bah∆-EcoGII_): barcode04
+
+Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 10kb / Yield: 12.6Gb
