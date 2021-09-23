@@ -1,0 +1,220 @@
+---
+title: "210917_Gorgonzola_results"
+author: "Molly Brothers"
+date: "9/23/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(tidyverse)
+```
+
+```{r SIR2-ecoGII v sir2D-ecoGII constitutive aggregate, fig.height=3, fig.width=8}
+# LOESS PLOT FUNCTION
+# d = data, ch = chromosome, b = beginning, e = end
+plot_loess <- function(d0, d1, d2, d3, ch, b, e){
+  region_methyl_0 <- d0[chrom == ch & start > b & start < e]
+  lo_methyl_0 <- loess(percentage ~ start, data = region_methyl_0, weights = region_methyl_0$coverage, enp.target = 100)
+  
+  region_methyl_1 <- d1[chrom == ch & start > b & start < e]
+  lo_methyl_1 <- loess(percentage ~ start, data = region_methyl_1, weights = region_methyl_1$coverage, enp.target = 100)
+  
+  region_methyl_2 <- d2[chrom == ch & start > b & start < e]
+  lo_methyl_2 <- loess(percentage ~ start, data = region_methyl_2, weights = region_methyl_2$coverage, enp.target = 100)
+  
+  region_methyl_3 <- d3[chrom == ch & start > b & start < e]
+  lo_methyl_3 <- loess(percentage ~ start, data = region_methyl_3, weights = region_methyl_3$coverage, enp.target = 100)
+  
+  plot(x=lo_methyl_0$x[order(lo_methyl_0$x)], y=lo_methyl_0$fitted[order(lo_methyl_0$x)], 
+     type = 'l', lwd=2, ylim = c(0,100), col = "deeppink", frame.plot = FALSE,
+     xlab = "", ylab = "")
+  lines(x=lo_methyl_1$x[order(lo_methyl_1$x)], y=lo_methyl_1$fitted[order(lo_methyl_1$x)],
+      type = 'l', lwd=2, ylim = c(0,100), col = "mediumpurple4")
+  lines(x=lo_methyl_2$x[order(lo_methyl_2$x)], y=lo_methyl_2$fitted[order(lo_methyl_2$x)],
+      type = 'l', lwd=2, ylim = c(0,100), col = "black")
+  lines(x=lo_methyl_3$x[order(lo_methyl_3$x)], y=lo_methyl_3$fitted[order(lo_methyl_3$x)],
+      type = 'l', lwd=2, ylim = c(0,100), col = "gray50")
+  box(bty="l")
+}
+
+columns <- c("chrom", "start", "end", "name", "score", 
+             "strand", "startCodon", "stopCodon", "color", 
+             "coverage", "percentage")
+select_cols <- c("chrom", "start", "coverage", "percentage")
+my_pal <- c("gray50", "forestgreen", "darkturquoise", "mediumpurple3", "deeppink", "black")
+
+# DATA
+methyl_5 <- fread("/home/mbrothers/nanopore/210917_Gorgonzola/modified_bases.aggregate05.6mA.bed",
+                col.names = columns)
+methyl_filtered_5 <- methyl_5[coverage > 10, ..select_cols]
+
+methyl_6 <- fread("/home/mbrothers/nanopore/210917_Gorgonzola/modified_bases.aggregate06.6mA.bed",
+                col.names = columns)
+methyl_filtered_6 <- methyl_6[coverage > 10, ..select_cols]
+
+methyl_7 <- fread("/home/mbrothers/nanopore/210917_Gorgonzola/modified_bases.aggregate07.6mA.bed",
+                col.names = columns)
+methyl_filtered_7 <- methyl_7[coverage > 10, ..select_cols]
+
+methyl_8 <- fread("/home/mbrothers/nanopore/210917_Gorgonzola/modified_bases.aggregate08.6mA.bed",
+                col.names = columns)
+methyl_filtered_8 <- methyl_8[coverage > 10, ..select_cols]
+
+#PLOT
+# PLOT CONTROL REGION
+plot_loess(methyl_filtered_5, methyl_filtered_6, methyl_filtered_7, methyl_filtered_8, "III", 80e3, 105e3)
+# with genes:
+# abline(v = c(79162, 82275, 83620, 83997, 91324, 92418, 92777, 94270, 94621, 95763, 96281, 101191, 
+#              101317, 101788, 102075, 103358, 103571, 104350))
+
+# PLOT HML
+plot_loess(methyl_filtered_5, methyl_filtered_6, methyl_filtered_7, methyl_filtered_8, "III", 0, 25e3)
+# with genes:
+# abline(v = c(11146, 14849, 9706, 11082, 6479, 8326, 15798, 16880, 17290, 18561, 18816, 22106, 22429, 23379,
+#              23584, 23925, 23523, 23981, 24032, 24325))
+# # with telomere:
+# abline(v = 1098)
+
+# PLOT HMR
+plot_loess(methyl_filtered_5, methyl_filtered_6, methyl_filtered_7, methyl_filtered_8, "III", 280e3, 305e3)
+# with genes:
+# abline(v = c(292674, 292769, 294805, 294864, 288170, 289258, 297049, 298605, 286762, 287937, 280117, 286443,
+#              301271, 302221, 304361, 305467))
+# with Ty elements:
+# abline(v = c(291922, 292167, 291373, 291712, 295958, 296190, 295003, 295330), col = "red")
+# with tRNA:
+# abline(v = c(295484, 295556), col = "green")
+
+# PLOT rDNA
+plot_loess(methyl_filtered_5, methyl_filtered_6, methyl_filtered_7, methyl_filtered_8, "XII", 450e3, 470e3)
+```
+
+```{r SIR2-ecoGII constitutive single-read HML and HMR, fig.height=4, fig.width=11}
+# PLOT FUNCTION
+plot_binary <- function(data) {
+  ggplot(data, aes(x = pos, y = read_id, color = methylation)) +
+    geom_point(shape = 15) +
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.title.y = element_blank(),
+          axis.title.x = element_blank(),
+          panel.grid = element_blank(),
+          panel.background = element_blank(),
+          text = element_text(size = 15, color = "black", family = "Arial"),
+          legend.position = "top",
+          legend.title = element_blank(),
+          legend.key = element_blank()) +
+    scale_color_manual(values = c("gray90", "mediumpurple4"), na.value = "white")
+}
+
+# DATA
+mega_directory <- "/home/mbrothers/nanopore/210917_Gorgonzola/"
+chr <- "III" #which chromosome?
+barcode <- "05"
+
+probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
+                    select = c(1, 2, 3, 4, 5),
+                    col.names = c("read_id", "chrm", "strand", "pos", "mod_log_prob"))
+
+#1. create a binary column; if 10^mod_log_prob is >0.8, set as methylated (m6A). if < 0.8, set as unmethylated (A)
+#2. add start and end positions for each read_id
+#3. find the average methylation of each read (for ordering on plot)
+#4. order by strand, avg methyl and read_id
+probs_filtered <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE, FALSE)][
+  , list(read_id, pos, methylation, strand)][
+    , start_pos := min(pos), by = read_id][
+      , end_pos := max(pos), by = read_id][
+        , avg_methyl := mean(methylation == TRUE), by = read_id][
+          order(-avg_methyl, read_id)]
+
+# extract each unique read_id to set the order (in same order as in the data table to start with) for single read plots
+read_names <- unique(probs_filtered$read_id)
+probs_filtered$read_id = factor(probs_filtered$read_id, levels = read_names)
+
+# PLOT CONTROL REGION
+control_region <- c(95e3, 100e3)
+control <- probs_filtered[start_pos <= control_region[1]][end_pos >= control_region[2]][
+  pos %between% control_region]
+plot_binary(control)
+
+# PLOT HML
+HML_region <- c(10.5e3, 15.5e3)
+HML_E <- c(11237, 11268)
+HML_I <- c(14600, 14711)
+
+HML_all <- probs_filtered[start_pos <= HML_region[1]][end_pos >= HML_region[2]][
+  pos %between% HML_region]
+HML_all <- droplevels(HML_all)
+hmlp <- plot_binary(HML_all)
+hmlp
+
+#plot with vertical lines for silencers and gene starts and stops
+hmlp + geom_vline(xintercept = c(HML_E[1], HML_E[2], HML_I[1], HML_I[2], 13282, 13809, 12386, 13018))
+
+# PLOT HMR
+HMR_region <- c(291e3, 296e3)
+HMR_E = c(292674, 292769)
+HMR_I = c(294805, 294864)
+
+HMR_all <- probs_filtered[start_pos <= HMR_region[1]][end_pos >= HMR_region[2]][
+  pos %between% HMR_region]
+HMR_all <- droplevels(HMR_all)
+hmrp <- plot_binary(HMR_all)
+hmrp
+
+#plot with vertical lines for silencers and gene starts and stops
+hmrp + geom_vline(xintercept = c(HMR_E[1], HMR_E[2], HMR_I[1], HMR_I[2], 293835, 294321, 293179, 293538))
+```
+
+```{r SIR2-ecoGII constitutive single-read rDNA, fig.height=4, fig.width=11}
+# PLOT FUNCTION
+plot_binary <- function(data) {
+  ggplot(data, aes(x = pos, y = read_id, color = methylation)) +
+    geom_point(shape = 15) +
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.title.y = element_blank(),
+          axis.title.x = element_blank(),
+          panel.grid = element_blank(),
+          panel.background = element_blank(),
+          text = element_text(size = 15, color = "black", family = "Arial"),
+          legend.position = "top",
+          legend.title = element_blank(),
+          legend.key = element_blank()) +
+    scale_color_manual(values = c("gray90", "mediumpurple4"), na.value = "white")
+}
+
+# DATA
+mega_directory <- "/home/mbrothers/nanopore/210917_Gorgonzola/"
+chr <- "XII" #which chromosome?
+barcode <- "05"
+
+probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
+                    select = c(1, 2, 3, 4, 5),
+                    col.names = c("read_id", "chrm", "strand", "pos", "mod_log_prob"))
+
+#1. create a binary column; if 10^mod_log_prob is >0.8, set as methylated (m6A). if < 0.8, set as unmethylated (A)
+#2. add start and end positions for each read_id
+#3. find the average methylation of each read (for ordering on plot)
+#4. order by strand, avg methyl and read_id
+probs_filtered <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE, FALSE)][
+  , list(read_id, pos, methylation, strand)][
+    , start_pos := min(pos), by = read_id][
+      , end_pos := max(pos), by = read_id][
+        , avg_methyl := mean(methylation == TRUE), by = read_id][
+          order(-avg_methyl, read_id)]
+
+# extract each unique read_id to set the order (in same order as in the data table to start with) for single read plots
+read_names <- unique(probs_filtered$read_id)
+probs_filtered$read_id = factor(probs_filtered$read_id, levels = read_names)
+
+rDNA_region <- c(455e3, 460e3)
+rDNA_all <- probs_filtered[start_pos <= rDNA_region[1]+1000][end_pos >= rDNA_region[2]-1000][
+  pos %between% rDNA_region]
+rDNA_all <- droplevels(rDNA_all)
+rdnap <- plot_binary(rDNA_all)
+rdnap
+```
+
