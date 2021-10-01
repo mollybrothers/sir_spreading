@@ -1,0 +1,192 @@
+---
+title: "Fig2"
+author: "Molly Brothers"
+date: "7/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(tidyverse)
+```
+
+```{r loess sir3-8 temp-ecoGII difference, fig.height=3, fig.width=8}
+# LOESS PLOT FUNCTION
+# d = data, ch = chromosome, b = beginning, e = end
+plot_loess <- function(d0, d1, ch, b, e){
+  region_methyl_0 <- d0[chrom == ch & start > b & start < e]
+  lo_methyl_0 <- loess(percentage ~ start, data = region_methyl_0, weights = region_methyl_0$coverage, enp.target = 100)
+  
+  region_methyl_1 <- d1[chrom == ch & start > b & start < e]
+  lo_methyl_1 <- loess(percentage ~ start, data = region_methyl_1, weights = region_methyl_1$coverage, enp.target = 100)
+  
+  plot(x=lo_methyl_0$x[order(lo_methyl_0$x)], y=lo_methyl_0$fitted[order(lo_methyl_0$x)], 
+     type = 'l', lwd=2, ylim = c(0,100), col = "darkturquoise", frame.plot = FALSE,
+     xlab = "", ylab = "")
+  lines(x=lo_methyl_1$x[order(lo_methyl_1$x)], y=lo_methyl_1$fitted[order(lo_methyl_1$x)],
+      type = 'l', lwd=2, ylim = c(0,100), col = "mediumpurple4")
+  box(bty="l")
+}
+
+# DATA
+columns <- c("chrom", "start", "end", "name", "score", 
+             "strand", "startCodon", "stopCodon", "color", 
+             "coverage", "percentage")
+select_cols <- c("chrom", "start", "coverage", "percentage")
+
+# sir3-8-ecoGII 37C
+methyl_37 <- fread("/home/mbrothers/nanopore/210205_Ocular/modified_bases.aggregate11.6mA.bed",
+                col.names = columns)
+methyl_filtered_37 <- methyl_37[coverage > 10, ..select_cols]
+
+# sir3-8-ecoGII 25C
+methyl_25 <- fread("/home/mbrothers/nanopore/210205_Ocular/modified_bases.aggregate08.6mA.bed",
+                col.names = columns)
+methyl_filtered_25 <- methyl_25[coverage > 10, ..select_cols]
+
+# PLOT CONTROL REGION
+plot_loess(methyl_filtered_37, methyl_filtered_25, "III", 80e3, 105e3)
+# with genes:
+# abline(v = c(79162, 82275, 83620, 83997, 91324, 92418, 92777, 94270, 94621, 95763, 96281, 101191, 
+#              101317, 101788, 102075, 103358, 103571, 104350))
+
+# PLOT HML
+plot_loess(methyl_filtered_37, methyl_filtered_25, "III", 0, 25e3)
+# with genes:
+# abline(v = c(11146, 14849, 9706, 11082, 6479, 8326, 15798, 16880, 17290, 18561, 18816, 22106, 22429, 23379,
+#              23584, 23925, 23523, 23981, 24032, 24325))
+# # with telomere:
+# abline(v = 1098)
+
+# PLOT HMR
+plot_loess(methyl_filtered_37, methyl_filtered_25, "III", 280e3, 305e3)
+# with genes:
+# abline(v = c(292674, 292769, 294805, 294864, 288170, 289258, 297049, 298605, 286762, 287937, 280117, 286443,
+#              301271, 302221, 304361, 305467))
+# with Ty elements:
+# abline(v = c(291922, 292167, 291373, 291712, 295958, 296190, 295003, 295330), col = "red")
+# with tRNA:
+# abline(v = c(295484, 295556), col = "green")
+
+# PLOT TELOMERES
+chromosomes <- c("I", "II", "III", "IV", "V", "VI", "VII", "VIII",
+                 "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI")
+right_ends <- c(230218, 813184, 316620, 1531933, 576874, 270161, 1090940, 562643,
+                439888, 745751, 666816, 1078177, 917000, 765000, 1091291, 948010)
+for(i in 1:16){
+  plot_loess(methyl_filtered_37, methyl_filtered_25, chromosomes[i], 0, 10e3)
+}
+
+for(i in 1:16){
+  plot_loess(methyl_filtered_37, methyl_filtered_25, chromosomes[i], right_ends[i]-10e3, right_ends[i])
+}
+```
+
+```{r time course, fig.height=3, fig.width=8}
+# PLOT FUNCTION
+# t = time point data, ch = chromosome, b = beginning, e = end
+plot_timecourse <- function(t0, t1, t2, t3, t4, t5, tss, ch, b, e){
+  region_methyl_0 <- t0[chrom == ch & start > b & start < e]
+  lo_methyl_0 <- loess(percentage ~ start, data=region_methyl_0, weights=region_methyl_0$coverage, enp.target = 100)
+
+  region_methyl_1 <- t1[chrom == ch & start > b & start < e]
+  lo_methyl_1 <- loess(percentage ~ start, data=region_methyl_1, weights=region_methyl_1$coverage, enp.target = 100)
+
+  region_methyl_2 <- t2[chrom == ch & start > b & start < e]
+  lo_methyl_2 <- loess(percentage ~ start, data=region_methyl_2, weights=region_methyl_2$coverage, enp.target = 100)
+
+  region_methyl_3 <- t3[chrom == ch & start > b & start < e]
+  lo_methyl_3 <- loess(percentage ~ start, data=region_methyl_3, weights=region_methyl_3$coverage, enp.target = 100)
+
+  region_methyl_4 <- t4[chrom == ch & start > b & start < e]
+  lo_methyl_4 <- loess(percentage ~ start, data=region_methyl_4, weights=region_methyl_4$coverage, enp.target = 100)
+
+  region_methyl_5 <- t5[chrom == ch & start > b & start < e]
+  lo_methyl_5 <- loess(percentage ~ start, data=region_methyl_5, weights=region_methyl_5$coverage, enp.target = 100)
+  
+  region_methyl_ss <- tss[chrom == ch & start > b & start < e]
+  lo_methyl_ss <- loess(percentage ~ start, data=region_methyl_ss, weights=region_methyl_ss$coverage, enp.target = 100)
+
+  plot(x=lo_methyl_0$x[order(lo_methyl_0$x)], y=lo_methyl_0$fitted[order(lo_methyl_0$x)],
+     type = 'l', lwd=2, ylim = c(0,100), col = "black", frame.plot = FALSE,
+     xlab = "", ylab = "")
+  lines(x=lo_methyl_1$x[order(lo_methyl_1$x)], y=lo_methyl_1$fitted[order(lo_methyl_1$x)],
+        type = 'l', lwd=2, ylim = c(0,100), col = "forestgreen")
+  # lines(x=lo_methyl_2$x[order(lo_methyl_2$x)], y=lo_methyl_2$fitted[order(lo_methyl_2$x)],
+  #       type = 'l', lwd=2, ylim = c(0,100), col = "black")
+  lines(x=lo_methyl_3$x[order(lo_methyl_3$x)], y=lo_methyl_3$fitted[order(lo_methyl_3$x)],
+        type = 'l', lwd=2, ylim = c(0,100), col = "mediumpurple3")
+  # lines(x=lo_methyl_4$x[order(lo_methyl_4$x)], y=lo_methyl_4$fitted[order(lo_methyl_4$x)],
+  #       type = 'l', lwd=2, ylim = c(0,100), col = "darkturquoise")
+  lines(x=lo_methyl_5$x[order(lo_methyl_5$x)], y=lo_methyl_5$fitted[order(lo_methyl_5$x)],
+        type = 'l', lwd=2, ylim = c(0,100), col = "deeppink")
+  lines(x=lo_methyl_ss$x[order(lo_methyl_ss$x)], y=lo_methyl_ss$fitted[order(lo_methyl_ss$x)],
+        type = 'l', lwd=2, lty = 3, ylim = c(0,100), col = "gray50")
+  box(bty="l")
+}
+
+# DATA
+columns <- c("chrom", "start", "end", "name", "score", 
+             "strand", "startCodon", "stopCodon", "color", 
+             "coverage", "percentage")
+select_cols <- c("chrom", "start", "coverage", "percentage")
+my_pal <- c("gray50", "forestgreen", "darkturquoise", "mediumpurple3", "deeppink", "black")
+
+# change for different samples
+methyl_0 <- fread("/home/mbrothers/nanopore/210304_Amanita/modified_bases.aggregate07.6mA.bed",
+                col.names = columns)
+methyl_filtered_0 <- methyl_0[coverage > 10, ..select_cols]
+
+methyl_15 <- fread("/home/mbrothers/nanopore/210304_Amanita/modified_bases.aggregate08.6mA.bed",
+                  col.names = columns)
+methyl_filtered_15 <- methyl_15[coverage > 10, ..select_cols]
+
+methyl_30 <- fread("/home/mbrothers/nanopore/210304_Amanita/modified_bases.aggregate09.6mA.bed",
+                  col.names = columns)
+methyl_filtered_30 <- methyl_30[coverage > 10, ..select_cols]
+
+methyl_45 <- fread("/home/mbrothers/nanopore/210304_Amanita/modified_bases.aggregate10.6mA.bed",
+                  col.names = columns)
+methyl_filtered_45 <- methyl_45[coverage > 10, ..select_cols]
+
+methyl_60 <- fread("/home/mbrothers/nanopore/210304_Amanita/modified_bases.aggregate11.6mA.bed",
+                   col.names = columns)
+methyl_filtered_60 <- methyl_60[coverage > 10, ..select_cols]
+
+methyl_90 <- fread("/home/mbrothers/nanopore/210304_Amanita/modified_bases.aggregate12.6mA.bed",
+                    col.names = columns)
+methyl_filtered_90 <- methyl_90[coverage > 10, ..select_cols]
+
+methyl_ss <- fread("/home/mbrothers/nanopore/210205_Ocular/modified_bases.aggregate08.6mA.bed",
+                    col.names = columns)
+methyl_filtered_ss <- methyl_ss[coverage > 10, ..select_cols]
+
+# PLOT CONTROL
+plot_timecourse(methyl_0, methyl_15, methyl_30, methyl_45, methyl_60, methyl_90, methyl_ss, "III", 90e3, 95e3)
+
+# PLOT HML
+plot_timecourse(methyl_0, methyl_15, methyl_30, methyl_45, methyl_60, methyl_90, methyl_ss, "III", 10e3, 15.5e3)
+# with genes:
+abline(v = c(11146, 14849, 11082, 13282, 13809, 12386, 13018))
+
+# PLOT HMR
+plot_timecourse(methyl_0, methyl_15, methyl_30, methyl_45, methyl_60, methyl_90, methyl_ss, "III", 292e3, 295.5e3)
+# with genes:
+abline(v = c(292674, 292769, 294805, 294864, 293179, 293538, 293835, 294321))
+
+# PLOT TELOMERES
+chromosomes <- c("I", "II", "III", "IV", "V", "VI", "VII", "VIII",
+                 "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI")
+right_ends <- c(230218, 813184, 316620, 1531933, 576874, 270161, 1090940, 562643,
+                439888, 745751, 666816, 1078177, 917000, 765000, 1091291, 948010)
+for(i in 1:16){
+  plot_timecourse(methyl_0, methyl_15, methyl_30, methyl_45, methyl_60, methyl_90, methyl_ss, chromosomes[i], 0, 10e3)
+}
+
+for(i in 1:16){
+  plot_timecourse(methyl_0, methyl_15, methyl_30, methyl_45, methyl_60, methyl_90, methyl_ss, chromosomes[i], right_ends[i]-10e3, right_ends[i])
+}
+
+```
+
