@@ -1,0 +1,86 @@
+---
+title: "WT telomeres"
+author: "Molly Brothers"
+date: "7/22/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(tidyverse)
+```
+
+
+```{r WT telomeres SIR234, fig.height=3, fig.width=8}
+plot_loess <- function(d0, d1, d2, d3, ch, b, e){
+  region_methyl_0 <- d0[chrom == ch & start > b & start < e]
+  lo_methyl_0 <- loess(percentage ~ start, data = region_methyl_0, weights = region_methyl_0$coverage, enp.target = 100)
+  
+  region_methyl_1 <- d1[chrom == ch & start > b & start < e]
+  lo_methyl_1 <- loess(percentage ~ start, data = region_methyl_1, weights = region_methyl_1$coverage, enp.target = 100)
+
+  region_methyl_2 <- d2[chrom == ch & start > b & start < e]
+  lo_methyl_2 <- loess(percentage ~ start, data = region_methyl_2, weights = region_methyl_2$coverage, enp.target = 100)
+  
+  region_methyl_3 <- d3[chrom == ch & start > b & start < e]
+  lo_methyl_3 <- loess(percentage ~ start, data = region_methyl_3, weights = region_methyl_3$coverage, enp.target = 100)
+  
+  plot(x=lo_methyl_0$x[order(lo_methyl_0$x)], y=lo_methyl_0$fitted[order(lo_methyl_0$x)], 
+     type = 'l', lwd=2, ylim = c(0,100), col = "mediumpurple4", frame.plot = FALSE,
+     xlab = "", ylab = "")
+  lines(x=lo_methyl_1$x[order(lo_methyl_1$x)], y=lo_methyl_1$fitted[order(lo_methyl_1$x)],
+      type = 'l', lwd=2, ylim = c(0,100), col = "black")
+  lines(x=lo_methyl_2$x[order(lo_methyl_2$x)], y=lo_methyl_2$fitted[order(lo_methyl_2$x)],
+      type = 'l', lwd=2, ylim = c(0,100), col = "forestgreen")
+  lines(x=lo_methyl_3$x[order(lo_methyl_3$x)], y=lo_methyl_3$fitted[order(lo_methyl_3$x)],
+      type = 'l', lwd=2, ylim = c(0,100), col = "deeppink")
+  box(bty="l")
+}
+
+# DATA
+columns <- c("chrom", "start", "end", "name", "score", 
+             "strand", "startCodon", "stopCodon", "color", 
+             "coverage", "percentage")
+select_cols <- c("chrom", "start", "coverage", "percentage")
+
+# SIR3-EcoGII
+methyl_3 <- fread("/home/mbrothers/nanopore/210730_Ashby/megalodon_output_01/modified_bases.aggregate01.6mA.bed",
+                col.names = columns)
+methyl_filtered_3 <- methyl_3[coverage > 10, ..select_cols]
+
+# sir3∆::EcoGII
+methyl_D <- fread("/home/mbrothers/nanopore/210730_Ashby/megalodon_output_02/modified_bases.aggregate02.6mA.bed",
+                col.names = columns)
+methyl_filtered_D <- methyl_D[coverage > 10, ..select_cols]
+
+# SIR2-EcoGII
+methyl_2 <- fread("/home/mbrothers/nanopore/210917_Gorgonzola/modified_bases.aggregate05.6mA.bed",
+                col.names = columns)
+methyl_filtered_2 <- methyl_2[coverage > 10, ..select_cols]
+
+# SIR4-EcoGII
+methyl_4 <- fread("/home/mbrothers/nanopore/210614_Raja/modified_bases.aggregate.6mA.bed",
+                col.names = columns)
+methyl_filtered_4 <- methyl_4[coverage > 10, ..select_cols]
+
+# tel01L
+plot_loess(methyl_filtered_3, methyl_filtered_D, methyl_filtered_2, methyl_filtered_4, "I", 0, 15e3)
+# abline(v = c(801, 337, 336, 63, 62, 1))
+
+#tel02L
+plot_loess(methyl_filtered_3, methyl_filtered_D, methyl_filtered_2, methyl_filtered_4, "II", 0, 15e3)
+# abline(v = c(6608, 6139, 6138, 5849, 5848, 1))
+
+#tel04R
+plot_loess(methyl_filtered_3, methyl_filtered_D, methyl_filtered_2, methyl_filtered_4, "IV", 1531933-15000, 1531933)
+# abline(v = c(1524625, 1525089, 1525090, 1525370, 1525467, 1531933))
+
+#tel13L
+plot_loess(methyl_filtered_3, methyl_filtered_D, methyl_filtered_2, methyl_filtered_4, "XIII", 0, 15e3)
+# abline(v = c(6344, 5875, 5874, 5586, 5585, 5538, 5537, 52, 51, 1))
+
+#tel10R
+plot_loess(methyl_filtered_3, methyl_filtered_D, methyl_filtered_2, methyl_filtered_4, "X", 745751-15000, 745751)
+# abline(v = c(745663, 745751, 745362, 745662, 744902, 745361, 742848, 743999))
+```

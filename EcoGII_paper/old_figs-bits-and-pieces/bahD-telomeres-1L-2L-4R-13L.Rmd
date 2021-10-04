@@ -23,8 +23,8 @@ plot_loess <- function(d0, d1, d2, d3, ch, b, e){
   region_methyl_2 <- d2[chrom == ch & start > b & start < e]
   lo_methyl_2 <- loess(percentage ~ start, data = region_methyl_2, weights = region_methyl_2$coverage, enp.target = 100)
   
-  region_methyl_3 <- d3[chrom == ch & start > b & start < e]
-  lo_methyl_3 <- loess(percentage ~ start, data = region_methyl_3, weights = region_methyl_3$coverage, enp.target = 100)
+  # region_methyl_3 <- d3[chrom == ch & start > b & start < e]
+  # lo_methyl_3 <- loess(percentage ~ start, data = region_methyl_3, weights = region_methyl_3$coverage, enp.target = 100)
   
   plot(x=lo_methyl_0$x[order(lo_methyl_0$x)], y=lo_methyl_0$fitted[order(lo_methyl_0$x)], 
      type = 'l', lwd=2, ylim = c(0,100), col = "mediumpurple4", frame.plot = FALSE,
@@ -33,8 +33,8 @@ plot_loess <- function(d0, d1, d2, d3, ch, b, e){
       type = 'l', lwd=2, ylim = c(0,100), col = "black")
   lines(x=lo_methyl_2$x[order(lo_methyl_2$x)], y=lo_methyl_2$fitted[order(lo_methyl_2$x)],
       type = 'l', lwd=2, ylim = c(0,100), col = "deeppink")
-  lines(x=lo_methyl_3$x[order(lo_methyl_3$x)], y=lo_methyl_3$fitted[order(lo_methyl_3$x)],
-      type = 'l', lwd=2, ylim = c(0,100), col = "darkturquoise")
+  # lines(x=lo_methyl_3$x[order(lo_methyl_3$x)], y=lo_methyl_3$fitted[order(lo_methyl_3$x)],
+  #     type = 'l', lwd=2, ylim = c(0,100), col = "darkturquoise")
   box(bty="l")
 }
 
@@ -60,9 +60,9 @@ methyl_bah <- fread("/home/mbrothers/nanopore/210706_Fireworks/modified_bases.ag
 methyl_filtered_bah <- methyl_bah[coverage > 10, ..select_cols]
 
 # sir3-wH∆::EcoGII
-methyl_wh <- fread("/home/mbrothers/nanopore/210706_Fireworks/modified_bases.aggregate12.6mA.bed",
-                col.names = columns)
-methyl_filtered_wh <- methyl_wh[coverage > 10, ..select_cols]
+# methyl_wh <- fread("/home/mbrothers/nanopore/210706_Fireworks/modified_bases.aggregate12.6mA.bed",
+#                 col.names = columns)
+# methyl_filtered_wh <- methyl_wh[coverage > 10, ..select_cols]
 
 # tel01L
 plot_loess(methyl_filtered_wt, methyl_filtered_D, methyl_filtered_bah, methyl_filtered_wh, "I", 0, 15e3)
@@ -79,4 +79,8 @@ abline(v = c(1524625, 1525089, 1525090, 1525370, 1525467, 1531933))
 #tel13L
 plot_loess(methyl_filtered_wt, methyl_filtered_D, methyl_filtered_bah, methyl_filtered_wh, "XIII", 0, 15e3)
 abline(v = c(6344, 5875, 5874, 5586, 5585, 5538, 5537, 52, 51, 1))
+
+#tel10R
+plot_loess(methyl_filtered_wt, methyl_filtered_D, methyl_filtered_bah, methyl_filtered_wh, "X", 745751-15000, 745751)
+abline(v = c(745663, 745751, 745362, 745662, 744902, 745361, 742848, 743999))
 ```
