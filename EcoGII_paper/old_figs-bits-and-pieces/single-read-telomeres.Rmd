@@ -119,3 +119,221 @@ tel14L <- probs_filtered[start_pos <= tel14L_region[1]+500][end_pos >= tel14L_re
   pos %between% tel14L_region]
 plot_binary(tel14L)
 ```
+
+```{r single read 1L telomere constitutive, fig.height=4, fig.width=11}
+plot_binary <- function(data) {
+  ggplot(data, aes(x = pos, y = read_id, color = methylation)) +
+    geom_point(shape = 15) +
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.title.y = element_blank(),
+          axis.title.x = element_blank(),
+          panel.grid = element_blank(),
+          panel.background = element_blank(),
+          text = element_text(size = 15, color = "black", family = "Arial"),
+          legend.position = "top",
+          legend.title = element_blank(),
+          legend.key = element_blank()) +
+    scale_color_manual(values = c("gray90", "mediumpurple4"), na.value = "white")
+}
+
+#### sir3∆::EcoGII ####
+mega_directory <- "/home/mbrothers/nanopore/210706_Fireworks/"
+chr <- "I" #which chromosome?
+barcode <- "10"
+
+probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
+                    select = c(1, 2, 3, 4, 5),
+                    col.names = c("read_id", "chrm", "strand", "pos", "mod_log_prob"))
+
+#1. create a binary column; if 10^mod_log_prob is >0.8, set as methylated (m6A). if < 0.8, set as unmethylated (A)
+#2. add start and end positions for each read_id
+#3. find the average methylation of each read (for ordering on plot)
+#4. order by strand, avg methyl and read_id
+probs_filtered <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE, FALSE)][
+  , list(read_id, pos, methylation, strand)][
+    , start_pos := min(pos), by = read_id][
+      , end_pos := max(pos), by = read_id][
+        , avg_methyl := mean(methylation == TRUE), by = read_id][
+          order(-avg_methyl, read_id)]
+
+# extract each unique read_id to set the order (in same order as in the data table to start with) for single read plots
+read_names <- unique(probs_filtered$read_id)
+probs_filtered$read_id = factor(probs_filtered$read_id, levels = read_names)
+
+# plot
+tel1L_region <- c(0, 10e3)
+tel1L <- probs_filtered[start_pos <= tel1L_region[1]+500][end_pos >= tel1L_region[2]][
+  pos %between% tel1L_region]
+plot_binary(tel1L)
+
+
+#### SIR3-EcoGII ####
+mega_directory <- "/home/mbrothers/nanopore/210706_Fireworks/"
+chr <- "I" #which chromosome?
+barcode <- "09"
+
+probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
+                    select = c(1, 2, 3, 4, 5),
+                    col.names = c("read_id", "chrm", "strand", "pos", "mod_log_prob"))
+
+#1. create a binary column; if 10^mod_log_prob is >0.8, set as methylated (m6A). if < 0.8, set as unmethylated (A)
+#2. add start and end positions for each read_id
+#3. find the average methylation of each read (for ordering on plot)
+#4. order by strand, avg methyl and read_id
+probs_filtered <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE, FALSE)][
+  , list(read_id, pos, methylation, strand)][
+    , start_pos := min(pos), by = read_id][
+      , end_pos := max(pos), by = read_id][
+        , avg_methyl := mean(methylation == TRUE), by = read_id][
+          order(-avg_methyl, read_id)]
+
+# extract each unique read_id to set the order (in same order as in the data table to start with) for single read plots
+read_names <- unique(probs_filtered$read_id)
+probs_filtered$read_id = factor(probs_filtered$read_id, levels = read_names)
+
+# plot
+tel1L_region <- c(0, 10e3)
+tel1L <- probs_filtered[start_pos <= tel1L_region[1]+500][end_pos >= tel1L_region[2]][
+  pos %between% tel1L_region]
+plot_binary(tel1L)
+
+#### sir3-bah∆-EcoGII ####
+mega_directory <- "/home/mbrothers/nanopore/210706_Fireworks/"
+chr <- "I" #which chromosome?
+barcode <- "11"
+
+probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
+                    select = c(1, 2, 3, 4, 5),
+                    col.names = c("read_id", "chrm", "strand", "pos", "mod_log_prob"))
+
+#1. create a binary column; if 10^mod_log_prob is >0.8, set as methylated (m6A). if < 0.8, set as unmethylated (A)
+#2. add start and end positions for each read_id
+#3. find the average methylation of each read (for ordering on plot)
+#4. order by strand, avg methyl and read_id
+probs_filtered <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE, FALSE)][
+  , list(read_id, pos, methylation, strand)][
+    , start_pos := min(pos), by = read_id][
+      , end_pos := max(pos), by = read_id][
+        , avg_methyl := mean(methylation == TRUE), by = read_id][
+          order(-avg_methyl, read_id)]
+
+# extract each unique read_id to set the order (in same order as in the data table to start with) for single read plots
+read_names <- unique(probs_filtered$read_id)
+probs_filtered$read_id = factor(probs_filtered$read_id, levels = read_names)
+
+# plot
+tel1L_region <- c(0, 10e3)
+tel1L <- probs_filtered[start_pos <= tel1L_region[1]+500][end_pos >= tel1L_region[2]][
+  pos %between% tel1L_region]
+plot_binary(tel1L)
+```
+
+```{r single read 2L telomere constitutive, fig.height=4, fig.width=11}
+plot_binary <- function(data) {
+  ggplot(data, aes(x = pos, y = read_id, color = methylation)) +
+    geom_point(shape = 15) +
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.title.y = element_blank(),
+          axis.title.x = element_blank(),
+          panel.grid = element_blank(),
+          panel.background = element_blank(),
+          text = element_text(size = 15, color = "black", family = "Arial"),
+          legend.position = "top",
+          legend.title = element_blank(),
+          legend.key = element_blank()) +
+    scale_color_manual(values = c("gray90", "mediumpurple4"), na.value = "white")
+}
+
+#### sir3∆::EcoGII ####
+mega_directory <- "/home/mbrothers/nanopore/210706_Fireworks/"
+chr <- "II" #which chromosome?
+barcode <- "10"
+
+probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
+                    select = c(1, 2, 3, 4, 5),
+                    col.names = c("read_id", "chrm", "strand", "pos", "mod_log_prob"))
+
+#1. create a binary column; if 10^mod_log_prob is >0.8, set as methylated (m6A). if < 0.8, set as unmethylated (A)
+#2. add start and end positions for each read_id
+#3. find the average methylation of each read (for ordering on plot)
+#4. order by strand, avg methyl and read_id
+probs_filtered <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE, FALSE)][
+  , list(read_id, pos, methylation, strand)][
+    , start_pos := min(pos), by = read_id][
+      , end_pos := max(pos), by = read_id][
+        , avg_methyl := mean(methylation == TRUE), by = read_id][
+          order(-avg_methyl, read_id)]
+
+# extract each unique read_id to set the order (in same order as in the data table to start with) for single read plots
+read_names <- unique(probs_filtered$read_id)
+probs_filtered$read_id = factor(probs_filtered$read_id, levels = read_names)
+
+# plot
+tel2L_region <- c(0, 10e3)
+tel2L <- probs_filtered[start_pos <= tel2L_region[1]+500][end_pos >= tel2L_region[2]][
+  pos %between% tel2L_region]
+plot_binary(tel2L)
+
+
+#### SIR3-EcoGII ####
+mega_directory <- "/home/mbrothers/nanopore/210706_Fireworks/"
+chr <- "II" #which chromosome?
+barcode <- "09"
+
+probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
+                    select = c(1, 2, 3, 4, 5),
+                    col.names = c("read_id", "chrm", "strand", "pos", "mod_log_prob"))
+
+#1. create a binary column; if 10^mod_log_prob is >0.8, set as methylated (m6A). if < 0.8, set as unmethylated (A)
+#2. add start and end positions for each read_id
+#3. find the average methylation of each read (for ordering on plot)
+#4. order by strand, avg methyl and read_id
+probs_filtered <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE, FALSE)][
+  , list(read_id, pos, methylation, strand)][
+    , start_pos := min(pos), by = read_id][
+      , end_pos := max(pos), by = read_id][
+        , avg_methyl := mean(methylation == TRUE), by = read_id][
+          order(-avg_methyl, read_id)]
+
+# extract each unique read_id to set the order (in same order as in the data table to start with) for single read plots
+read_names <- unique(probs_filtered$read_id)
+probs_filtered$read_id = factor(probs_filtered$read_id, levels = read_names)
+
+# plot
+tel2L_region <- c(0, 10e3)
+tel2L <- probs_filtered[start_pos <= tel2L_region[1]+500][end_pos >= tel2L_region[2]][
+  pos %between% tel2L_region]
+plot_binary(tel2L)
+
+#### sir3-bah∆-EcoGII ####
+mega_directory <- "/home/mbrothers/nanopore/210706_Fireworks/"
+chr <- "II" #which chromosome?
+barcode <- "11"
+
+probs <- fread(sprintf("%schr%s_%s.txt", mega_directory, chr, barcode),
+                    select = c(1, 2, 3, 4, 5),
+                    col.names = c("read_id", "chrm", "strand", "pos", "mod_log_prob"))
+
+#1. create a binary column; if 10^mod_log_prob is >0.8, set as methylated (m6A). if < 0.8, set as unmethylated (A)
+#2. add start and end positions for each read_id
+#3. find the average methylation of each read (for ordering on plot)
+#4. order by strand, avg methyl and read_id
+probs_filtered <- probs[, methylation := ifelse(10^mod_log_prob > 0.8, TRUE, FALSE)][
+  , list(read_id, pos, methylation, strand)][
+    , start_pos := min(pos), by = read_id][
+      , end_pos := max(pos), by = read_id][
+        , avg_methyl := mean(methylation == TRUE), by = read_id][
+          order(-avg_methyl, read_id)]
+
+# extract each unique read_id to set the order (in same order as in the data table to start with) for single read plots
+read_names <- unique(probs_filtered$read_id)
+probs_filtered$read_id = factor(probs_filtered$read_id, levels = read_names)
+
+# plot
+tel2L_region <- c(0, 10e3)
+tel2L <- probs_filtered[start_pos <= tel2L_region[1]+500][end_pos >= tel2L_region[2]][
+  pos %between% tel2L_region]
+plot_binary(tel2L)
+```
