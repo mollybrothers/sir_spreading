@@ -221,3 +221,19 @@ Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 9.8kb / Yield: 12Gb
 + JRY13439 (_sir3-bah∆-EcoGII_): barcode04
 
 Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 10kb / Yield: 12.6Gb
+
+## 210917_Gorgonzola (megalodon v2.3.3, guppy v5.0.11)
+### Strains:
++ JRY13625 (_SIR2-EcoGII_): barcode05
++ JRY13626 (_SIR2-EcoGII_): barcode06
++ JRY13627 (_sir2∆::EcoGII_): barcode07
++ JRY13628 (_sir2∆::EcoGII_): barcode08
+
+Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 10.8kb / Yield: 8.5Gb
+
+## 211022_Bonus (megalodon v2.3.3, guppy v5.0.11)
+### Strains:
++ JRY13671 (_SIR3-EcoGII_ + empty vector 2-micron): barcode03
++ JRY13673 (_SIR3-EcoGII_ + _SIR3-EcoGII_ 2-micron): barcode04
+
+Flowcell: FLO-MIN106 / Kit: SQK-LSK109 + EXP-NBD104 / N50: 12kb / Yield: 5.8Gb
